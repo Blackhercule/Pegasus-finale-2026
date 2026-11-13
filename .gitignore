@@ -1,0 +1,14 @@
+# Secrets et certificats propres à chaque installation : jamais dans le dépôt.
+.env
+*.crt
+*.key
+*.local.json
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+
+# Node
+node_modules/
