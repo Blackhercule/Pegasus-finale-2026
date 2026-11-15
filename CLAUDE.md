@@ -6,8 +6,8 @@ Ce fichier est lu par Claude Code au début de chaque session, sur le PC de l'é
 
 Nous sommes trois étudiants de l'Université Joseph Ki-Zerbo (Ouagadougou), finalistes du
 Hackathon des Universités 2026, dont le thème est la souveraineté technologique. L'énoncé est
-dévoilé à l'ouverture. Nous avons environ deux jours pour livrer un prototype qui fonctionne,
-le montrer en direct à un jury sur ce PC, et le soumettre.
+dévoilé à l'ouverture. Nous avons deux à trois jours (72 heures annoncées) pour livrer un
+prototype qui fonctionne, le montrer en direct à un jury sur ce PC, et le soumettre.
 
 Le temps est la ressource rare. Une petite solution qui marche devant le jury vaut mieux qu'une
 grande solution à moitié finie : à chaque choix, prends la voie la plus simple qui répond à
@@ -87,6 +87,14 @@ puisse lire ton essai.
 - **Pas de cryptographie écrite par l'équipe.** Utilise des bibliothèques et des protocoles
   éprouvés. Un jury de cybersécurité sanctionne la cryptographie maison.
 - **Données fictives uniquement**, et aucun test d'intrusion sur un système réel.
+- **Open source.** Le code est publié sous licence libre (`LICENSE` à la racine) et ne repose
+  que sur des composants open source. Chaque fois que tu ajoutes un composant (image Docker,
+  bibliothèque, outil), note son nom, sa licence et le lien de son projet dans le compte rendu :
+  le règlement demande de citer chaque technologie avec sa licence.
+- **Un code que chaque membre peut expliquer.** Le jury désigne lui-même le membre qui explique
+  une fonction, et ne pas savoir l'expliquer est éliminatoire. Écris un code simple et lisible,
+  commenté en français là où l'intention ne se devine pas, et explique dans le compte rendu
+  comment fonctionne ce que tu as ajouté, surtout ce qui touche à la sécurité.
 - **Aucun secret dans le dépôt.** Les mots de passe et les clés vont dans `.env` (ignoré par
   Git), avec un `.env.exemple` sans valeur réelle.
 - **En français** : l'interface, les messages d'erreur, la documentation et les messages de

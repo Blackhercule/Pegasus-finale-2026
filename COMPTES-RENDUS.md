@@ -8,6 +8,8 @@ fichier, sur ce modèle :
 
 - Réalisé : ce qui a été fait, en deux ou trois lignes.
 - Vérification : la commande lancée sur ce PC et la fin de sa sortie.
+- Comment ça marche : l'explication que chaque membre de l'équipe doit pouvoir redonner au jury.
+- Composants ajoutés : nom, licence et lien du projet (ou « aucun »).
 - Décisions : les choix techniques pris seul, une ligne chacun.
 - Problèmes : message d'erreur exact et ce qui a été essayé (si partiel ou bloqué).
 - À savoir : ce qui demande Internet, ce que l'équipe doit faire à la main, défauts remarqués
