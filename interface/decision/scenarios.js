@@ -1,7 +1,7 @@
 /* Comparaison de scénarios : on change les moyens, on voit ce que ça donne (exigence E5). */
 "use strict";
 
-const COULEURS = ["#0e6b3a", "#c8102e", "#1d4f91"];
+const COULEURS = ["#1e2455", "#c8102e", "#8a6a00"];
 const REGLAGES = [
   { cle: "nb_camions", nom: "Camions", min: 0, max: 100, pas: 1, defaut: 24 },
   { cle: "camions_en_panne", nom: "Camions en panne", min: 0, max: 50, pas: 1, defaut: 0 },
@@ -118,9 +118,9 @@ function dessinerCourbes(series) {
   const graduations = [0, 0.25, 0.5, 0.75, 1].map((part) => {
     const valeur = maximum * part;
     return `<line x1="${marge.gauche}" x2="${largeur - marge.droite}" y1="${y(valeur)}" y2="${y(valeur)}"
-                  stroke="#e6e2d8"/>
+                  stroke="#dfe2ec"/>
             <text x="${marge.gauche - 8}" y="${y(valeur) + 4}" text-anchor="end" font-size="11"
-                  fill="#6c7772">${nombre(valeur / 1000, 0)} k</text>`;
+                  fill="#666e85">${nombre(valeur / 1000, 0)} k</text>`;
   }).join("");
 
   const courbes = series.map((s, rang) => {
@@ -132,8 +132,8 @@ function dessinerCourbes(series) {
     `<svg viewBox="0 0 ${largeur} ${hauteur}" role="img" aria-label="Déchets accumulés en dépotoir, en milliers de mètres cubes">
        ${graduations}${courbes}
        <text x="${largeur - marge.droite}" y="${hauteur - 8}" text-anchor="end" font-size="11"
-             fill="#6c7772">jour ${jours}</text>
-       <text x="${marge.gauche}" y="${hauteur - 8}" font-size="11" fill="#6c7772">jour 1</text>
+             fill="#666e85">jour ${jours}</text>
+       <text x="${marge.gauche}" y="${hauteur - 8}" font-size="11" fill="#666e85">jour 1</text>
      </svg>
      <div class="legende">${series.map((s, rang) =>
        `<span><i style="background:${COULEURS[rang % COULEURS.length]}"></i>${echapper(s.nom)}</span>`).join("")}</div>`;

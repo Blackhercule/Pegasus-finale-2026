@@ -8,7 +8,7 @@ paquets npm officiels, copiés tels quels le 16/11/2026.
 | `maplibre-gl/` | `maplibre-gl` 5.24.1 | BSD-3-Clause (`LICENSE.txt`) | https://github.com/maplibre/maplibre-gl-js |
 | `pmtiles/` | `pmtiles` 4.5.0 | BSD-3-Clause | https://github.com/protomaps/PMTiles |
 | `protomaps-basemaps/` | `@protomaps/basemaps` 5.7.2 | BSD-3-Clause | https://github.com/protomaps/basemaps |
-| `polices/inter/` | `@fontsource/inter` 5.3.0 (police Inter) | OFL-1.1 pour la police, MIT pour le paquet | https://github.com/rsms/inter |
+| `polices/lato/` | `@fontsource/lato` 5.2.9 (police Lato, graisses 400 et 700) | OFL-1.1 pour la police, MIT pour le paquet | https://www.latofonts.com/ |
 | `polices/noto/` | `smp-noto-glyphs` 2.0.0 (police GoNotoKurrent, tirée de Noto Sans) | MIT pour le paquet, OFL-1.1 pour la police | https://github.com/digidem/styled-map-package |
 
 ## Comment les charger
@@ -43,4 +43,5 @@ const carte = new maplibregl.Map({
 });
 ```
 
-Ce chargement n'a pas encore été essayé dans un navigateur : c'est l'objet de la tâche T5.
+Ce chargement est essayé dans un navigateur à chaque tournage de la vidéo de démonstration
+(`outils/filmer.mjs`) : la carte s'affiche sans aucune requête vers Internet.

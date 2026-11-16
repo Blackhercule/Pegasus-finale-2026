@@ -1,15 +1,15 @@
 /* Page de signalement : utilisable d'une main, en plein soleil, sur un petit écran.
-   Couleurs du Burkina Faso : vert et rouge du drapeau, jaune de l'étoile. */
-@import url("/vendor/polices/inter/inter.css");
-:root { --vert: #0a4f2b; --vert-clair: #0e6b3a; --or: #fcd116; --or-fonce: #8a6a00;
-        --rouge: #c8102e; --papier: #fbf7ee; --trait: #e2dccc; --gris: #6c7772;
-        --sur-accent: #1a1a0d; }
+   Mêmes couleurs que le reste : bleu marine, blanc, jaune en accent. */
+@import url("/vendor/polices/lato/lato.css");
+:root { --vert: #1e2455; --vert-clair: #2b3372; --or: #ffff00; --or-fonce: #8a7a00;
+        --rouge: #c8102e; --papier: #f5f6fa; --trait: #dfe2ec; --gris: #666e85;
+        --sur-accent: #1e2455; --succes: #0e6b3a; }
 /* « hidden » doit l'emporter sur nos propres règles d'affichage. */
 [hidden] { display: none !important; }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; }
 body {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  font-family: Lato, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
   background: var(--papier); color: #15211c; line-height: 1.45; padding-bottom: 2rem;
 }
 header {
@@ -27,7 +27,7 @@ h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: 
 .facultatif { text-transform: none; letter-spacing: 0; font-weight: 400; }
 
 .position { margin: 0 0 .6rem; font-size: .95rem; }
-.position.bonne { color: var(--vert-clair); font-weight: 600; }
+.position.bonne { color: var(--succes); font-weight: 700; }
 .position.faible { color: var(--or-fonce); }
 .position.absente { color: var(--rouge); }
 
@@ -40,7 +40,7 @@ h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: 
 }
 .choix button small { color: var(--gris); font-size: .72rem; }
 .choix button .icone { color: var(--or-fonce); letter-spacing: .1em; }
-.choix button.actif { border-color: var(--vert-clair); background: #daf0e3; font-weight: 600; }
+.choix button.actif { border-color: var(--vert-clair); background: #e3e6f5; font-weight: 700; }
 
 .bouton-photo, button[type=submit], .secondaire {
   font: inherit; font-weight: 600; cursor: pointer; display: block; width: 100%;
@@ -54,7 +54,7 @@ button[type=submit]:disabled { background: #9db3a7; border-color: #9db3a7; }
 
 textarea { font: inherit; width: 100%; border: 1px solid var(--trait); border-radius: 10px; padding: .6rem; resize: vertical; }
 .message { padding: .8rem 1rem; border-radius: 10px; margin: 0; font-weight: 600; }
-.message.succes { background: #d9f0e2; color: var(--vert-clair); border: 1px solid #a9dcc0; }
+.message.succes { background: #d9f0e2; color: var(--succes); border: 1px solid #a9dcc0; }
 .message.erreur { background: #fbdcdc; color: var(--rouge); border: 1px solid #efb3b3; }
 .message.attente { background: #fdf2cc; color: var(--or-fonce); border: 1px solid #e8cf6a; }
 .mentions { font-size: .78rem; color: var(--gris); text-align: center; margin: .2rem 0 0; }
@@ -67,7 +67,7 @@ textarea { font: inherit; width: 100%; border: 1px solid var(--trait); border-ra
 }
 .guidage.actif { background: var(--or); border-color: var(--or); color: var(--sur-accent); }
 .accueil {
-  background: #fdf2cc; border: 1px solid #e8cf6a; border-radius: 10px; padding: .7rem .9rem;
+  background: #fdf7cc; border: 1px solid #ded06a; border-radius: 10px; padding: .7rem .9rem;
   margin: 0; font-size: .88rem;
 }
 .parler {

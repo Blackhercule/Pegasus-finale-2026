@@ -148,7 +148,7 @@ briques éprouvées, on les adapte à Ouagadougou, et on ajoute ce qui manque en
 | [Mesa](https://github.com/projectmesa/mesa) | simulation multi-agents | Apache-2.0 |
 | [pyosmium](https://osmcode.org/pyosmium/) | lecture des extraits OpenStreetMap | BSD-2 |
 | [MapLibre GL JS](https://maplibre.org/), [PMTiles](https://github.com/protomaps/PMTiles), [Protomaps basemaps](https://github.com/protomaps/basemaps) | carte hors ligne | BSD-3 |
-| [Inter](https://github.com/rsms/inter) | police de l'interface | OFL-1.1 |
+| [Lato](https://www.latofonts.com/) | police de l'interface | OFL-1.1 |
 | [Noto Sans](https://fonts.google.com/noto) (via `smp-noto-glyphs`) | polices de la carte | OFL-1.1, paquet MIT |
 | [Caddy](https://caddyserver.com/) | HTTPS local | Apache-2.0 |
 | [Docker](https://www.docker.com/) | déploiement en une commande | Apache-2.0 |

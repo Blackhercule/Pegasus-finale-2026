@@ -1,11 +1,11 @@
 .scenarios { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 1rem; }
 .scenario { background: #fff; border: 1px solid var(--trait); border-radius: 10px; padding: 1rem; }
 .scenario h2 { margin-top: 0; }
-.scenario .titre { font: inherit; font-weight: 700; width: 100%; border: 0; border-bottom: 2px solid var(--or);
+.scenario .titre { font: inherit; font-weight: 700; width: 100%; border: 0; border-bottom: 2px solid var(--panneau);
                    padding: .2rem 0 .3rem; margin-bottom: .8rem; }
 .scenario label { display: grid; gap: .15rem; font-size: .82rem; color: var(--gris); margin-bottom: .55rem; }
 .scenario .ligne { display: flex; align-items: center; gap: .5rem; }
-.scenario input[type=range] { flex: 1; accent-color: var(--or); }
+.scenario input[type=range] { flex: 1; accent-color: var(--panneau); }
 .scenario output { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--encre); min-width: 3.4rem; text-align: right; }
 .scenario label.case { display: flex; align-items: center; gap: .5rem; color: var(--encre); }
 .barre-action { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }

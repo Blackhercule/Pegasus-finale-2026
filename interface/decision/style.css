@@ -1,29 +1,30 @@
 /* Carte de décision. Aucune police ni image chargée depuis Internet.
-   Couleurs du Burkina Faso : le vert et le rouge du drapeau, l'étoile jaune en accent. */
-@import url("/vendor/polices/inter/inter.css");
+   Couleurs reprises des portails de l'administration burkinabè : bleu marine, blanc,
+   et le jaune vif en accent sur les fonds sombres. */
+@import url("/vendor/polices/lato/lato.css");
 :root {
-  --encre: #17211b;
-  --papier: #fbf7ee;
+  --encre: #1b2033;
+  --papier: #f5f6fa;
   --carte: #ffffff;
-  --panneau: #0e6b3a;        /* vert du drapeau */
-  --panneau-fonce: #0a4f2b;
-  --trait: #e2dccc;
+  --panneau: #1e2455;        /* bleu marine de l'en-tête et des boutons */
+  --panneau-fonce: #161a3f;
+  --trait: #dfe2ec;
   --vert: #0e6b3a;
   --vert-clair: #d9f0e2;
-  --or: #fcd116;             /* jaune de l'étoile */
-  --or-fonce: #8a6a00;
-  --or-clair: #fdf2cc;
-  --rouge: #c8102e;          /* rouge du drapeau */
+  --or: #ffff00;             /* jaune vif : seulement sur fond sombre */
+  --or-fonce: #8a7a00;
+  --or-clair: #fdf7cc;
+  --rouge: #c8102e;
   --rouge-clair: #fbdcdc;
-  --gris: #6c7772;
-  --sur-accent: #1a1a0d;     /* texte posé sur le jaune */
+  --gris: #666e85;
+  --sur-accent: #1e2455;     /* texte posé sur le jaune */
 }
 /* « hidden » doit l'emporter sur nos propres règles d'affichage. */
 [hidden] { display: none !important; }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
 body {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  font-family: Lato, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
   color: var(--encre); background: var(--papier); line-height: 1.45;
 }
 #application { display: grid; grid-template-columns: 330px 1fr; height: 100vh; }
@@ -35,10 +36,10 @@ body {
   border-right: 4px solid var(--or);
 }
 #panneau h1 { font-size: 1.15rem; margin: 0; letter-spacing: .01em; }
-.sous-titre { margin: .2rem 0 0; font-size: .82rem; color: #cfe7da; }
+.sous-titre { margin: .2rem 0 0; font-size: .82rem; color: #c9cfe8; }
 #panneau h2 {
   font-size: .78rem; text-transform: uppercase; letter-spacing: .08em;
-  color: #bcdcc9; margin: 0 0 .55rem; font-weight: 600;
+  color: #aab2d6; margin: 0 0 .55rem; font-weight: 600;
 }
 .bloc { border-top: 1px solid rgba(255,255,255,.12); padding-top: .9rem; }
 
@@ -48,22 +49,23 @@ body {
   display: flex; flex-direction: column;
 }
 .chiffre .valeur { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.chiffre .etiquette { font-size: .75rem; color: #cfe7da; }
-.chiffre.rejet .valeur { color: #ffb3a7; }
+.chiffre .etiquette { font-size: .75rem; color: #c9cfe8; }
+.chiffre.rejet .valeur { color: #ff9b8f; }
 
 .couches { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
 .couches label { display: flex; align-items: center; gap: .5rem; font-size: .88rem; cursor: pointer; }
 .pastille { width: 11px; height: 11px; border-radius: 3px; flex: none;
-  /* Sans ce liseré, une pastille verte disparaîtrait dans le panneau vert. */
-  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .6); }
+  /* Le panneau est bleu marine, et trois couches de la carte le sont aussi : sans ce liseré
+     blanc, leur pastille se fondrait dans le fond et on ne la verrait plus du tout. */
+  box-shadow: 0 0 0 2.5px #fff; }
 
 #selection { display: grid; grid-template-columns: max-content 1fr; gap: .3rem .8rem; margin: 0; font-size: .88rem; }
-#selection dt { color: #bcdcc9; }
+#selection dt { color: #aab2d6; }
 #selection dd { margin: 0; font-variant-numeric: tabular-nums; }
 
 #panneau footer { margin-top: auto; }
-#etat-chargement { font-size: .82rem; color: #cfe7da; margin: 0 0 .5rem; }
-.mentions { font-size: .72rem; color: #a8cbb8; margin: 0; }
+#etat-chargement { font-size: .82rem; color: #c9cfe8; margin: 0 0 .5rem; }
+.mentions { font-size: .72rem; color: #8f98c4; margin: 0; }
 
 .maplibregl-popup-content {
   font-family: inherit; font-size: .86rem; border-radius: 8px; padding: .7rem .8rem;
@@ -77,7 +79,7 @@ body {
 
 /* ------------------------------------------------------------ panneau du plan */
 .reglages { display: grid; gap: .5rem; margin-bottom: .7rem; }
-.reglages label { font-size: .82rem; color: #dcefe4; display: grid; gap: .15rem; }
+.reglages label { font-size: .82rem; color: #dde1f2; display: grid; gap: .15rem; }
 .reglages .ligne { display: flex; align-items: center; gap: .5rem; }
 .reglages input[type=range] { flex: 1; accent-color: var(--or); }
 .reglages output { font-variant-numeric: tabular-nums; font-weight: 700; color: #fff; min-width: 3.2rem; text-align: right; }
@@ -93,11 +95,11 @@ body {
 .controles { list-style: none; margin: 0; padding: 0; display: grid; gap: .45rem; font-size: .82rem; }
 .controles li { display: grid; grid-template-columns: 1.1rem 1fr; gap: .4rem; align-items: start; }
 .controles .marque { font-weight: 700; }
-.controles .ok .marque { color: #9ef0c0; }
+.controles .ok .marque { color: #7fe0a8; }
 .controles .attention .marque { color: var(--or); }
-.controles .probleme .marque { color: #ffb3a7; }
-.controles .nom { display: block; font-weight: 600; color: #f2fbf6; }
-.controles .detail { color: #cfe7da; }
+.controles .probleme .marque { color: #ff9b8f; }
+.controles .nom { display: block; font-weight: 600; color: #f2f3fb; }
+.controles .detail { color: #c9cfe8; }
 
 .liens { margin: .4rem 0 0; font-size: .8rem; }
 .liens a { color: var(--or); }
