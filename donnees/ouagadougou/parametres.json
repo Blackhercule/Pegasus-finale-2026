@@ -1,0 +1,42 @@
+{
+  "_source": "Valeurs de départ. Celles marquées « hypothèse » seront remplacées par les paramètres fixés avec la mairie (exigence E8).",
+
+  "population": 2900000,
+  "taille_menage": 6.2,
+  "kg_par_habitant_jour": 0.55,
+  "taux_abonnement": 0.35,
+  "tarif_abonnement": 1500,
+
+  "nb_camions": 24,
+  "capacite_camion_m3": 12,
+  "heures_travail": 8,
+  "camions_en_panne": 0,
+  "frequence_collecte_jours": 3,
+  "capacite_point_m3": 30,
+  "distance_max_precollecte_m": 800,
+
+  "budget_mensuel": 45000000,
+  "cout_km": 900,
+  "cout_jour_camion": 25000,
+
+  "saison": "seche",
+  "vitesses_kmh": {
+    "seche":  {"primary": 40, "secondary": 35, "tertiary": 30, "residential": 20, "unclassified": 20, "service": 15, "track": 12, "defaut": 20, "non_revetu": 0.75},
+    "pluies": {"primary": 32, "secondary": 28, "tertiary": 22, "residential": 14, "unclassified": 14, "service": 10, "track": 6, "defaut": 14, "non_revetu": 0.55}
+  },
+  "nouveaux_quartiers": [],
+  "effectif_brigade": 60,
+
+  "mode_strict": false,
+  "controles": {
+    "anciennete_max_jours": 365,
+    "volume_max_m3": 500,
+    "precision_max_m": 100,
+    "rafale_max": 20,
+    "rafale_fenetre_min": 10,
+    "rayon_regroupement_m": 30,
+    "photo_max_octets": 6000000,
+    "texte_max_caracteres": 500
+  },
+  "volumes_par_taille_m3": {"petit": 1, "moyen": 5, "grand": 20, "tres_grand": 60}
+}

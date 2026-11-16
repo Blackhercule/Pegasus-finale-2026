@@ -1,0 +1,9 @@
+# Application (Flask) et préparation des données.
+Flask>=3.0
+gunicorn>=22.0
+shapely>=2.0
+pyproj>=3.6
+scipy>=1.11
+numpy>=1.26
+ortools>=9.10
+mesa>=2.3

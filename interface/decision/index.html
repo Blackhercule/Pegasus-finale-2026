@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assainissement de Ouaga — carte de décision</title>
+<link rel="stylesheet" href="/vendor/maplibre-gl/maplibre-gl.css">
+<link rel="stylesheet" href="/decision/style.css">
+</head>
+<body>
+<div id="application">
+  <aside id="panneau">
+    <header>
+      <h1>Assainissement de Ouaga</h1>
+      <p class="sous-titre">Outil libre d'aide à la décision · Groupe Pegasus</p>
+    </header>
+
+    <section class="bloc">
+      <h2>Signalements</h2>
+      <div class="chiffres" id="chiffres">
+        <div class="chiffre"><span class="valeur" id="n-depotoirs">—</span><span class="etiquette">dépotoirs</span></div>
+        <div class="chiffre"><span class="valeur" id="n-verifie">—</span><span class="etiquette">vérifiés</span></div>
+        <div class="chiffre"><span class="valeur" id="n-attente">—</span><span class="etiquette">à vérifier</span></div>
+        <div class="chiffre rejet"><span class="valeur" id="n-rejete">—</span><span class="etiquette">écartés</span></div>
+      </div>
+    </section>
+
+    <section class="bloc">
+      <h2>Couches</h2>
+      <ul class="couches" id="couches">
+        <li><label><input type="checkbox" data-couche="depotoirs" checked> <span class="pastille" style="background:#e4572e"></span>Dépotoirs signalés</label></li>
+        <li><label><input type="checkbox" data-couche="decharges" checked> <span class="pastille" style="background:#8a6a3b"></span>Sites de déchets (OpenStreetMap)</label></li>
+        <li><label><input type="checkbox" data-couche="densite"> <span class="pastille" style="background:#2f6f4e"></span>Densité de bâti</label></li>
+        <li><label><input type="checkbox" data-couche="eau" checked> <span class="pastille" style="background:#3d7ea6"></span>Plans d'eau</label></li>
+        <li><label><input type="checkbox" data-couche="limite" checked> <span class="pastille" style="background:#1d1d1b"></span>Limite de la commune</label></li>
+      </ul>
+    </section>
+
+    <section class="bloc" id="bloc-selection" hidden>
+      <h2>Dépotoir sélectionné</h2>
+      <dl id="selection"></dl>
+    </section>
+
+    <footer>
+      <p id="etat-chargement">Chargement…</p>
+      <p class="mentions">Fond de carte et données © les contributeurs d'OpenStreetMap (ODbL).
+        Tout est servi par cette machine : aucune connexion à Internet.</p>
+    </footer>
+  </aside>
+  <main id="carte"></main>
+</div>
+
+<script src="/vendor/maplibre-gl/maplibre-gl-csp.js"></script>
+<script src="/vendor/pmtiles/pmtiles.js"></script>
+<script src="/vendor/protomaps-basemaps/basemaps.js"></script>
+<script src="/decision/carte.js"></script>
+</body>
+</html>

@@ -17,3 +17,7 @@ node_modules/
 *.osm.pbf
 donnees/outils/
 telechargements/
+
+# Base de données et photos : propres à chaque installation.
+donnees/*/signalements.sqlite*
+donnees/*/photos/
