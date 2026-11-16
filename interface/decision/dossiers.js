@@ -14,6 +14,16 @@ function echapper(texte) {
   return n.innerHTML;
 }
 
+/* T16 : une position déduite d'un lieu connu n'est pas un relevé GPS. L'agent doit le voir
+   avant d'envoyer une équipe : on l'écrit en toutes lettres, avec le lieu et la précision. */
+function avertissementLieu(signalements) {
+  const depuisUnLieu = (signalements || []).filter((s) => s.source_position === "lieu");
+  if (!depuisUnLieu.length) return "";
+  return depuisUnLieu.map((s) => `<p class="position-lieu">⚠ Position approximative : déduite du
+    lieu « ${echapper(s.lieu_nom || "?")} » (± ${Math.round(s.precision_m || 150)} m), pas d'un GPS.
+    Chercher aux abords ; voir le repère dans le commentaire.</p>`).join("");
+}
+
 function dateCourte(iso) {
   if (!iso) return "—";
   const d = new Date(iso);
@@ -179,6 +189,7 @@ async function afficherDossier(identifiant) {
       <dt>Signalements</dt><dd>${d.nb_signalements}, de ${d.nb_sources} source(s)</dd>
       <dt>Position</dt><dd>${Number(d.latitude).toFixed(5)}, ${Number(d.longitude).toFixed(5)}</dd>
     </dl>
+    ${avertissementLieu(d.signalements)}
     ${photos ? `<div class="vignettes">${photos}</div>` : ""}
     ${voix ? `<h3 class="aide">Message vocal du déclarant</h3>${voix}` : ""}
     ${blocTemoins}

@@ -1,8 +1,10 @@
 /* Garde la page utilisable sans réseau : les fichiers sont mis de côté à la première visite. */
 "use strict";
-const CACHE = "signaler-v1";
+const CACHE = "signaler-v2";
 const FICHIERS = ["/signaler/", "/signaler/index.html", "/signaler/style.css",
-                  "/signaler/signaler.js", "/signaler/manifeste.webmanifest"];
+                  "/signaler/signaler.js", "/signaler/manifeste.webmanifest",
+                  // T16 : la liste des lieux connus, pour choisir un lieu même hors ligne.
+                  "/api/lieux"];
 
 self.addEventListener("install", (evenement) => {
   evenement.waitUntil(caches.open(CACHE).then((c) => c.addAll(FICHIERS)).then(() => self.skipWaiting()));
@@ -17,7 +19,9 @@ self.addEventListener("activate", (evenement) => {
 self.addEventListener("fetch", (evenement) => {
   const requete = evenement.request;
   // Les envois de signalements ne passent jamais par la réserve : ils doivent atteindre le serveur.
-  if (requete.method !== "GET" || new URL(requete.url).pathname.startsWith("/api/")) return;
+  const chemin = new URL(requete.url).pathname;
+  // Seule adresse d'API gardée : la liste des lieux (données publiques, jamais un signalement).
+  if (requete.method !== "GET" || (chemin.startsWith("/api/") && chemin !== "/api/lieux")) return;
   evenement.respondWith(
     fetch(requete)
       .then((reponse) => {

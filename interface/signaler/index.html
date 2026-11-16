@@ -70,6 +70,17 @@
           aria-label="Écouter la consigne">🔊</button></h2>
       <p id="position" class="position">Recherche de votre position…</p>
       <button type="button" id="relancer-position" class="secondaire">Relancer la localisation</button>
+      <button type="button" id="sans-gps" class="lien-lieu" aria-expanded="false"
+              aria-controls="bloc-lieu">Je ne peux pas être localisé</button>
+      <div id="bloc-lieu" class="bloc-lieu" hidden>
+        <label for="recherche-lieu">Choisissez un lieu connu près du dépotoir :
+          marché, école, collège, université, centre de santé</label>
+        <input id="recherche-lieu" type="search" autocomplete="off" spellcheck="false"
+               placeholder="Ex. : marché Gounghin">
+        <ul id="resultats-lieu" class="resultats-lieu"></ul>
+        <label for="repere">À côté de quoi exactement ? <span class="facultatif">(facultatif)</span></label>
+        <input id="repere" type="text" maxlength="120" placeholder="Ex. : derrière le marché, côté nord">
+      </div>
     </section>
 
     <section class="carte-bloc" data-pour="ordures">

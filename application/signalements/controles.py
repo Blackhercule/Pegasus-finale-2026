@@ -49,6 +49,9 @@ TYPES = ("menager", "gravats", "mixte", "autre")
 # faut envoyer sur place et l'urgence (un caniveau bouché inonde le quartier aux pluies).
 DEPOTS = ("plein_air", "bac", "caniveau", "fosse", "berge", "autre")
 DIMENSION_MAX_M = 200
+# Précision donnée à une position tirée d'un lieu connu (T16) : l'ordre de grandeur d'un marché
+# ou d'un campus, pas celle d'un GPS.
+PRECISION_LIEU_M = 150
 # Premiers octets des formats d'image acceptés : on lit le contenu, jamais le nom du fichier.
 SIGNATURES_IMAGE = (b"\xff\xd8\xff", b"\x89PNG\r\n\x1a\n", b"RIFF", b"GIF87a", b"GIF89a")
 # Sons acceptés pour un message vocal : WebM/Matroska (ce qu'enregistre un navigateur), OGG, MP4, MP3.
@@ -112,8 +115,11 @@ def est_un_son(contenu: bytes) -> bool:
 class Controleur:
     """Applique tous les contrôles. `geo` répond « dans la commune ? dans l'eau ? »."""
 
-    def __init__(self, geographie, parametres: dict):
+    def __init__(self, geographie, parametres: dict, lieux: list = None):
         self.geo = geographie
+        # Les lieux connus, par identifiant (T16) : c'est le serveur qui donne la position d'un
+        # lieu choisi, pas le téléphone.
+        self.lieux = {l["id"]: l for l in (lieux or [])}
         self.seuils = parametres["controles"]
         self.volumes = parametres["volumes_par_taille_m3"]
 
@@ -135,6 +141,23 @@ class Controleur:
         elif self.geo.dans_l_eau(lon, lat):
             motifs.append("dans_l_eau")
         return lon, lat
+
+    def _depuis_un_lieu(self, brut: dict):
+        """Le téléphone n'a pas pu se localiser et l'habitant a choisi un lieu connu (T16).
+
+        Renvoie (brut, provenance, motifs). Si un lieu est choisi, sa position et son nom sont
+        pris dans NOTRE liste, d'après son identifiant : un envoi forgé ne peut pas mettre un
+        nom rassurant sur une position quelconque. La précision annoncée est celle d'un repère,
+        150 m au moins, et non celle d'un GPS : l'agent doit savoir qu'il faudra chercher."""
+        if brut.get("source_position") != "lieu":
+            return brut, {"source_position": "gps", "lieu_nom": None}, []
+        lieu = self.lieux.get(str(brut.get("lieu_id", ""))[:80])
+        if lieu is None:
+            return brut, {"source_position": "lieu", "lieu_nom": None}, ["format_invalide"]
+        precision = max(nombre(brut.get("precision_m")) or 0, PRECISION_LIEU_M)
+        corrige = dict(brut, latitude=lieu["latitude"], longitude=lieu["longitude"],
+                       precision_m=precision)
+        return corrige, {"source_position": "lieu", "lieu_nom": lieu["nom"]}, []
 
     def _date(self, brut: dict, motifs: list):
         date = lire_date(brut.get("date_observation"))
@@ -174,7 +197,7 @@ class Controleur:
         n'importe qui peut décrire sans rien mesurer, et le quartier."""
         if not isinstance(brut, dict):
             return self.resultat({"nature": "fuite_eau"}, ["format_invalide"])
-        motifs = []
+        brut, provenance, motifs = self._depuis_un_lieu(brut)
         lon, lat = self._position(brut, motifs)
         date = self._date(brut, motifs)
         precision = self._precision(brut, motifs)
@@ -187,7 +210,7 @@ class Controleur:
         propre = {"nature": "fuite_eau", "latitude": lat, "longitude": lon,
                   "precision_m": precision, "date_observation": date.isoformat(timespec="seconds"),
                   "ampleur": ampleur,
-                  "quartier": texte(brut.get("quartier"), 80) or None}
+                  "quartier": texte(brut.get("quartier"), 80) or None, **provenance}
         propre.update(self._declarant(brut, motifs))
         return self.resultat(propre, motifs)
 
@@ -202,6 +225,7 @@ class Controleur:
         nature = brut.get("nature")
         if nature not in NATURES_NUISANCE:
             return self.resultat({}, ["nature_inconnue"])
+        brut, provenance, motifs = self._depuis_un_lieu(brut)
         lon, lat = self._position(brut, motifs)
         date = self._date(brut, motifs)
         precision = self._precision(brut, motifs)
@@ -214,7 +238,7 @@ class Controleur:
         propre = {"nature": nature, "latitude": lat, "longitude": lon,
                   "precision_m": precision, "date_observation": date.isoformat(timespec="seconds"),
                   "gravite": gravite,
-                  "quartier": texte(brut.get("quartier"), 80) or None}
+                  "quartier": texte(brut.get("quartier"), 80) or None, **provenance}
         propre.update(self._declarant(brut, motifs))
         return self.resultat(propre, motifs)
 
@@ -235,6 +259,7 @@ class Controleur:
         if nature is not None and nature not in NATURES:
             return self.resultat({}, ["nature_inconnue"])
 
+        brut, provenance, motifs = self._depuis_un_lieu(brut)
         lon, lat = self._position(brut, motifs)
 
         taille = brut.get("taille")
@@ -267,6 +292,7 @@ class Controleur:
             "depot": brut.get("depot") if brut.get("depot") in DEPOTS else None,
             "longueur_m": longueur, "largeur_m": largeur,
             "quartier": texte(brut.get("quartier"), 80) or None,
+            **provenance,
         }
         propre.update(self._declarant(brut, motifs))
         return self.resultat(propre, motifs)

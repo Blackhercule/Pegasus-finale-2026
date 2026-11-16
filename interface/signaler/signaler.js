@@ -56,6 +56,12 @@ let surveillance = null;
 
 function afficherPosition() {
   const p = element("position");
+  if (position && position.lieu) {
+    // T16 : position tirée d'un lieu connu. On le dit, avec sa précision honnête.
+    p.className = "position faible";
+    p.textContent = `Position approximative : près de « ${position.lieu.nom} » (± ${PRECISION_LIEU_M} m)`;
+    return;
+  }
   if (!position) { p.className = "position absente"; p.textContent = "Position inconnue : sortez à l'air libre, puis relancez."; return; }
   const precision = Math.round(position.precision_m);
   const bonne = precision <= 30;
@@ -66,7 +72,13 @@ function afficherPosition() {
 
 function localiser() {
   const p = element("position");
-  if (!navigator.geolocation) { p.className = "position absente"; p.textContent = "Ce téléphone ne donne pas sa position."; return; }
+  position = null;                         // « Relancer » abandonne un lieu choisi
+
+  if (!navigator.geolocation) {
+    p.className = "position absente"; p.textContent = "Ce téléphone ne donne pas sa position.";
+    ouvrirLeChoixDeLieu();
+    return;
+  }
   p.className = "position"; p.textContent = "Recherche de votre position…";
   if (surveillance !== null) navigator.geolocation.clearWatch(surveillance);
   surveillance = navigator.geolocation.watchPosition(
@@ -77,12 +89,86 @@ function localiser() {
     },
     (erreur) => {
       position = null;
+      ouvrirLeChoixDeLieu();             // pas de position : on propose tout de suite un lieu
       p.className = "position absente";
       p.textContent = erreur.code === erreur.PERMISSION_DENIED
         ? "Localisation refusée : autorisez-la pour ce site, puis relancez."
         : "Position introuvable pour l'instant.";
     },
     { enableHighAccuracy: true, timeout: 20000, maximumAge: 10000 });
+}
+
+/* ------------------------------------------------------------------ lieu connu (T16)
+   Quand la position ne marche pas (refusée, introuvable, téléphone ancien), l'habitant
+   choisit un lieu connu dans une liste : marchés, écoles, universités, santé. La liste vient
+   du serveur (/api/lieux) et le service worker la garde : la recherche marche hors ligne. */
+const PRECISION_LIEU_M = 150;
+let lieux = null;
+
+/* « Marché de Gounghin » → « marche de gounghin » : on cherche sans accents ni majuscules. */
+function sansAccents(texte) {
+  return texte.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+async function chargerLesLieux() {
+  if (lieux) return lieux;
+  try {
+    const reponse = await fetch("/api/lieux");
+    if (!reponse.ok) throw new Error();
+    lieux = (await reponse.json()).map((l) => ({ ...l, cle: sansAccents(l.nom + " " + l.genre) }));
+  } catch {
+    lieux = null;
+  }
+  return lieux;
+}
+
+function ouvrirLeChoixDeLieu() {
+  element("bloc-lieu").hidden = false;
+  element("sans-gps").setAttribute("aria-expanded", "true");
+  chargerLesLieux().then(chercherUnLieu);
+}
+
+/* Tous les mots tapés doivent se trouver dans le nom (ou le genre) : « marche gounghin »
+   trouve « Marché de Gounghin ». On montre les huit premiers. */
+function chercherUnLieu() {
+  const liste = element("resultats-lieu");
+  const mots = sansAccents(element("recherche-lieu").value).split(/\s+/).filter(Boolean);
+  liste.replaceChildren();
+  if (!lieux) {
+    const vide = document.createElement("li");
+    vide.textContent = "Liste des lieux indisponible : ouvrez la page une fois avec le réseau.";
+    liste.append(vide);
+    return;
+  }
+  if (!mots.length) return;
+  const trouves = lieux.filter((l) => mots.every((mot) => l.cle.includes(mot))).slice(0, 8);
+  if (!trouves.length) {
+    const vide = document.createElement("li");
+    vide.textContent = "Aucun lieu trouvé. Essayez un autre mot.";
+    liste.append(vide);
+  }
+  for (const lieu of trouves) {
+    const ligne = document.createElement("li");
+    const bouton = document.createElement("button");
+    bouton.type = "button";
+    bouton.setAttribute("aria-pressed", String(position?.lieu?.id === lieu.id));
+    bouton.textContent = lieu.nom;          // texte, jamais HTML
+    const genre = document.createElement("small");
+    genre.textContent = lieu.genre;
+    bouton.append(genre);
+    bouton.addEventListener("click", () => choisirUnLieu(lieu));
+    ligne.append(bouton);
+    liste.append(ligne);
+  }
+}
+
+function choisirUnLieu(lieu) {
+  // Le GPS ne doit plus remplacer le lieu choisi par une position qu'il trouverait plus tard.
+  if (surveillance !== null) { navigator.geolocation.clearWatch(surveillance); surveillance = null; }
+  position = { latitude: lieu.latitude, longitude: lieu.longitude,
+               precision_m: PRECISION_LIEU_M, lieu };
+  afficherPosition();
+  chercherUnLieu();
 }
 
 /* ------------------------------------------------------------------ photos */
@@ -354,6 +440,13 @@ function afficher(texte, genre) {
   m.hidden = false;
 }
 
+/* Le repère donné à la main (« derrière le marché, côté nord ») part avec le commentaire. */
+function commentaireAvecRepere() {
+  const repere = position && position.lieu ? element("repere").value.trim() : "";
+  const commentaire = element("commentaire").value;
+  return repere ? `Repère : ${repere}. ${commentaire}`.trim() : commentaire;
+}
+
 function identifiantUnique() {
   return pseudonyme() + "-" + Date.now().toString(36) + "-"
     + crypto.getRandomValues(new Uint32Array(1))[0].toString(36);
@@ -424,8 +517,11 @@ element("formulaire").addEventListener("submit", async (evenement) => {
     nature,
     latitude: position.latitude, longitude: position.longitude,
     precision_m: Math.round(position.precision_m),
+    // T16 : d'où vient la position. Le serveur reprend la position du lieu dans SA liste.
+    source_position: position.lieu ? "lieu" : "gps",
+    lieu_id: position.lieu ? position.lieu.id : "",
     date_observation: new Date().toISOString(),
-    commentaire: element("commentaire").value, source: pseudonyme(),
+    commentaire: commentaireAvecRepere(), source: pseudonyme(),
     declarant_nom: element("declarant_nom").value,
     declarant_telephone: element("declarant_telephone").value,
   };
@@ -454,6 +550,7 @@ element("formulaire").addEventListener("submit", async (evenement) => {
   } finally {
     bouton.disabled = false;
     element("commentaire").value = "";
+    element("repere").value = "";
     element("quartier").value = "";
     Object.keys(photos).forEach((cle) => { photos[cle] = null; });
     messageVocal = null;
@@ -475,6 +572,8 @@ function etatDuReseau() {
 }
 
 element("relancer-position").addEventListener("click", () => { localiser(); jouer("position"); });
+element("sans-gps").addEventListener("click", ouvrirLeChoixDeLieu);
+element("recherche-lieu").addEventListener("input", chercherUnLieu);
 
 element("guidage").addEventListener("click", () => {
   guidageActif = !guidageActif;

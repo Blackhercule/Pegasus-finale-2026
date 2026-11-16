@@ -82,8 +82,13 @@ async function charger() {
     return;
   }
   corps.innerHTML = lignes.map((s) => {
-    const lieu = s.latitude == null ? "—"
+    let lieu = s.latitude == null ? "—"
       : `${Number(s.latitude).toFixed(5)}, ${Number(s.longitude).toFixed(5)}`;
+    // T16 : position déduite d'un lieu connu, pas d'un GPS — l'agent doit le voir.
+    if (s.source_position === "lieu") {
+      lieu += `<span class="position-lieu">⚠ Près de « ${echapper(s.lieu_nom || "?")} »
+        (± ${Math.round(s.precision_m || 150)} m, pas de GPS)</span>`;
+    }
     const motifs = s.motifs && s.motifs.length
       ? `<span class="motifs">${echapper(s.motifs.join(", "))}</span>` : "";
     const commentaire = s.commentaire

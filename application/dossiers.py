@@ -98,7 +98,8 @@ class Dossiers:
             "SELECT date, poste, auteur, etape, detail FROM journal_dossier"
             " WHERE depotoir_id = ? ORDER BY id", (id_depotoir,))]
         colonnes = ("id, date_observation, date_reception, taille, volume_m3, type, depot,"
-                    " longueur_m, largeur_m, commentaire, photo, message_vocal, source, statut, motifs")
+                    " longueur_m, largeur_m, commentaire, photo, message_vocal, source, statut, motifs,"
+                    " precision_m, source_position, lieu_nom")
         if avec_declarants:
             # Identité facultative : réservée aux agents connectés, jamais servie au public.
             colonnes += ", declarant_nom, declarant_telephone, photo_cnib, photo_visage"

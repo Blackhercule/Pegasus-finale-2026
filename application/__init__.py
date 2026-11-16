@@ -25,6 +25,7 @@ from .fuites import AMPLEUR_NOMS, CHAINE_EAU, ErreurFuite, Fuites
 from .nuisances import (CHAINE_NUISANCE, GRAVITE_NOMS, NATURES as NATURES_NUISANCE,
                         ErreurNuisance, Nuisances)
 from .geo import Geographie
+from .lieux import charger_lieux
 from .plan import repartir_la_demande
 from .plan.calcul import calculer_le_plan, charger_geojson
 from .simulation import simuler
@@ -49,7 +50,10 @@ def creer_application(reglages: Reglages = None) -> Flask:
     app.extensions["reglages"] = reglages
     app.extensions["geographie"] = Geographie(reglages.fichier("commune.geojson"),
                                               reglages.fichier("eau.geojson"))
-    app.extensions["controleur"] = Controleur(app.extensions["geographie"], reglages.parametres)
+    # Les lieux connus (marchés, écoles, santé), lus une fois : T16.
+    app.extensions["lieux"] = charger_lieux(reglages.fichier("lieux.geojson"))
+    app.extensions["controleur"] = Controleur(app.extensions["geographie"], reglages.parametres,
+                                              app.extensions["lieux"])
     app.register_blueprint(vues)
 
     @app.before_request
@@ -241,6 +245,7 @@ OUVERT_A_TOUS = {
     "api.accueil",             # / : la page d'accueil publique (T12)
     "api.page_accueil",        # /accueil/… : son style et son script
     "api.chiffres_publics",    # GET /api/publics : trois nombres, rien d'autre
+    "api.lieux_connus",        # GET /api/lieux : marchés, écoles… pour signaler sans GPS (T16)
     "api.page_signaler",       # /signaler/… : la page de l'habitant, ses sons, son service worker
     "api.bibliotheques",       # /vendor/… : polices et bibliothèques (la page de signalement en charge)
     "api.recevoir",            # POST /api/signalements : un signalement (habitants et jury)
@@ -286,6 +291,16 @@ def accueil():
 @vues.route("/accueil/<path:fichier>")
 def page_accueil(fichier):
     return send_from_directory(os.path.join(reglages().dossier_interface, "accueil"), fichier)
+
+
+@vues.route("/api/lieux")
+def lieux_connus():
+    """Les lieux nommés de la commune, pour la page de signalement quand le GPS ne marche pas.
+    Ce sont des données publiques d'OpenStreetMap : aucun signalement n'y figure."""
+    from flask import current_app
+    reponse = jsonify(current_app.extensions["lieux"])
+    reponse.headers["Cache-Control"] = "public, max-age=86400"
+    return reponse
 
 
 @vues.route("/api/publics")

@@ -43,8 +43,8 @@ class Depotoirs:
                 "INSERT INTO signalements (id_client, latitude, longitude, precision_m, date_observation,"
                 " date_reception, taille, volume_m3, type, commentaire, photo, source, statut, motifs,"
                 " depot, longueur_m, largeur_m, declarant_nom, declarant_telephone, photo_cnib,"
-                " photo_visage, message_vocal)"
-                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                " photo_visage, message_vocal, source_position, lieu_nom)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (examine.get("id_client"), examine.get("latitude"), examine.get("longitude"),
                  examine.get("precision_m"), examine.get("date_observation"), recu,
                  examine.get("taille"), examine.get("volume_m3"), examine.get("type"),
@@ -52,7 +52,8 @@ class Depotoirs:
                  statut, json.dumps(motifs, ensure_ascii=False),
                  examine.get("depot"), examine.get("longueur_m"), examine.get("largeur_m"),
                  examine.get("declarant_nom"), examine.get("declarant_telephone"),
-                 examine.get("photo_cnib"), examine.get("photo_visage"), examine.get("message_vocal")))
+                 examine.get("photo_cnib"), examine.get("photo_visage"), examine.get("message_vocal"),
+                 examine.get("source_position") or "gps", examine.get("lieu_nom")))
         except sqlite3.IntegrityError:
             # Le même envoi est arrivé deux fois en même temps (réseau qui revient, double appui) :
             # le premier a gagné, on renvoie simplement son résultat.

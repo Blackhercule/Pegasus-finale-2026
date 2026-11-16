@@ -144,8 +144,8 @@ class Nuisances:
                 "INSERT INTO signalements (id_client, nature, latitude, longitude, precision_m,"
                 " date_observation, date_reception, gravite, quartier, commentaire, photo,"
                 " source, statut, motifs, declarant_nom, declarant_telephone, photo_cnib,"
-                " photo_visage, message_vocal)"
-                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                " photo_visage, message_vocal, source_position, lieu_nom)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (examine.get("id_client"), examine.get("nature"), examine.get("latitude"),
                  examine.get("longitude"), examine.get("precision_m"),
                  examine.get("date_observation"), maintenant(), examine.get("gravite"),
@@ -154,7 +154,8 @@ class Nuisances:
                  json.dumps(motifs, ensure_ascii=False),
                  examine.get("declarant_nom"), examine.get("declarant_telephone"),
                  examine.get("photo_cnib"), examine.get("photo_visage"),
-                 examine.get("message_vocal")))
+                 examine.get("message_vocal"),
+                 examine.get("source_position") or "gps", examine.get("lieu_nom")))
         except sqlite3.IntegrityError:
             self.co.rollback()
             return self.deja_recu(examine.get("id_client")) or {
@@ -287,7 +288,8 @@ class Nuisances:
             "SELECT date, poste, auteur, etape, detail FROM journal_nuisance"
             " WHERE nuisance_id = ? ORDER BY id", (id_nuisance,))]
         colonnes = ("id, date_observation, date_reception, gravite, quartier, commentaire,"
-                    " photo, message_vocal, source, statut, motifs")
+                    " photo, message_vocal, source, statut, motifs,"
+                    " precision_m, source_position, lieu_nom")
         if avec_declarants:
             colonnes += ", declarant_nom, declarant_telephone, photo_cnib, photo_visage"
         signalements = [dict(l) for l in self.co.execute(

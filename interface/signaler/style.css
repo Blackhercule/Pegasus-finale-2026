@@ -143,3 +143,18 @@ h2 .facultatif + .parler, h2 .parler { vertical-align: middle; }
   margin-top: .9rem; background: none; border: 0; color: #fff; opacity: .75;
   font: inherit; font-size: .9rem; text-decoration: underline; cursor: pointer; padding: .5rem;
 }
+
+/* T16 : choisir un lieu connu quand la position ne marche pas. */
+.lien-lieu { display: block; margin-top: .7rem; padding: .3rem 0; border: 0; background: none;
+             font: inherit; font-weight: 700; color: var(--vert-clair); text-decoration: underline;
+             cursor: pointer; }
+.bloc-lieu { display: grid; gap: .4rem; margin-top: .5rem; }
+.bloc-lieu label { font-size: .9rem; font-weight: 600; }
+.bloc-lieu input { width: 100%; font: inherit; padding: .65rem .7rem; border: 1px solid var(--trait);
+                   border-radius: 10px; background: #fff; }
+.resultats-lieu { list-style: none; margin: 0; padding: 0; display: grid; gap: .3rem; }
+.resultats-lieu button { width: 100%; text-align: left; font: inherit; padding: .6rem .7rem;
+                         border: 1px solid var(--trait); border-radius: 10px; background: #fff;
+                         cursor: pointer; }
+.resultats-lieu button small { display: block; color: var(--gris); font-size: .8rem; }
+.resultats-lieu button[aria-pressed="true"] { border: 2px solid var(--vert); background: #eef0fa; }

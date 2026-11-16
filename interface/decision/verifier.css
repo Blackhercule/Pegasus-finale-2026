@@ -45,3 +45,7 @@ tr.rejete td { color: var(--gris); background: #faf9f6; }
 .message { padding: .6rem .9rem; border-radius: 8px; margin: 0; font-size: .88rem; }
 .message.succes { background: var(--vert-clair); color: var(--vert); border: 1px solid #a9dcc0; }
 .message.erreur { background: var(--rouge-clair); color: var(--rouge); border: 1px solid #efb3b3; }
+
+/* T16 : position tirée d'un lieu connu, et non d'un GPS. */
+.position-lieu { display: block; margin: .3rem 0; padding: .3rem .5rem; border-radius: 6px;
+                 background: var(--or-clair); color: #5c4f00; font-weight: 700; font-size: .82rem; }

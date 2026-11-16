@@ -153,7 +153,9 @@ AJOUTS = {
                      ("photo_cnib", "TEXT"), ("photo_visage", "TEXT"), ("message_vocal", "TEXT"),
                      ("nature", "TEXT NOT NULL DEFAULT 'ordures'"), ("fuite_id", "INTEGER"),
                      ("ampleur", "TEXT"), ("quartier", "TEXT"),
-                     ("nuisance_id", "INTEGER"), ("gravite", "TEXT")],
+                     ("nuisance_id", "INTEGER"), ("gravite", "TEXT"),
+                     # T16 : d'où vient la position — « gps », ou « lieu » choisi dans une liste.
+                     ("source_position", "TEXT NOT NULL DEFAULT 'gps'"), ("lieu_nom", "TEXT")],
     "depotoirs": [("etape", "TEXT NOT NULL DEFAULT 'signale'"), ("surface_m2", "REAL"),
                   ("depot", "TEXT")],
 }
