@@ -1,0 +1,62 @@
+/* La barre commune des pages de décision (T14), et le panneau ☰ de la carte.
+   Le drapeau du Burkina Faso est dessiné ici, sans fichier image : un dégradé du rouge vers
+   le vert, un voile sombre pour que le texte blanc reste lisible, et l'étoile jaune (SVG
+   construit par barre.js) à droite. */
+.barre {
+  position: relative; z-index: 30; display: flex; align-items: center; gap: .4rem 1.2rem;
+  padding: .55rem 1rem; color: #fff; isolation: isolate; flex-wrap: wrap;
+  background: linear-gradient(90deg, #ef2b2d 0%, #c8402c 35%, #3d8a3c 65%, #009e49 100%);
+  font-family: Lato, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+}
+.barre::before {                                   /* le voile sombre, sous le texte */
+  content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, .35); z-index: -1;
+}
+.barre__etoile { height: 1.7rem; width: 1.7rem; flex: none; fill: #fcd116;
+                 filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .35)); }
+.barre__marque { color: #fff; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.barre__sections { display: flex; gap: .15rem; flex: 1; min-width: 0; overflow-x: auto; }
+.barre__sections a {
+  color: #fff; text-decoration: none; padding: .35rem .65rem; border-radius: 6px;
+  white-space: nowrap; font-size: .92rem;
+}
+.barre__sections a:hover { background: rgba(255, 255, 255, .15); }
+.barre__sections a[aria-current="page"] {          /* la section ouverte */
+  background: #fff; color: #1e2455; font-weight: 700;
+}
+.barre__compte { display: flex; align-items: center; gap: .6rem; margin-left: auto; }
+.barre__poste { font-size: .85rem; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
+.barre__changer, .barre__menu {
+  font: inherit; font-size: .85rem; cursor: pointer; color: #fff; border-radius: 6px;
+  background: rgba(0, 0, 0, .25); border: 1px solid rgba(255, 255, 255, .6); padding: .3rem .6rem;
+}
+.barre__menu { font-size: 1.25rem; line-height: 1; padding: .3rem .55rem; }
+.barre a:focus-visible, .barre button:focus-visible { outline: 3px solid #fcd116; outline-offset: 2px; }
+
+/* Les anciens en-têtes des pages gardent leur titre ; leurs liens sont dans la barre. */
+.bandeau nav a, #panneau .liens { display: none; }
+
+/* --- Page de la carte : la carte prend tout l'écran, les réglages sont dans le panneau ☰ --- */
+body.avec-panneau { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+body.avec-panneau #application { display: block; position: relative; flex: 1; min-height: 0; height: auto; }
+body.avec-panneau #carte { height: 100%; }
+body.avec-panneau #panneau {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 40; width: min(360px, 92vw);
+  max-height: none; border-right: 0; border-bottom: 0; border-left: 4px solid var(--or);
+  transform: translateX(100%); transition: transform .2s ease; visibility: hidden;
+}
+body.panneau-ouvert #panneau { transform: none; visibility: visible; }
+.voile-panneau { display: none; position: fixed; inset: 0; z-index: 35; background: rgba(0, 0, 0, .3); }
+body.panneau-ouvert .voile-panneau { display: block; }
+
+/* --- Téléphone : la marque et le compte sur une ligne, les sections défilent dessous --- */
+@media (max-width: 640px) {
+  .barre { padding: .45rem .6rem; }
+  .barre__sections { order: 3; flex-basis: 100%; }
+  .barre__poste { display: none; }
+}
+
+/* Sur téléphone, un tableau large défile dans son cadre au lieu d'élargir toute la page. */
+@media (max-width: 640px) {
+  .page-verifier main > * { min-width: 0; }
+  .page-verifier table { display: block; overflow-x: auto; }
+}
