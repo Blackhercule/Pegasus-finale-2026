@@ -24,11 +24,13 @@ ne modifie pas ce fichier.
 | — | Nuisances : caniveaux, abattage clandestin, toilettes en plein air, eaux usées animales | coordinateur | **Fait** (16/11) |
 | — | Habillage : police Lato, couleurs des portails de l'administration | coordinateur | **Fait** (16/11) |
 | — | Quatre écrans d'accueil parlés avant le formulaire de signalement | coordinateur | **Fait** (16/11). Les enregistrements mooré restent à faire par l'équipe |
-| T12 | Page d'accueil publique | cloud ou PC | **À faire** |
-| T13 | Partie décision protégée par identifiant et mot de passe | cloud ou PC | **À faire** |
-| T14 | Habillage de la partie décision : barre horizontale, menu ☰, drapeau | cloud ou PC | **À faire** |
-| T15 | Les tournées suivent les rues, comme un GPS | cloud ou PC | **À faire** |
-| T16 | Choisir un lieu connu quand la position ne marche pas | cloud ou PC | **À faire** |
+| C1 | Trois erreurs 500 et limite des essais de mot de passe | coordinateur | **Fait** (16/11) |
+| C2 | Un lot ne doit pas pouvoir confirmer son propre dépotoir | — | **À faire**, recommandé avant la démonstration |
+| T12 | Page d'accueil publique | Claude Code | **Fait** (16/11), vérifié par le coordinateur |
+| T13 | Partie décision protégée par identifiant et mot de passe | Claude Code | **Fait** (16/11), vérifié et fusionné. Correctif C1 ajouté par-dessus |
+| T14 | Habillage de la partie décision : barre horizontale, menu ☰, drapeau | Claude Code | **Fait** (16/11), vérifié. Reste la bande grise au bord du fond de carte |
+| T15 | Les tournées suivent les rues, comme un GPS | Claude Code | **Fait** (16/11), vérifié : 142 tournées tracées, médiane de 80 points. Recalcul 6 à 7 s — **à remesurer sur le PC** |
+| T16 | Choisir un lieu connu quand la position ne marche pas | Claude Code | **Fait** (16/11), vérifié : 1 187 lieux, recherche sans accent, position imposée par le serveur |
 
 **Important.** Depuis le 16/11 au matin, c'est le coordinateur qui écrit le code (les sessions de
 Claude Code se heurtaient à la limite d'utilisation). Avant de commencer quoi que ce soit : fais
