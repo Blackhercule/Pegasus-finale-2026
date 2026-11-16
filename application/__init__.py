@@ -191,7 +191,8 @@ def recevoir_lot():
     resultats = []
     for brut in lignes[:5000]:
         try:
-            resultats.append(depotoirs().enregistrer(controleur().examiner(brut)))
+            resultats.append(depotoirs().enregistrer(controleur().examiner(brut),
+                                                     verifier_rafale=False))
         except Exception as erreur:        # une ligne piégée n'interrompt pas le lot
             resultats.append({"statut": "rejete", "motifs": ["format_invalide"], "detail": str(erreur)[:200]})
     comptes = {}
@@ -265,6 +266,15 @@ def connecter():
     session["agent"] = r.agent_nom
     session["jeton"] = secrets.token_urlsafe(32)
     return jsonify({"agent": r.agent_nom, "jeton": session["jeton"]})
+
+
+@vues.route("/api/session")
+def session_en_cours():
+    """La page de vérification demande si un agent est déjà connecté (la session dure 
+    le temps du navigateur)."""
+    if not session.get("agent"):
+        return jsonify({"agent": None}), 401
+    return jsonify({"agent": session["agent"], "jeton": session["jeton"]})
 
 
 @vues.route("/api/deconnexion", methods=["POST"])

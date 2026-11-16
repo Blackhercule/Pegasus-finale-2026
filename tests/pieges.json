@@ -1,0 +1,403 @@
+[
+ {
+  "motif_attendu": "format_invalide",
+  "signalement": {
+   "latitude": "douze virgule trois",
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury"
+  }
+ },
+ {
+  "motif_attendu": "format_invalide",
+  "signalement": {
+   "latitude": null,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury"
+  }
+ },
+ {
+  "motif_attendu": "format_invalide",
+  "signalement": {
+   "latitude": [
+    12.37
+   ],
+   "longitude": -1.51,
+   "taille": "grand",
+   "source": "jury"
+  }
+ },
+ {
+  "motif_attendu": "format_invalide",
+  "signalement": {
+   "latitude": {
+    "valeur": 12.37
+   },
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury"
+  }
+ },
+ {
+  "motif_attendu": "format_invalide",
+  "signalement": {
+   "latitude": true,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury"
+  }
+ },
+ {
+  "motif_attendu": "coordonnees_invalides",
+  "signalement": {
+   "latitude": 0,
+   "longitude": 0,
+   "taille": "grand",
+   "source": "jury"
+  }
+ },
+ {
+  "motif_attendu": "coordonnees_invalides",
+  "signalement": {
+   "latitude": 91.5,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury"
+  }
+ },
+ {
+  "motif_attendu": "coordonnees_invalides",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -200,
+   "taille": "grand",
+   "source": "jury"
+  }
+ },
+ {
+  "motif_attendu": "format_invalide",
+  "signalement": {
+   "latitude": Infinity,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury"
+  }
+ },
+ {
+  "motif_attendu": "format_invalide",
+  "signalement": {
+   "latitude": NaN,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury"
+  }
+ },
+ {
+  "motif_attendu": "coordonnees_inversees",
+  "signalement": {
+   "latitude": -1.5197,
+   "longitude": 12.3714,
+   "taille": "grand",
+   "source": "jury"
+  }
+ },
+ {
+  "motif_attendu": "hors_commune",
+  "signalement": {
+   "latitude": 48.8566,
+   "longitude": 2.3522,
+   "taille": "grand",
+   "source": "jury"
+  }
+ },
+ {
+  "motif_attendu": "hors_commune",
+  "signalement": {
+   "latitude": 11.1771,
+   "longitude": -4.2979,
+   "taille": "grand",
+   "source": "jury"
+  }
+ },
+ {
+  "motif_attendu": "hors_commune",
+  "signalement": {
+   "latitude": 12.6,
+   "longitude": -1.52,
+   "taille": "grand",
+   "source": "jury"
+  }
+ },
+ {
+  "motif_attendu": "date_future",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury",
+   "date_observation": "2030-01-01T10:00:00Z"
+  }
+ },
+ {
+  "motif_attendu": "date_future",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury",
+   "date_observation": "2027-06-15T08:00:00+00:00"
+  }
+ },
+ {
+  "motif_attendu": "date_trop_ancienne",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury",
+   "date_observation": "2001-09-11T08:46:00Z"
+  }
+ },
+ {
+  "motif_attendu": "volume_invraisemblable",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury",
+   "volume_m3": -5
+  }
+ },
+ {
+  "motif_attendu": "volume_invraisemblable",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury",
+   "volume_m3": 0
+  }
+ },
+ {
+  "motif_attendu": "volume_invraisemblable",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury",
+   "volume_m3": 1000000000.0
+  }
+ },
+ {
+  "motif_attendu": "volume_invraisemblable",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury",
+   "volume_m3": 999
+  }
+ },
+ {
+  "motif_attendu": "format_invalide",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "source": "jury"
+  }
+ },
+ {
+  "motif_attendu": "format_invalide",
+  "signalement": {
+   "taille": "grand",
+   "source": "jury"
+  }
+ },
+ {
+  "motif_attendu": "format_invalide",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury",
+   "commentaire": {
+    "a": 1
+   }
+  }
+ },
+ {
+  "motif_attendu": "format_invalide",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": 12345
+  }
+ },
+ {
+  "motif_attendu": "precision_insuffisante",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury",
+   "precision_m": 5000
+  }
+ },
+ {
+  "motif_attendu": "precision_insuffisante",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury",
+   "precision_m": -3
+  }
+ },
+ {
+  "motif_attendu": "aucun",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury",
+   "commentaire": "<script>alert('x')</script>"
+  }
+ },
+ {
+  "motif_attendu": "aucun",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury",
+   "commentaire": "'; DROP TABLE signalements;--"
+  }
+ },
+ {
+  "motif_attendu": "aucun",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury",
+   "commentaire": "<img src=x onerror=alert(1)>"
+  }
+ },
+ {
+  "motif_attendu": "aucun",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury",
+   "commentaire": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  }
+ },
+ {
+  "motif_attendu": "aucun",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury",
+   "commentaire": "\u0000\u0001 caractères de contrôle"
+  }
+ },
+ {
+  "motif_attendu": "aucun",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury",
+   "commentaire": "{{7*7}}"
+  }
+ },
+ {
+  "motif_attendu": "aucun",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury",
+   "commentaire": "../../etc/passwd"
+  }
+ },
+ {
+  "motif_attendu": "aucun",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury",
+   "commentaire": "😀 emoji et accents éàü"
+  }
+ },
+ {
+  "motif_attendu": "aucun",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "gigantesque",
+   "source": "jury",
+   "volume_m3": 12
+  }
+ },
+ {
+  "motif_attendu": "aucun",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "grand",
+   "source": "jury",
+   "type": "nucleaire"
+  }
+ },
+ {
+  "motif_attendu": "aucun",
+  "signalement": {
+   "latitude": 12.3714,
+   "longitude": -1.5197,
+   "taille": "petit",
+   "source": "jury-0"
+  }
+ },
+ {
+  "motif_attendu": "aucun",
+  "signalement": {
+   "latitude": 12.33,
+   "longitude": -1.47,
+   "taille": "moyen",
+   "source": "jury-1"
+  }
+ },
+ {
+  "motif_attendu": "aucun",
+  "signalement": {
+   "latitude": 12.4,
+   "longitude": -1.56,
+   "taille": "grand",
+   "source": "jury-2"
+  }
+ },
+ {
+  "motif_attendu": "aucun",
+  "signalement": {
+   "latitude": 12.35,
+   "longitude": -1.5,
+   "taille": "tres_grand",
+   "source": "jury-3"
+  }
+ },
+ {
+  "motif_attendu": "aucun",
+  "signalement": {
+   "latitude": 12.31,
+   "longitude": -1.53,
+   "taille": "petit",
+   "source": "jury-4"
+  }
+ }
+]

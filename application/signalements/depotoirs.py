@@ -21,15 +21,19 @@ class Depotoirs:
         self.rafale_min = parametres["controles"]["rafale_fenetre_min"]
 
     # ------------------------------------------------------------------ écriture
-    def enregistrer(self, examine: dict) -> dict:
-        """Range un signalement déjà contrôlé. Renvoie ce qu'il faut répondre à l'appareil."""
+    def enregistrer(self, examine: dict, verifier_rafale: bool = True) -> dict:
+        """Range un signalement déjà contrôlé. Renvoie ce qu'il faut répondre à l'appareil.
+
+        `verifier_rafale` protège l'adresse publique : un téléphone qui envoie des dizaines de
+        signalements en quelques minutes est suspect. Un lot chargé par un agent est au
+        contraire volumineux par nature : chaque ligne y est jugée sur ses propres contrôles."""
         deja = self.deja_recu(examine.get("id_client"))
         if deja:                           # même envoi reçu deux fois : on ne compte pas deux fois
             return deja
 
         motifs = list(examine["motifs"])
         statut = examine["statut"]
-        if statut != REJET and self.rafale(examine["source"]):
+        if verifier_rafale and statut != REJET and self.rafale(examine["source"]):
             motifs.append("rafale_meme_source")
             statut = "a_verifier"
 
