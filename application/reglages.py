@@ -14,9 +14,17 @@ class Reglages:
         self.dossier_interface = os.path.join(RACINE, "interface")
         self.base = base or os.environ.get("BASE_DONNEES", os.path.join(self.dossier_donnees, "signalements.sqlite"))
         self.dossier_photos = os.environ.get("DOSSIER_PHOTOS", os.path.join(os.path.dirname(self.base), "photos"))
-        # Compte de l'agent qui vérifie les signalements. Le mot de passe n'est jamais dans le dépôt.
+        # Un compte par poste. Les mots de passe viennent de .env, jamais du dépôt.
+        # « agent » reste le compte de la mairie : c'est lui qui vérifie les signalements.
         self.agent_nom = os.environ.get("AGENT_NOM", "agent")
         self.agent_mot_de_passe = os.environ.get("AGENT_MOT_DE_PASSE", "")
+        self.comptes = {
+            self.agent_nom: {"poste": "mairie", "mot_de_passe": self.agent_mot_de_passe},
+            os.environ.get("BRIGADE_NOM", "brigade"): {
+                "poste": "brigade", "mot_de_passe": os.environ.get("BRIGADE_MOT_DE_PASSE", "")},
+            os.environ.get("COLLECTE_NOM", "collecte"): {
+                "poste": "collecte", "mot_de_passe": os.environ.get("COLLECTE_MOT_DE_PASSE", "")},
+        }
         self.secret_session = os.environ.get("SECRET_SESSION", "")
         self.parametres = self.lire_parametres()
 

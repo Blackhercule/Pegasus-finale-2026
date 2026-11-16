@@ -51,7 +51,8 @@
     "rafale_fenetre_min": 10,
     "rayon_regroupement_m": 30,
     "photo_max_octets": 6000000,
-    "texte_max_caracteres": 500
+    "texte_max_caracteres": 500,
+    "audio_max_octets": 4000000
   },
   "volumes_par_taille_m3": {
     "petit": 1,

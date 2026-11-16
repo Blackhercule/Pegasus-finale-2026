@@ -5,6 +5,8 @@ import os
 
 import pytest
 
+from conftest import MOT_DE_PASSE
+
 ICI = os.path.dirname(os.path.abspath(__file__))
 BON = {"latitude": 12.3714, "longitude": -1.5197, "taille": "grand", "source": "essai"}
 
@@ -262,3 +264,117 @@ def test_l_export_osm_echappe_les_valeurs(client):
     assert "<script>" not in contenu.replace("&lt;script&gt;", "")
     import xml.etree.ElementTree as ET
     ET.fromstring(contenu)              # doit rester un XML valide
+
+
+# ------------------------------------------------------------------ chaîne de traitement
+def connecter(client, nom, mot_de_passe):
+    reponse = client.post("/api/connexion", json={"nom": nom, "mot_de_passe": mot_de_passe})
+    if reponse.status_code == 200:
+        client.environ_base["HTTP_X_JETON"] = reponse.get_json()["jeton"]
+    return reponse
+
+
+def test_chaque_poste_a_son_compte(client, monkeypatch):
+    assert connecter(client, "agent", MOT_DE_PASSE).get_json()["poste"] == "mairie"
+    assert connecter(client, "brigade", "essai-brigade").get_json()["poste"] == "brigade"
+    assert connecter(client, "collecte", "essai-collecte").get_json()["poste"] == "collecte"
+    assert connecter(client, "inconnu", "x").status_code == 401
+
+
+def test_le_dossier_avance_de_poste_en_poste(client):
+    envoyer(client, source="a", id_client="a")
+    envoyer(client, latitude=12.37145, source="b", id_client="b")
+    assert client.get("/api/dossiers").get_json()[0]["etape"] == "signale"
+
+    connecter(client, "agent", MOT_DE_PASSE)
+    dossier = client.post("/api/dossiers/1/avancer", json={"detail": "Vu sur place"}).get_json()
+    assert dossier["etape"] == "confirme"
+
+    connecter(client, "brigade", "essai-brigade")
+    dossier = client.post("/api/dossiers/1/avancer",
+                          json={"detail": "Riverains sensibilisés, un récidiviste verbalisé"}).get_json()
+    assert dossier["etape"] == "constat"
+
+    connecter(client, "agent", MOT_DE_PASSE)
+    assert client.post("/api/dossiers/1/avancer", json={}).get_json()["etape"] == "a_collecter"
+
+    connecter(client, "collecte", "essai-collecte")
+    dossier = client.post("/api/dossiers/1/avancer", json={"detail": "Deux camions"}).get_json()
+    assert dossier["etape"] == "collecte"
+    assert dossier["etat"] == "nettoye"
+    assert [e["poste"] for e in dossier["journal"]] == ["mairie", "brigade", "mairie", "collecte"]
+    # Un dépotoir ramassé sort du plan de gestion.
+    assert client.get("/api/depotoirs").get_json()["features"] == []
+
+
+def test_un_poste_ne_peut_pas_agir_a_la_place_d_un_autre(client):
+    envoyer(client, source="a", id_client="a")
+    connecter(client, "brigade", "essai-brigade")
+    reponse = client.post("/api/dossiers/1/avancer", json={})
+    assert reponse.status_code == 400
+    assert "mairie" in reponse.get_json()["erreur"].lower()
+
+
+def test_seule_la_mairie_classe_sans_suite(client):
+    envoyer(client, source="a", id_client="a")
+    connecter(client, "collecte", "essai-collecte")
+    assert client.post("/api/dossiers/1/classer", json={"motif": "rien"}).status_code == 403
+    connecter(client, "agent", MOT_DE_PASSE)
+    dossier = client.post("/api/dossiers/1/classer", json={"motif": "Le tas n'existe plus"}).get_json()
+    assert dossier["etape"] == "classe"
+
+
+def test_l_identite_du_declarant_n_est_pas_publique(client):
+    client.post("/api/signalements", json={**BON, "id_client": "temoin",
+                                           "declarant_nom": "Témoin Fictif",
+                                           "declarant_telephone": "+226 00 00 00 00"})
+    public = client.get("/api/dossiers/1").get_json()
+    assert "declarant_nom" not in public["signalements"][0]
+    connecter(client, "agent", MOT_DE_PASSE)
+    prive = client.get("/api/dossiers/1").get_json()
+    assert prive["signalements"][0]["declarant_nom"] == "Témoin Fictif"
+
+
+def test_les_identites_s_effacent_a_la_cloture(client):
+    client.post("/api/signalements", json={**BON, "id_client": "t",
+                                           "declarant_telephone": "+226 00 00 00 00"})
+    connecter(client, "agent", MOT_DE_PASSE)
+    assert client.delete("/api/dossiers/1/identites").get_json()["signalements_nettoyes"] == 1
+    assert client.get("/api/dossiers/1").get_json()["signalements"][0]["declarant_telephone"] is None
+
+
+def test_superficie_et_mode_de_depot(client):
+    envoyer(client, depot="caniveau", longueur_m=6, largeur_m=3, source="a", id_client="a")
+    envoyer(client, latitude=12.37145, depot="caniveau", longueur_m=5, largeur_m=4,
+            source="b", id_client="b")
+    proprietes = client.get("/api/depotoirs").get_json()["features"][0]["properties"]
+    assert proprietes["depot"] == "caniveau"
+    assert proprietes["surface_m2"] == 20.0          # médiane de 18 et 20
+
+
+def test_les_pieces_privees_ne_sont_pas_publiques(client):
+    """Un message vocal ou une CNIB ne se télécharge pas sans être connecté."""
+    import io
+    son = b"\x1aE\xdf\xa3" + b"0" * 200
+    reponse = client.post("/api/signalements", data={
+        "latitude": "12.3714", "longitude": "-1.5197", "taille": "grand", "source": "a",
+        "id_client": "vocal", "message_vocal": (io.BytesIO(son), "voix.webm"),
+    }, content_type="multipart/form-data")
+    assert reponse.status_code == 201
+    connecter(client, "agent", MOT_DE_PASSE)
+    nom = client.get("/api/dossiers/1").get_json()["signalements"][0]["message_vocal"]
+    assert nom.startswith("prive/")
+    adresse = "/api/fichiers/" + nom
+    assert client.get(adresse).status_code == 200
+    client.post("/api/deconnexion")
+    assert client.get(adresse).status_code == 401
+
+
+def test_un_son_qui_n_en_est_pas_un_est_ignore(client):
+    import io
+    client.post("/api/signalements", data={
+        "latitude": "12.3714", "longitude": "-1.5197", "taille": "grand", "source": "a",
+        "id_client": "faux", "message_vocal": (io.BytesIO(b"<?php echo 1; ?>"), "voix.webm"),
+    }, content_type="multipart/form-data")
+    connecter(client, "agent", MOT_DE_PASSE)
+    assert client.get("/api/dossiers/1").get_json()["signalements"][0]["message_vocal"] is None

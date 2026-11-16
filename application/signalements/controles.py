@@ -25,12 +25,19 @@ MOTIFS = {
     "date_trop_ancienne":     (A_VERIFIER, "Observation trop ancienne pour être encore d'actualité"),
     "precision_insuffisante": (A_VERIFIER, "Position trop imprécise"),
     "rafale_meme_source":     (A_VERIFIER, "Beaucoup de signalements d'un même appareil en très peu de temps"),
+    "dimensions_invraisemblables": (A_VERIFIER, "Longueur ou largeur hors de proportion"),
 }
 
 TAILLES = ("petit", "moyen", "grand", "tres_grand")
 TYPES = ("menager", "gravats", "mixte", "autre")
+# Où le tas se trouve : à même le sol, dans un bac, dans un caniveau… Cela change ce qu'il
+# faut envoyer sur place et l'urgence (un caniveau bouché inonde le quartier aux pluies).
+DEPOTS = ("plein_air", "bac", "caniveau", "fosse", "berge", "autre")
+DIMENSION_MAX_M = 200
 # Premiers octets des formats d'image acceptés : on lit le contenu, jamais le nom du fichier.
 SIGNATURES_IMAGE = (b"\xff\xd8\xff", b"\x89PNG\r\n\x1a\n", b"RIFF", b"GIF87a", b"GIF89a")
+# Sons acceptés pour un message vocal : WebM/Matroska (ce qu'enregistre un navigateur), OGG, MP4, MP3.
+SIGNATURES_SON = (b"\x1aE\xdf\xa3", b"OggS", b"ID3", b"\xff\xfb", b"\xff\xf3", b"RIFF")
 
 
 def nombre(valeur):
@@ -71,6 +78,12 @@ def lire_date(valeur):
 
 def est_une_image(contenu: bytes) -> bool:
     return any(contenu.startswith(s) for s in SIGNATURES_IMAGE)
+
+
+def est_un_son(contenu: bytes) -> bool:
+    """Le format se lit dans le contenu, jamais dans le nom du fichier."""
+    return (any(contenu.startswith(s) for s in SIGNATURES_SON)
+            or contenu[4:8] == b"ftyp")          # MP4 et M4A : la marque est au cinquième octet
 
 
 class Controleur:
@@ -122,6 +135,14 @@ class Controleur:
         elif (maintenant() - date).days > self.seuils["anciennete_max_jours"]:
             motifs.append("date_trop_ancienne")
 
+        # Dimensions au sol, facultatives : elles donnent une superficie estimée.
+        longueur, largeur = nombre(brut.get("longueur_m")), nombre(brut.get("largeur_m"))
+        for valeur in (longueur, largeur):
+            if valeur is not None and not (0 < valeur <= DIMENSION_MAX_M):
+                motifs.append("dimensions_invraisemblables")
+                longueur = largeur = None
+                break
+
         precision = nombre(brut.get("precision_m"))
         if precision is not None and (precision < 0 or precision > self.seuils["precision_max_m"]):
             motifs.append("precision_insuffisante")
@@ -137,7 +158,13 @@ class Controleur:
             "id_client": id_client or None, "latitude": lat, "longitude": lon,
             "precision_m": precision, "date_observation": date.isoformat(timespec="seconds"),
             "taille": taille, "volume_m3": volume, "type": genre,
+            "depot": brut.get("depot") if brut.get("depot") in DEPOTS else None,
+            "longueur_m": longueur, "largeur_m": largeur,
             "commentaire": commentaire or "", "source": source or "inconnue",
+            # Identité FACULTATIVE : seulement si le déclarant accepte d'être témoin.
+            # Elle n'est jamais servie au public (voir Dossiers.detail).
+            "declarant_nom": texte(brut.get("declarant_nom"), 80) or None,
+            "declarant_telephone": texte(brut.get("declarant_telephone"), 30) or None,
         }
         return self.resultat(propre, motifs)
 
@@ -153,3 +180,7 @@ class Controleur:
 
     def controler_photo(self, contenu: bytes) -> bool:
         return bool(contenu) and len(contenu) <= self.seuils["photo_max_octets"] and est_une_image(contenu)
+
+    def controler_audio(self, contenu: bytes) -> bool:
+        maximum = self.seuils.get("audio_max_octets", 4_000_000)
+        return bool(contenu) and len(contenu) <= maximum and est_un_son(contenu)
