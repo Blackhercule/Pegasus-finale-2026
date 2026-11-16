@@ -48,10 +48,13 @@ body.panneau-ouvert #panneau { transform: none; visibility: visible; }
 .voile-panneau { display: none; position: fixed; inset: 0; z-index: 35; background: rgba(0, 0, 0, .3); }
 body.panneau-ouvert .voile-panneau { display: block; }
 
-/* --- Téléphone : la marque et le compte sur une ligne, les sections défilent dessous --- */
+/* --- Écran étroit (portable de 1100 px, tablette, téléphone) : les sections passent sur une
+   seconde ligne, où elles tiennent ou défilent ; aucune n'est coupée sans qu'on le voie. --- */
+@media (max-width: 1180px) {
+  .barre__sections { order: 3; flex-basis: 100%; }
+}
 @media (max-width: 640px) {
   .barre { padding: .45rem .6rem; }
-  .barre__sections { order: 3; flex-basis: 100%; }
   .barre__poste { display: none; }
 }
 
