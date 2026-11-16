@@ -50,9 +50,12 @@ def creer_application(reglages: Reglages = None) -> Flask:
     @app.after_request
     def entetes(reponse):
         # La page ne charge que ses propres fichiers : ni script, ni police, ni carte d'ailleurs.
-        reponse.headers.setdefault("Content-Security-Policy",
-                                   "default-src 'self'; img-src 'self' data: blob:; worker-src 'self' blob:; "
-                                   "style-src 'self' 'unsafe-inline'; object-src 'none'; frame-ancestors 'none'")
+        reponse.headers.setdefault(
+            "Content-Security-Policy",
+            "default-src 'self'; img-src 'self' data: blob:; worker-src 'self' blob:; "
+            # blob: est nécessaire pour réécouter un message vocal avant de l'envoyer.
+            "media-src 'self' blob:; "
+            "style-src 'self' 'unsafe-inline'; object-src 'none'; frame-ancestors 'none'")
         reponse.headers.setdefault("X-Content-Type-Options", "nosniff")
         reponse.headers.setdefault("Referrer-Policy", "no-referrer")
         return reponse
