@@ -9,6 +9,8 @@
   --rouge: #e4572e;
   --gris: #6c7772;
 }
+/* « hidden » doit l'emporter sur nos propres règles d'affichage. */
+[hidden] { display: none !important; }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
 body {

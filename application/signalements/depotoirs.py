@@ -7,6 +7,7 @@ signalement CONFIRME le premier. Et un dépotoir confirmé par deux appareils di
 
 import datetime
 import json
+import sqlite3
 
 from ..geo import distance_m
 from .controles import REJET
@@ -22,12 +23,9 @@ class Depotoirs:
     # ------------------------------------------------------------------ écriture
     def enregistrer(self, examine: dict) -> dict:
         """Range un signalement déjà contrôlé. Renvoie ce qu'il faut répondre à l'appareil."""
-        if examine.get("id_client"):
-            deja = self.co.execute("SELECT id, statut, motifs, depotoir_id FROM signalements "
-                                   "WHERE id_client = ?", (examine["id_client"],)).fetchone()
-            if deja:                       # même envoi reçu deux fois : on ne compte pas deux fois
-                return {"id": deja["id"], "statut": deja["statut"], "nouveau": False,
-                        "motifs": json.loads(deja["motifs"] or "[]"), "depotoir_id": deja["depotoir_id"]}
+        deja = self.deja_recu(examine.get("id_client"))
+        if deja:                           # même envoi reçu deux fois : on ne compte pas deux fois
+            return deja
 
         motifs = list(examine["motifs"])
         statut = examine["statut"]
@@ -36,20 +34,38 @@ class Depotoirs:
             statut = "a_verifier"
 
         recu = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
-        curseur = self.co.execute(
-            "INSERT INTO signalements (id_client, latitude, longitude, precision_m, date_observation,"
-            " date_reception, taille, volume_m3, type, commentaire, photo, source, statut, motifs)"
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-            (examine.get("id_client"), examine.get("latitude"), examine.get("longitude"),
-             examine.get("precision_m"), examine.get("date_observation"), recu,
-             examine.get("taille"), examine.get("volume_m3"), examine.get("type"),
-             examine.get("commentaire", ""), examine.get("photo"), examine.get("source", "inconnue"),
-             statut, json.dumps(motifs, ensure_ascii=False)))
+        try:
+            curseur = self.co.execute(
+                "INSERT INTO signalements (id_client, latitude, longitude, precision_m, date_observation,"
+                " date_reception, taille, volume_m3, type, commentaire, photo, source, statut, motifs)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (examine.get("id_client"), examine.get("latitude"), examine.get("longitude"),
+                 examine.get("precision_m"), examine.get("date_observation"), recu,
+                 examine.get("taille"), examine.get("volume_m3"), examine.get("type"),
+                 examine.get("commentaire", ""), examine.get("photo"), examine.get("source", "inconnue"),
+                 statut, json.dumps(motifs, ensure_ascii=False)))
+        except sqlite3.IntegrityError:
+            # Le même envoi est arrivé deux fois en même temps (réseau qui revient, double appui) :
+            # le premier a gagné, on renvoie simplement son résultat.
+            self.co.rollback()
+            return self.deja_recu(examine.get("id_client")) or {
+                "id": None, "statut": "rejete", "nouveau": False, "motifs": ["format_invalide"]}
         identifiant = curseur.lastrowid
         depotoir = self.rattacher(identifiant) if statut != REJET else None
         self.co.commit()
         return {"id": identifiant, "statut": self.statut_actuel(identifiant), "nouveau": True,
                 "motifs": motifs, "depotoir_id": depotoir}
+
+    def deja_recu(self, id_client):
+        """Ce signalement est-il déjà en base ? (même identifiant d'envoi)"""
+        if not id_client:
+            return None
+        deja = self.co.execute("SELECT id, statut, motifs, depotoir_id FROM signalements"
+                               " WHERE id_client = ?", (id_client,)).fetchone()
+        if deja is None:
+            return None
+        return {"id": deja["id"], "statut": deja["statut"], "nouveau": False,
+                "motifs": json.loads(deja["motifs"] or "[]"), "depotoir_id": deja["depotoir_id"]}
 
     def rafale(self, source: str) -> bool:
         """Beaucoup d'envois d'un même appareil en quelques minutes : un humain regarde."""
