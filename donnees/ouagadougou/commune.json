@@ -1,0 +1,46 @@
+{
+  "nom": "Ouagadougou",
+  "bbox": [
+    -1.654274,
+    12.251189,
+    -1.407587,
+    12.491113
+  ],
+  "emprise_avec_marge": [
+    -1.700257,
+    12.205956,
+    -1.361603,
+    12.536346
+  ],
+  "epsg_metrique": 32630,
+  "surface_km2": 526.6,
+  "niveau_administratif": 6,
+  "id_osm": 5675756,
+  "carreau_m": 250,
+  "extrait": {
+    "fichier": "burkina-faso-latest.osm.pbf",
+    "octets": 85116242,
+    "date_des_donnees": "2026-11-15T21:22:28Z"
+  },
+  "source": "OpenStreetMap, extrait Geofabrik",
+  "licence": "ODbL 1.0 — © les contributeurs d'OpenStreetMap",
+  "comptes": {
+    "noeuds": 111840,
+    "troncons": 166611,
+    "noeuds_isoles_ecartes": 388,
+    "carreaux_batis": 4498,
+    "batiments": 332556,
+    "secteurs": 0,
+    "plans_d_eau": 440,
+    "cours_d_eau": 3194,
+    "lieux": {
+      "ecole": 1049,
+      "sante": 181,
+      "dechets": 7,
+      "marche": 112,
+      "decharge": 219
+    },
+    "part_revetement_connu": 0.248
+  },
+  "trajet_de_controle_km": 39.2
+}
