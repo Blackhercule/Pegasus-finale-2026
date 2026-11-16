@@ -1,0 +1,42 @@
+# Point d'entrée unique, en HTTPS, avec une autorité de certification INTERNE : aucun service
+# extérieur (ni Let's Encrypt, ni personne). Le HTTPS n'est pas un luxe ici : sans lui, le
+# navigateur d'un téléphone refuse de donner la position et l'accès à l'appareil photo.
+{
+	local_certs
+	skip_install_trust
+	# Un navigateur qui ouvre https://<adresse IP> n'annonce aucun nom de domaine (SNI) ;
+	# sans cette ligne, Caddy ne sait pas quel certificat présenter (ERR_SSL_PROTOCOL_ERROR).
+	default_sni {$DOMAINE}
+}
+
+{$DOMAINE}:{$PORT_HTTPS} {
+	tls internal
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		-Server
+	}
+
+	# Le fond de carte est demandé par morceaux (requêtes partielles) : Caddy les transmet
+	# telles quelles, sans compresser, sinon le navigateur ne peut plus les assembler.
+	@fond path /donnees/fond.pmtiles
+	handle @fond {
+		reverse_proxy application:8000
+	}
+
+	# Le certificat de notre autorité, à installer sur les téléphones et les PC du jury.
+	handle /ca-assainissement.crt {
+		root * /data/caddy/pki/authorities/local
+		rewrite * /root.crt
+		header Content-Type application/x-x509-ca-cert
+		header Content-Disposition "attachment; filename=ca-assainissement.crt"
+		file_server
+	}
+
+	encode gzip
+	handle {
+		reverse_proxy application:8000
+	}
+}

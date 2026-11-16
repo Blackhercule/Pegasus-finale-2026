@@ -1,0 +1,43 @@
+# Assainissement de Ouaga — tout tient en deux conteneurs, sur une seule machine.
+#
+#     ./installer.sh                  installation et démarrage
+#     ./installer.sh 192.168.1.20     accessible depuis les téléphones du réseau local
+#
+# Aucun service extérieur n'est nécessaire : ni carte en ligne, ni base de données distante.
+
+name: assainissement-ouaga
+
+services:
+  application:
+    build: .
+    restart: unless-stopped
+    environment:
+      COMMUNE: ${COMMUNE:-ouagadougou}
+      AGENT_NOM: ${AGENT_NOM:-agent}
+      AGENT_MOT_DE_PASSE: ${AGENT_MOT_DE_PASSE:?à définir dans .env}
+      SECRET_SESSION: ${SECRET_SESSION:?à définir dans .env}
+    volumes:
+      - travail:/travail
+    networks: [interne]
+
+  caddy:
+    build: ./caddy
+    restart: unless-stopped
+    environment:
+      DOMAINE: ${DOMAINE}
+      PORT_HTTPS: ${PORT_HTTPS}
+    ports:
+      - "${PORT_HTTPS}:${PORT_HTTPS}"
+    volumes:
+      - caddy:/data            # contient l'autorité de certification interne
+    depends_on: [application]
+    networks: [interne, publique]
+
+networks:
+  interne:
+    internal: true             # l'application n'a aucun accès à Internet
+  publique: {}
+
+volumes:
+  travail:
+  caddy:
