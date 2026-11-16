@@ -56,8 +56,15 @@ echo "Extrait utilisé : $EXTRAIT ($(wc -c < "$EXTRAIT" | tr -d ' ') octets)"
 
 { echo "Préparation lancée le $(date '+%d/%m/%Y à %H:%M') sur $(uname -s)"; echo; } > "$JOURNAL"
 "$PY" donnees/preparer.py --extrait "$EXTRAIT" --commune "$COMMUNE" 2>&1 | tee -a "$JOURNAL"
-if [ "${PIPESTATUS[0]}" -ne 0 ]; then
-  echo "La préparation a échoué : envoyez le contenu de $JOURNAL au coordinateur."
+resultat=${PIPESTATUS[0]}
+if [ "$resultat" -ne 0 ] && grep -q "Aucune limite administrative" "$JOURNAL"; then
+  # La limite de la commune manque ou est cassée dans l'extrait : on prend un rectangle autour de la ville.
+  echo "Limite de la commune introuvable : nouvel essai avec un rectangle autour de Ouagadougou." | tee -a "$JOURNAL"
+  "$PY" donnees/preparer.py --extrait "$EXTRAIT" --commune "$COMMUNE" --bbox=-1.72,12.22,-1.36,12.52 2>&1 | tee -a "$JOURNAL"
+  resultat=${PIPESTATUS[0]}
+fi
+if [ "$resultat" -ne 0 ]; then
+  echo "La préparation a échoué : envoyez une capture d'écran au coordinateur." | tee -a "$JOURNAL"
   ECHEC=1
 fi
 
