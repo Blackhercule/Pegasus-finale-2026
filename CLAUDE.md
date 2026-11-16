@@ -1,6 +1,6 @@
 # Groupe Pegasus — finale du Hackathon des Universités 2026
 
-Ce fichier est lu par Claude Code au début de chaque session, sur le PC de l'équipe.
+Ce fichier est lu par Claude Code au début de chaque session.
 
 ## La situation
 
@@ -28,7 +28,7 @@ Deux Claude travaillent sur ce projet. Ils ne se parlent pas directement.
 - **Toi (Claude Code)** : le code, Docker, les tests, Git.
 - **Le coordinateur (Claude dans l'application, avec Franck)** : il lit l'énoncé officiel, écrit
   les tâches, rédige la documentation, la présentation et le dossier de soumission. Il ne voit
-  pas ce PC : il ne connaît que ce qui est poussé sur GitHub.
+  ni le PC ni ta session : il ne connaît que ce qui est poussé sur GitHub.
 - **Franck** fait le lien : il lance tes sessions et rapporte au coordinateur ce qu'il observe.
 
 Conséquence : tout ce que le coordinateur doit savoir (ce qui est fait, ce qui a échoué, ce que
@@ -68,7 +68,7 @@ Franck te dira par exemple « fais la tâche T3 ».
 
 1. `git pull`, puis lis la tâche dans `TACHES.md` et les exigences de `ENONCE.md` qu'elle cite.
 2. Réalise la tâche, et seulement elle.
-3. Lance sur ce PC la vérification décrite sous « Réussi si ».
+3. Lance la vérification décrite sous « Réussi si ».
 4. Écris ton compte rendu dans `comptes-rendus/T3.md` (au numéro de la tâche), sur le modèle de
    `comptes-rendus/MODELE.md`. Un fichier par tâche : plusieurs sessions peuvent ainsi
    travailler en même temps sans conflit Git.
