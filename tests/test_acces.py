@@ -19,7 +19,6 @@ BON = {"latitude": 12.3714, "longitude": -1.5197, "taille": "grand", "source": "
 
 # Adresses que la tâche T13 cite comme devant être protégées : (méthode, adresse).
 PROTEGEES = [
-    ("GET", "/"),
     ("GET", "/decision/"),
     ("GET", "/decision/index.html"),
     ("GET", "/decision/carte.js"),

@@ -238,6 +238,9 @@ def entier_demande(nom: str, defaut: int, maximum: int) -> int:
 # Chaque nom est celui de la fonction Flask (« endpoint »), qui fixe aussi la méthode :
 # « recevoir » est POST /api/signalements, alors que la liste (GET) s'appelle « lister ».
 OUVERT_A_TOUS = {
+    "api.accueil",             # / : la page d'accueil publique (T12)
+    "api.page_accueil",        # /accueil/… : son style et son script
+    "api.chiffres_publics",    # GET /api/publics : trois nombres, rien d'autre
     "api.page_signaler",       # /signaler/… : la page de l'habitant, ses sons, son service worker
     "api.bibliotheques",       # /vendor/… : polices et bibliothèques (la page de signalement en charge)
     "api.recevoir",            # POST /api/signalements : un signalement (habitants et jury)
@@ -276,7 +279,29 @@ def filtrer_l_acces():
 # ------------------------------------------------------------------ interface et données
 @vues.route("/")
 def accueil():
-    return send_from_directory(os.path.join(reglages().dossier_interface, "decision"), "index.html")
+    """La page d'accueil publique : deux portes, « Signaler » et « Espace des services » (T12)."""
+    return send_from_directory(os.path.join(reglages().dossier_interface, "accueil"), "index.html")
+
+
+@vues.route("/accueil/<path:fichier>")
+def page_accueil(fichier):
+    return send_from_directory(os.path.join(reglages().dossier_interface, "accueil"), fichier)
+
+
+@vues.route("/api/publics")
+def chiffres_publics():
+    """Trois nombres, et rien d'autre : jamais une position, jamais un détail.
+
+    C'est la seule adresse de données ouverte sans connexion (T12) ; tout le reste est derrière
+    le mot de passe (T13). Ne rien y ajouter sans se demander ce que cela révèle."""
+    co = depotoirs().co
+    (signalements,) = co.execute("SELECT COUNT(*) FROM signalements").fetchone()
+    (recenses,) = co.execute("SELECT COUNT(*) FROM depotoirs").fetchone()
+    # Un dossier traité est un dépotoir arrivé au bout de la chaîne : ramassé, ou classé.
+    fins = [nom for nom, etape in CHAINE.items() if etape["suivante"] is None]
+    (traites,) = co.execute("SELECT COUNT(*) FROM depotoirs WHERE etape IN (%s)"
+                            % ",".join("?" * len(fins)), fins).fetchone()
+    return jsonify({"signalements": signalements, "depotoirs": recenses, "dossiers_traites": traites})
 
 
 @vues.route("/signaler/")

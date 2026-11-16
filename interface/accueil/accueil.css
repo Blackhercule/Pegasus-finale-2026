@@ -1,0 +1,33 @@
+/* Page d'accueil publique. Mêmes police et couleurs que le reste de l'outil ; rien d'Internet. */
+@import url("/vendor/polices/lato/lato.css");
+* { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh; background: #f5f6fa; color: #1b2033; line-height: 1.45;
+  font-family: Lato, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+}
+main { max-width: 34rem; margin: 0 auto; padding: 2.5rem 1.2rem 3rem; }
+.equipe { margin: 0; font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: #666e85; }
+h1 { margin: .3rem 0 .6rem; font-size: 2rem; color: #1e2455; }
+.chapeau { margin: 0 0 1.8rem; font-size: 1.1rem; }
+
+/* Le bouton « Signaler » : l'élément le plus gros de la page, lisible de loin. */
+.signaler {
+  display: grid; justify-items: center; gap: .2rem; padding: 1.6rem 1rem;
+  background: #0e6b3a; color: #fff; text-decoration: none; border-radius: 18px;
+  box-shadow: 0 6px 18px rgb(14 107 58 / 30%);
+}
+.signaler:focus-visible { outline: 4px solid #1e2455; outline-offset: 3px; }
+.signaler__icone { font-size: 2.6rem; line-height: 1; }
+.signaler__texte { font-size: 2.6rem; font-weight: 700; }
+.signaler__aide { font-size: 1rem; opacity: .9; }
+
+.chiffres { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; margin: 2rem 0; }
+.chiffres p {
+  margin: 0; padding: .8rem .5rem; background: #fff; border: 1px solid #dfe2ec;
+  border-radius: 12px; text-align: center; display: grid;
+}
+.chiffres strong { font-size: 1.7rem; color: #1e2455; }
+.chiffres span { font-size: .85rem; color: #666e85; }
+
+.services { font-size: .95rem; color: #666e85; text-align: center; }
+.services a { color: #1e2455; font-weight: 700; }
