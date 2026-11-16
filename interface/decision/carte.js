@@ -7,6 +7,9 @@ maplibregl.addProtocol("pmtiles", new pmtiles.Protocol().tile);
 
 const COULEURS = { depotoir: "#c8102e", decharge: "#6e6457", eau: "#2f7da6",
                    limite: "#1b2033", densite: "#1e2455", fuite: "#0090d4", nuisance: "#7b3fa0" };
+// La couleur de la terre dans le style clair de Protomaps.
+const TERRE = "#e2dfda";
+
 const etat = (texte) => { document.getElementById("etat-chargement").textContent = texte; };
 
 /* Le style Protomaps demande trois variantes de Noto ; nous n'en embarquons qu'une, et aucune
@@ -15,7 +18,13 @@ function couchesDuFond() {
   return basemaps.layers("fond", basemaps.namedFlavor("light"), { lang: "fr" })
     .filter((c) => !(c.layout && c.layout["icon-image"]))
     .map((c) => (c.layout && c.layout["text-font"]
-      ? { ...c, layout: { ...c.layout, "text-font": ["noto"] } } : c));
+      ? { ...c, layout: { ...c.layout, "text-font": ["noto"] } } : c))
+    /* Notre fond de carte ne couvre que la commune et sa marge : au-delà, c'est la couleur de
+       fond du style qui se voit, et elle est grise là où la terre est beige. D'où une bande
+       grise au bord sur les grands écrans. On aligne le fond sur la couleur de la terre : le
+       bord de l'extrait ne se distingue plus. */
+    .map((c) => (c.type === "background"
+      ? { ...c, paint: { ...c.paint, "background-color": TERRE } } : c));
 }
 
 function style(origine) {

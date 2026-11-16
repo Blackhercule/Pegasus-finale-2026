@@ -13,10 +13,10 @@ h1 { margin: .3rem 0 .6rem; font-size: 2rem; color: #1e2455; }
 /* Le bouton « Signaler » : l'élément le plus gros de la page, lisible de loin. */
 .signaler {
   display: grid; justify-items: center; gap: .2rem; padding: 1.6rem 1rem;
-  background: #0e6b3a; color: #fff; text-decoration: none; border-radius: 18px;
-  box-shadow: 0 6px 18px rgb(14 107 58 / 30%);
+  background: #1e2455; color: #fff; text-decoration: none; border-radius: 18px;
+  box-shadow: 0 6px 18px rgb(30 36 85 / 30%);
 }
-.signaler:focus-visible { outline: 4px solid #1e2455; outline-offset: 3px; }
+.signaler:focus-visible { outline: 4px solid #8a7a00; outline-offset: 3px; }
 .signaler__icone { font-size: 2.6rem; line-height: 1; }
 .signaler__texte { font-size: 2.6rem; font-weight: 700; }
 .signaler__aide { font-size: 1rem; opacity: .9; }
