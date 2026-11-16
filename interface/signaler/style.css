@@ -55,3 +55,43 @@ textarea { font: inherit; width: 100%; border: 1px solid var(--trait); border-ra
 .message.erreur { background: #fcefee; color: #8f2a20; border: 1px solid #e5a9a4; }
 .message.attente { background: #fdf5ea; color: #8a5a00; border: 1px solid #ecc58e; }
 .mentions { font-size: .78rem; color: var(--gris); text-align: center; margin: .2rem 0 0; }
+
+/* ------------------------------------------------------------ guidage parlé */
+.entete { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
+.guidage {
+  font: inherit; font-weight: 700; cursor: pointer; border: 2px solid rgba(255,255,255,.5);
+  background: transparent; color: #fff; border-radius: 999px; padding: .3rem .8rem; font-size: .85rem;
+}
+.guidage.actif { background: var(--or); border-color: var(--or); color: #1d1d1b; }
+.accueil {
+  background: #fdf5ea; border: 1px solid #ecc58e; border-radius: 10px; padding: .7rem .9rem;
+  margin: 0; font-size: .88rem;
+}
+.parler {
+  font: inherit; cursor: pointer; border: 0; background: transparent; padding: 0 .2rem;
+  font-size: 1rem; line-height: 1;
+}
+h2 .facultatif + .parler, h2 .parler { vertical-align: middle; }
+
+/* ------------------------------------------------------------ mesures et dépôt */
+.mesures { margin-top: .8rem; }
+.mesures summary { cursor: pointer; color: var(--vert-clair); font-weight: 600; font-size: .9rem; }
+.aide { color: var(--gris); font-size: .84rem; margin: .4rem 0; }
+.deux { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+.deux label, #bloc-identite label { display: grid; gap: .2rem; font-size: .85rem; color: var(--gris); }
+.deux input, #bloc-identite input[type=text], #bloc-identite input[type=tel] {
+  font: inherit; padding: .5rem .6rem; border: 1px solid var(--trait); border-radius: 8px; width: 100%;
+}
+#bloc-identite { margin-top: .5rem; display: grid; gap: .6rem; }
+#bloc-identite summary { cursor: pointer; color: var(--vert-clair); font-weight: 600; }
+.deux-photos { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+.deux-photos img { width: 100%; margin-top: .5rem; border-radius: 8px; }
+
+/* ------------------------------------------------------------ message vocal */
+.bouton-vocal {
+  font: inherit; font-weight: 700; cursor: pointer; display: block; width: 100%;
+  padding: .9rem 1rem; border-radius: 10px; text-align: center;
+  border: 2px solid var(--or); background: #fff; color: #8a5a00; font-size: 1.05rem;
+}
+.bouton-vocal.enregistre { background: var(--rouge); border-color: var(--rouge); color: #fff; }
+#ecoute-vocal { width: 100%; margin: .6rem 0; }

@@ -10,30 +10,64 @@
 </head>
 <body>
 <header>
-  <h1>Signaler un dépotoir</h1>
+  <div class="entete">
+    <h1>Signaler un dépotoir</h1>
+    <button type="button" id="guidage" class="guidage" aria-pressed="false">
+      <span aria-hidden="true">🔊</span> Mooré
+    </button>
+  </div>
   <p id="reseau" class="reseau">—</p>
 </header>
 
 <main>
+  <p id="accueil-moore" class="accueil" hidden>
+    Guidage en mooré activé. Chaque étape vous parle. Touchez le haut-parleur d'une étape pour
+    réécouter.
+  </p>
+
   <form id="formulaire" novalidate>
     <section class="carte-bloc">
-      <h2>1 · Position</h2>
+      <h2>1 · Position <button type="button" class="parler" data-audio="position"
+          aria-label="Écouter la consigne">🔊</button></h2>
       <p id="position" class="position">Recherche de votre position…</p>
       <button type="button" id="relancer-position" class="secondaire">Relancer la localisation</button>
     </section>
 
     <section class="carte-bloc">
-      <h2>2 · Taille du tas</h2>
+      <h2>2 · Taille du tas <button type="button" class="parler" data-audio="taille"
+          aria-label="Écouter la consigne">🔊</button></h2>
       <div class="choix" id="taille" role="radiogroup" aria-label="Taille du tas">
         <button type="button" data-valeur="petit"><span class="icone">▪</span>Petit<small>un sac</small></button>
         <button type="button" data-valeur="moyen" class="actif"><span class="icone">▪▪</span>Moyen<small>une brouette</small></button>
         <button type="button" data-valeur="grand"><span class="icone">▪▪▪</span>Grand<small>une charrette</small></button>
         <button type="button" data-valeur="tres_grand"><span class="icone">▪▪▪▪</span>Très grand<small>un camion</small></button>
       </div>
+      <details class="mesures">
+        <summary>Mesurer le tas (facultatif)</summary>
+        <p class="aide">Comptez vos pas le long du tas : un pas vaut environ 1 mètre.</p>
+        <div class="deux">
+          <label>Longueur (m)<input type="number" id="longueur_m" min="0" max="200" step="0.5" inputmode="decimal"></label>
+          <label>Largeur (m)<input type="number" id="largeur_m" min="0" max="200" step="0.5" inputmode="decimal"></label>
+        </div>
+        <p id="superficie" class="aide"></p>
+      </details>
     </section>
 
     <section class="carte-bloc">
-      <h2>3 · Type de déchets</h2>
+      <h2>3 · Où sont les ordures ? <button type="button" class="parler" data-audio="depot"
+          aria-label="Écouter la consigne">🔊</button></h2>
+      <div class="choix compact" id="depot" role="radiogroup" aria-label="Où sont les ordures">
+        <button type="button" data-valeur="plein_air" class="actif">À même le sol</button>
+        <button type="button" data-valeur="bac">Dans un bac</button>
+        <button type="button" data-valeur="caniveau">Dans un caniveau</button>
+        <button type="button" data-valeur="fosse">Dans une fosse</button>
+        <button type="button" data-valeur="berge">Sur une berge</button>
+        <button type="button" data-valeur="autre">Autre</button>
+      </div>
+    </section>
+
+    <section class="carte-bloc">
+      <h2>4 · Type de déchets</h2>
       <div class="choix compact" id="type" role="radiogroup" aria-label="Type de déchets">
         <button type="button" data-valeur="menager" class="actif">Ménagers</button>
         <button type="button" data-valeur="gravats">Gravats</button>
@@ -43,16 +77,49 @@
     </section>
 
     <section class="carte-bloc">
-      <h2>4 · Photo <span class="facultatif">(conseillé)</span></h2>
+      <h2>5 · Photo du tas <span class="facultatif">(conseillé)</span>
+        <button type="button" class="parler" data-audio="photo" aria-label="Écouter la consigne">🔊</button></h2>
       <label class="bouton-photo" for="photo">Prendre une photo</label>
       <input type="file" id="photo" accept="image/*" capture="environment" hidden>
       <img id="apercu" alt="Aperçu de la photo" hidden>
     </section>
 
     <section class="carte-bloc">
-      <h2>5 · Précision <span class="facultatif">(facultatif)</span></h2>
+      <h2>6 · Parler plutôt qu'écrire <span class="facultatif">(facultatif)</span>
+        <button type="button" class="parler" data-audio="vocal" aria-label="Écouter la consigne">🔊</button></h2>
+      <p class="aide">Dites où se trouve le tas et depuis quand. Vous pouvez parler en mooré,
+        en dioula ou en français : un agent de la mairie vous écoutera.</p>
+      <button type="button" id="enregistrer" class="bouton-vocal">Appuyer pour parler</button>
+      <p id="etat-vocal" class="aide"></p>
+      <audio id="ecoute-vocal" controls hidden></audio>
       <textarea id="commentaire" rows="2" maxlength="500"
-                placeholder="Repère, rue, depuis quand…"></textarea>
+                placeholder="Ou écrivez ici : repère, rue, depuis quand…"></textarea>
+    </section>
+
+    <section class="carte-bloc">
+      <h2>7 · Vous identifier <span class="facultatif">(facultatif)</span>
+        <button type="button" class="parler" data-audio="identite" aria-label="Écouter la consigne">🔊</button></h2>
+      <p class="aide">Le signalement fonctionne <strong>sans donner votre nom</strong>. Ne
+        remplissez cette partie que si vous acceptez d'être témoin dans une procédure : la
+        brigade Laabal pourra alors vous recontacter. Ces renseignements ne sont vus que par
+        un agent de la mairie, et sont effacés à la clôture du dossier.</p>
+      <details id="bloc-identite">
+        <summary>J'accepte d'être témoin</summary>
+        <label>Nom<input type="text" id="declarant_nom" maxlength="80" autocomplete="name"></label>
+        <label>Téléphone<input type="tel" id="declarant_telephone" maxlength="30" autocomplete="tel"></label>
+        <div class="deux-photos">
+          <div>
+            <label class="bouton-photo" for="photo_cnib">Photo de la CNIB</label>
+            <input type="file" id="photo_cnib" accept="image/*" capture="environment" hidden>
+            <img id="apercu-cnib" alt="Aperçu de la CNIB" hidden>
+          </div>
+          <div>
+            <label class="bouton-photo" for="photo_visage">Photo de vous</label>
+            <input type="file" id="photo_visage" accept="image/*" capture="user" hidden>
+            <img id="apercu-visage" alt="Aperçu de votre photo" hidden>
+          </div>
+        </div>
+      </details>
     </section>
 
     <button type="submit" id="envoyer">Enregistrer le signalement</button>
@@ -65,8 +132,8 @@
     <button type="button" id="envoyer-attente" class="secondaire">Envoyer maintenant</button>
   </section>
 
-  <p class="mentions">Aucun nom, aucun numéro de téléphone n'est enregistré : seulement le lieu,
-    la taille et la photo du dépotoir.</p>
+  <p class="mentions">Sans la partie 7, aucun nom ni numéro n'est enregistré : seulement le
+    lieu, la taille et la photo du dépotoir.</p>
 </main>
 
 <script src="/signaler/signaler.js"></script>
