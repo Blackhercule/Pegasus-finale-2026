@@ -27,13 +27,21 @@ MOTIFS = {
     "rafale_meme_source":     (A_VERIFIER, "Beaucoup de signalements d'un même appareil en très peu de temps"),
     "dimensions_invraisemblables": (A_VERIFIER, "Longueur ou largeur hors de proportion"),
     "ampleur_invalide":       (REJET, "Ampleur de la fuite absente ou inconnue"),
+    "gravite_invalide":       (REJET, "Gravité absente ou inconnue"),
+    "nature_inconnue":        (REJET, "Nature du signalement inconnue"),
 }
 
 # Ce qui est signalé. Un tas d'ordures part dans les tournées des camions ; une fuite d'eau
 # part à l'ONEA, qui seul intervient sur ses conduites.
-NATURES = ("ordures", "fuite_eau")
+# « ordures » part dans les tournées des camions, « fuite_eau » à l'ONEA, et les quatre
+# dernières au service que leur nature désigne (voir application/nuisances.py).
+NATURES = ("ordures", "fuite_eau", "caniveau_bouche", "abattoir_clandestin",
+           "toilettes_plein_air", "eaux_usees_animales")
+NATURES_NUISANCE = NATURES[2:]
 # Ampleur d'une fuite, telle qu'un habitant peut la décrire sans rien mesurer.
 AMPLEURS = ("suintement", "jet", "inondation")
+# Gravité d'une nuisance : trois niveaux, formulés au téléphone dans les mots de chaque nature.
+GRAVITES = ("leger", "moyen", "grave")
 
 TAILLES = ("petit", "moyen", "grand", "tres_grand")
 TYPES = ("menager", "gravats", "mixte", "autre")
@@ -175,15 +183,49 @@ class Controleur:
         propre.update(self._declarant(brut, motifs))
         return self.resultat(propre, motifs)
 
+    def examiner_nuisance(self, brut: dict) -> dict:
+        """Caniveau bouché, abattoir clandestin, déversement de toilettes, eaux usées.
+
+        Mêmes contrôles de position et de date que tout le reste. Ce qu'on demande en plus,
+        c'est la gravité : trois niveaux qu'on peut juger à l'œil, sans rien mesurer."""
+        if not isinstance(brut, dict):
+            return self.resultat({}, ["format_invalide"])
+        motifs = []
+        nature = brut.get("nature")
+        if nature not in NATURES_NUISANCE:
+            return self.resultat({}, ["nature_inconnue"])
+        lon, lat = self._position(brut, motifs)
+        date = self._date(brut, motifs)
+        precision = self._precision(brut, motifs)
+
+        gravite = brut.get("gravite")
+        if gravite not in GRAVITES:
+            motifs.append("gravite_invalide")
+            gravite = None
+
+        propre = {"nature": nature, "latitude": lat, "longitude": lon,
+                  "precision_m": precision, "date_observation": date.isoformat(timespec="seconds"),
+                  "gravite": gravite,
+                  "quartier": texte(brut.get("quartier"), 80) or None}
+        propre.update(self._declarant(brut, motifs))
+        return self.resultat(propre, motifs)
+
     def examiner(self, brut: dict) -> dict:
         """Renvoie un signalement propre : champs normalisés, statut et motifs.
 
-        `brut` vient du téléphone ou d'un lot du jury : rien n'y est tenu pour vrai."""
+        `brut` vient du téléphone ou d'un lot du jury : rien n'y est tenu pour vrai.
+        Un signalement sans nature est un tas d'ordures : c'est le cas de loin le plus
+        fréquent, et c'était le seul avant que les autres natures existent."""
         motifs = []
         if not isinstance(brut, dict):
             return self.resultat({}, ["format_invalide"])
-        if brut.get("nature") == "fuite_eau":
+        nature = brut.get("nature")
+        if nature == "fuite_eau":
             return self.examiner_fuite(brut)
+        if nature in NATURES_NUISANCE:
+            return self.examiner_nuisance(brut)
+        if nature is not None and nature not in NATURES:
+            return self.resultat({}, ["nature_inconnue"])
 
         lon, lat = self._position(brut, motifs)
 

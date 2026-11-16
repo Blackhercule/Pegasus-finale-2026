@@ -6,7 +6,7 @@ maplibregl.setWorkerUrl("/vendor/maplibre-gl/maplibre-gl-csp-worker.js");
 maplibregl.addProtocol("pmtiles", new pmtiles.Protocol().tile);
 
 const COULEURS = { depotoir: "#c8102e", decharge: "#6e6457", eau: "#2f7da6",
-                   limite: "#1b2033", densite: "#1e2455", fuite: "#0090d4" };
+                   limite: "#1b2033", densite: "#1e2455", fuite: "#0090d4", nuisance: "#7b3fa0" };
 const etat = (texte) => { document.getElementById("etat-chargement").textContent = texte; };
 
 /* Le style Protomaps demande trois variantes de Noto ; nous n'en embarquons qu'une, et aucune
@@ -94,6 +94,16 @@ carte.on("load", async () => {
         "circle-radius": ["match", ["get", "ampleur"],
           "inondation", 11, "jet", 8, "suintement", 6, 6],
         "circle-color": COULEURS.fuite, "circle-opacity": 0.85,
+        "circle-stroke-width": 2, "circle-stroke-color": "#fff",
+      } });
+
+    /* Caniveaux, abattages clandestins, déversements : un losange violet, encore une autre
+       forme, pour qu'on distingue les trois familles d'un coup d'œil sur la carte. */
+    carte.addSource("nuisances", { type: "geojson", data: await json("/api/nuisances/carte") });
+    carte.addLayer({ id: "nuisances", type: "circle", source: "nuisances",
+      paint: {
+        "circle-radius": ["match", ["get", "gravite"], "grave", 10, "moyen", 8, "leger", 6, 6],
+        "circle-color": COULEURS.nuisance, "circle-opacity": 0.85,
         "circle-stroke-width": 2, "circle-stroke-color": "#fff",
       } });
 

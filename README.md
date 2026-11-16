@@ -17,6 +17,7 @@ challenge 01.
 | **Vérifier** | Chaque signalement passe treize contrôles automatiques. Un signalement douteux est écarté **avec son motif**, jamais silencieusement. Un agent tranche les cas limites. |
 | **Traiter** | Le signalement ouvre un dossier qui passe de poste en poste : mairie, brigade Laabal, mairie, équipe de collecte. Chaque passage est daté et signé. |
 | **Alerter l'ONEA** | Une fuite d'eau suit sa propre chaîne : la mairie la confirme et la transmet, l'ONEA déclare la réparation. Un **bordereau CSV** se télécharge pour l'envoi. |
+| **Orienter** | Caniveau bouché, abattage clandestin, toilettes vidées en pleine rue, eaux usées de poissonnerie : la mairie reçoit et **oriente vers le service compétent**, que la nature du signalement désigne. |
 | **Cartographier** | Les dépotoirs sur un fond OpenStreetMap servi par notre propre machine, avec les 226 sites de déchets déjà cartographiés. |
 | **Planifier** | Emplacement des points de regroupement, tournées des camions, jour par jour, avec les coûts. |
 | **Simuler** | Ménages, pré-collecteurs, brigade Laabal et mairie, un jour par pas de temps. |
@@ -64,6 +65,29 @@ Le bordereau à transmettre est un fichier **CSV** (`/api/export/onea`), pas un 
 automatique : l'outil ne sort pas de la machine (E14), et l'ONEA n'a pas d'interface publique de
 dépôt. Un agent l'imprime ou l'envoie, et note en retour le numéro que l'ONEA lui donne.
 
+## Six choses à signaler, trois destinations
+
+Tout ne se ramasse pas, et tout ne relève pas du même service. C'est la **nature** du
+signalement qui décide où il va :
+
+| Ce qu'on signale | Qui intervient après la mairie |
+|---|---|
+| Tas d'ordures | les tournées des camions |
+| Fuite d'eau sur une conduite | **ONEA** |
+| Caniveau bouché | **équipe de collecte** (curage) |
+| Déversement de toilettes en plein air | **ONEA** (assainissement) |
+| Abattage clandestin d'animaux | **brigade Laabal** (constat, verbalisation) |
+| Eaux usées de poisson et de poulet | **brigade Laabal** |
+
+Cette répartition est une hypothèse de l'équipe, **à confirmer avec la mairie** : la changer
+demande de modifier une ligne par nature dans `application/nuisances.py`, rien d'autre.
+
+Deux règles valent pour toutes les natures. Le regroupement ne se fait qu'**à nature égale** :
+un caniveau bouché et un abattage clandestin au même carrefour sont deux problèmes, deux
+services, deux dossiers. Et la gravité retenue est la **plus forte** signalée, jamais la
+moyenne : entre « un peu bouché » et « ça déborde dans la rue », c'est la seconde qui décide
+de l'ordre de passage.
+
 ## Parler plutôt qu'écrire, et comprendre le mooré
 
 - **Message vocal** : on décrit le lieu à la voix, en mooré, en dioula ou en français. Un agent
@@ -106,6 +130,7 @@ L'installateur affiche ensuite les adresses et le mot de passe de l'agent :
 
 - carte de décision : `https://<adresse>:8443/decision/`
 - postes de travail (mairie, brigade, collecte) : `https://<adresse>:8443/decision/dossiers.html`
+- caniveaux, abattoirs, eaux usées : `https://<adresse>:8443/decision/nuisances.html`
 - fuites d'eau (mairie et ONEA) : `https://<adresse>:8443/decision/fuites.html`
 - vérification des signalements : `https://<adresse>:8443/decision/verifier.html`
 - simulation : `https://<adresse>:8443/decision/simulation.html`
@@ -201,12 +226,12 @@ Notre code est publié sous **AGPL-3.0** (`LICENSE`).
 
 ```bash
 pip install -r requirements.txt
-python -m pytest tests/ -q        # 79 tests : contrôles, pièges, chaînes, plan, simulation, fuites, export
+python -m pytest tests/ -q        # 93 tests : contrôles, pièges, chaînes, plan, simulation, fuites, export
 ```
 
 | Dossier | Contenu |
 |---|---|
-| `application/` | l'application : `geo.py`, `reseau.py`, `signalements/`, `dossiers.py`, `fuites.py`, `plan/`, `simulation/` |
+| `application/` | l'application : `geo.py`, `reseau.py`, `signalements/`, `dossiers.py`, `fuites.py`, `nuisances.py`, `plan/`, `simulation/` |
 | `interface/` | pages servies telles quelles ; `vendor/` contient les bibliothèques de la carte |
 | `donnees/` | préparation des données d'une commune et fichiers produits |
 | `tests/` | tests automatisés, dont le jeu de 42 signalements piégés |

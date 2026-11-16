@@ -53,7 +53,15 @@
         <button type="button" data-valeur="ordures" class="actif">
           <span class="icone" aria-hidden="true">🗑</span>Un tas d'ordures<small>dépotoir sauvage</small></button>
         <button type="button" data-valeur="fuite_eau">
-          <span class="icone" aria-hidden="true">💧</span>Une fuite d'eau<small>conduite percée (ONEA)</small></button>
+          <span class="icone" aria-hidden="true">💧</span>Une fuite d'eau<small>conduite percée</small></button>
+        <button type="button" data-valeur="caniveau_bouche">
+          <span class="icone" aria-hidden="true">🚧</span>Un caniveau bouché<small>l'eau ne passe plus</small></button>
+        <button type="button" data-valeur="toilettes_plein_air">
+          <span class="icone" aria-hidden="true">🚽</span>Toilettes vidées dehors<small>matières répandues</small></button>
+        <button type="button" data-valeur="abattoir_clandestin">
+          <span class="icone" aria-hidden="true">🐄</span>Abattage clandestin<small>bêtes tuées hors abattoir</small></button>
+        <button type="button" data-valeur="eaux_usees_animales">
+          <span class="icone" aria-hidden="true">🐟</span>Eaux de poisson ou poulet<small>eaux de lavage déversées</small></button>
       </div>
     </section>
 
@@ -107,10 +115,21 @@
       </div>
     </section>
 
-    <section class="carte-bloc" data-pour="fuite_eau" hidden>
+    <section class="carte-bloc" data-pour="caniveau_bouche toilettes_plein_air abattoir_clandestin eaux_usees_animales" hidden>
+      <h2 id="titre-gravite">Quelle est la gravité ? <button type="button" class="parler" data-audio="gravite"
+          aria-label="Écouter la consigne">🔊</button></h2>
+      <div class="choix" id="gravite" role="radiogroup" aria-label="Gravité">
+        <button type="button" data-valeur="leger"><span class="icone" aria-hidden="true">▪</span><span class="mot">Léger</span></button>
+        <button type="button" data-valeur="moyen" class="actif"><span class="icone" aria-hidden="true">▪▪</span><span class="mot">Moyen</span></button>
+        <button type="button" data-valeur="grave"><span class="icone" aria-hidden="true">▪▪▪</span><span class="mot">Grave</span></button>
+      </div>
+      <p class="aide" id="pourquoi-nature"></p>
+    </section>
+
+    <section class="carte-bloc" data-pour="fuite_eau caniveau_bouche toilettes_plein_air abattoir_clandestin eaux_usees_animales" hidden>
       <h2>Dans quel quartier ? <span class="facultatif">(conseillé)</span></h2>
-      <p class="aide">Le nom du quartier aide l'ONEA à trouver la conduite : son plan de réseau
-        est rangé par quartier, pas par coordonnées.</p>
+      <p class="aide" id="aide-quartier">Le nom du quartier aide le service à se repérer : les
+        plans de réseau sont rangés par quartier, pas par coordonnées.</p>
       <input type="text" id="quartier" maxlength="80" placeholder="Tanghin, Dassasgho, Nioko II…">
     </section>
 

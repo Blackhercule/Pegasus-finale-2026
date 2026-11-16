@@ -30,6 +30,8 @@ CREATE TABLE IF NOT EXISTS signalements (
     fuite_id          INTEGER REFERENCES fuites(id),
     ampleur           TEXT,                 -- fuites : suintement | jet | inondation
     quartier          TEXT,                 -- quartier donné par le déclarant
+    nuisance_id       INTEGER REFERENCES nuisances(id),
+    gravite           TEXT,                 -- nuisances : leger | moyen | grave
     -- Dépôt : à même le sol, dans un bac, dans un caniveau… et dimensions estimées au sol.
     depot             TEXT,
     longueur_m        REAL,
@@ -102,6 +104,36 @@ CREATE TABLE IF NOT EXISTS journal_fuite (
     detail    TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS i_journal_fuite ON journal_fuite(fuite_id);
+
+-- Les autres atteintes à la salubrité : caniveau bouché, abattoir clandestin, déversement de
+-- toilettes en plein air, eaux usées de poisson et de poulet. Elles ne se ramassent pas comme
+-- un tas et ne se réparent pas comme une conduite : chacune appelle un service, et c'est la
+-- nature du signalement qui désigne lequel (voir application/nuisances.py).
+CREATE TABLE IF NOT EXISTS nuisances (
+    id              INTEGER PRIMARY KEY,
+    nature          TEXT NOT NULL,
+    latitude        REAL NOT NULL,
+    longitude       REAL NOT NULL,
+    quartier        TEXT,
+    gravite         TEXT,                           -- leger | moyen | grave
+    nb_signalements INTEGER NOT NULL DEFAULT 0,
+    nb_sources      INTEGER NOT NULL DEFAULT 0,
+    premier_vu      TEXT,
+    dernier_vu      TEXT,
+    etat            TEXT NOT NULL DEFAULT 'active', -- active | traitee
+    etape           TEXT NOT NULL DEFAULT 'signale'
+);
+
+CREATE TABLE IF NOT EXISTS journal_nuisance (
+    id          INTEGER PRIMARY KEY,
+    nuisance_id INTEGER NOT NULL REFERENCES nuisances(id) ON DELETE CASCADE,
+    date        TEXT NOT NULL,
+    poste       TEXT NOT NULL,
+    auteur      TEXT NOT NULL,
+    etape       TEXT NOT NULL,
+    detail      TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS i_journal_nuisance ON journal_nuisance(nuisance_id);
 """
 
 
@@ -120,7 +152,8 @@ AJOUTS = {
                      ("declarant_nom", "TEXT"), ("declarant_telephone", "TEXT"),
                      ("photo_cnib", "TEXT"), ("photo_visage", "TEXT"), ("message_vocal", "TEXT"),
                      ("nature", "TEXT NOT NULL DEFAULT 'ordures'"), ("fuite_id", "INTEGER"),
-                     ("ampleur", "TEXT"), ("quartier", "TEXT")],
+                     ("ampleur", "TEXT"), ("quartier", "TEXT"),
+                     ("nuisance_id", "INTEGER"), ("gravite", "TEXT")],
     "depotoirs": [("etape", "TEXT NOT NULL DEFAULT 'signale'"), ("surface_m2", "REAL"),
                   ("depot", "TEXT")],
 }
@@ -128,6 +161,7 @@ AJOUTS = {
 
 INDEX_APRES_AJOUTS = (
     "CREATE INDEX IF NOT EXISTS i_signalements_fuite ON signalements(fuite_id)",
+    "CREATE INDEX IF NOT EXISTS i_signalements_nuisance ON signalements(nuisance_id)",
 )
 
 

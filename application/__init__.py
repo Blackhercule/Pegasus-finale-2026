@@ -20,6 +20,8 @@ from .base import connexion, creer
 from .dossiers import CHAINE, POSTES, Dossiers, ErreurDossier
 from .export_osm import en_osm, note_d_export
 from .fuites import AMPLEUR_NOMS, CHAINE_EAU, ErreurFuite, Fuites
+from .nuisances import (CHAINE_NUISANCE, GRAVITE_NOMS, NATURES as NATURES_NUISANCE,
+                        ErreurNuisance, Nuisances)
 from .geo import Geographie
 from .plan import repartir_la_demande
 from .plan.calcul import calculer_le_plan, charger_geojson
@@ -138,6 +140,14 @@ def fuites() -> Fuites:
     return g.fuites
 
 
+def nuisances() -> Nuisances:
+    from flask import current_app, g
+    depotoirs()                       # ouvre la connexion si besoin
+    if "nuisances" not in g:
+        g.nuisances = Nuisances(g.co, current_app.extensions["reglages"].parametres)
+    return g.nuisances
+
+
 def agent_requis(vue=None, postes=None):
     """Seul un agent connecté agit, et seulement depuis le poste qui en a le droit."""
     def decorateur(vue):
@@ -239,8 +249,11 @@ def recevoir():
                 examine[cle] = brut[cle]
     # Une fuite d'eau suit sa propre chaîne (mairie → ONEA) : elle n'entre pas dans les
     # tournées des camions, et ne devient donc jamais un dépotoir.
-    if examine.get("nature") == "fuite_eau":
+    nature = examine.get("nature")
+    if nature == "fuite_eau":
         resultat = fuites().enregistrer(examine)
+    elif nature in NATURES_NUISANCE:
+        resultat = nuisances().enregistrer(examine)
     else:
         resultat = depotoirs().enregistrer(examine)
     return jsonify(resultat), 201 if resultat["nouveau"] else 200
@@ -559,6 +572,97 @@ def classer_fuite(identifiant):
                                         str(envoi.get("motif", ""))))
     except ErreurFuite as erreur:
         return jsonify({"erreur": str(erreur)}), 400
+
+
+# --------------------------------------------------------------- autres nuisances
+
+@vues.route("/api/nuisances/chaine")
+def chaine_nuisances():
+    """Les étapes, les natures, et qui intervient pour chacune."""
+    return jsonify({"etapes": CHAINE_NUISANCE, "natures": NATURES_NUISANCE,
+                    "gravites": GRAVITE_NOMS,
+                    "comptes": nuisances().comptes_par_etape(),
+                    "par_nature": nuisances().comptes_par_nature()})
+
+
+@vues.route("/api/nuisances")
+def lister_nuisances():
+    poste = session.get("poste")
+    pour_moi = request.args.get("pour_moi") in ("1", "oui", "true")
+    return jsonify(nuisances().liste(etape=request.args.get("etape"),
+                                     nature=request.args.get("nature"),
+                                     poste=poste if pour_moi else None))
+
+
+@vues.route("/api/nuisances/carte")
+def carte_nuisances():
+    """Les nuisances non traitées, en GeoJSON, pour la carte de décision."""
+    entites = [{"type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [n["longitude"], n["latitude"]]},
+                "properties": {"id": n["id"], "nature": n["nature"],
+                               "nature_nom": n["nature_nom"], "gravite": n["gravite"] or "inconnue",
+                               "quartier": n["quartier"], "etape_nom": n["etape_nom"],
+                               "service": n["service"],
+                               "nb_signalements": n["nb_signalements"]}}
+               for n in nuisances().carte()]
+    return jsonify({"type": "FeatureCollection", "features": entites})
+
+
+@vues.route("/api/nuisances/<int:identifiant>")
+def detail_nuisance(identifiant):
+    try:
+        return jsonify(nuisances().detail(identifiant,
+                                          avec_declarants=bool(session.get("agent"))))
+    except ErreurNuisance as erreur:
+        return jsonify({"erreur": str(erreur)}), 404
+
+
+@vues.route("/api/nuisances/<int:identifiant>/avancer", methods=["POST"])
+@agent_requis(postes=("mairie", "brigade", "collecte", "onea"))
+def avancer_nuisance(identifiant):
+    envoi = request.get_json(silent=True) or {}
+    try:
+        return jsonify(nuisances().avancer(identifiant, session["poste"], session["agent"],
+                                           str(envoi.get("detail", ""))))
+    except ErreurNuisance as erreur:
+        return jsonify({"erreur": str(erreur)}), 400
+
+
+@vues.route("/api/nuisances/<int:identifiant>/classer", methods=["POST"])
+@agent_requis(postes=("mairie",))
+def classer_nuisance(identifiant):
+    envoi = request.get_json(silent=True) or {}
+    try:
+        return jsonify(nuisances().classer(identifiant, session["poste"], session["agent"],
+                                           str(envoi.get("motif", ""))))
+    except ErreurNuisance as erreur:
+        return jsonify({"erreur": str(erreur)}), 400
+
+
+@vues.route("/api/export/nuisances")
+def export_nuisances():
+    """Le bordereau des nuisances orientées, par service, en CSV.
+
+    Même raison que pour l'ONEA : l'outil ne sort pas de la machine (E14). Un agent imprime
+    ce bordereau ou l'envoie au service, qui n'a pas forcément accès à l'outil."""
+    lignes = nuisances().liste(etape=request.args.get("etape", "confirme"),
+                               nature=request.args.get("nature"), limite=1000)
+    tampon = io.StringIO()
+    plume = csv.writer(tampon, delimiter=";")
+    plume.writerow(["Reference", "Nature", "Service", "Quartier", "Gravite", "Latitude",
+                    "Longitude", "Premier signalement", "Dernier signalement",
+                    "Nombre de signalements", "Appareils distincts", "Etape"])
+    for n in lignes:
+        plume.writerow([f"NUIS-{n['id']:05d}", n["nature_nom"], n["service"] or "",
+                        n["quartier"] or "non précisé", n["gravite_nom"],
+                        round(n["latitude"], 6), round(n["longitude"], 6),
+                        n["premier_vu"] or "", n["dernier_vu"] or "",
+                        n["nb_signalements"], n["nb_sources"], n["etape_nom"]])
+    contenu = "\ufeff" + tampon.getvalue()
+    return contenu, 200, {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": 'attachment; filename="bordereau-nuisances.csv"',
+        "X-Nuisances": str(len(lignes))}
 
 
 @vues.route("/api/export/onea")

@@ -199,6 +199,46 @@ par quartier et non par coordonnées, c'est le renseignement le plus utile du bo
 | `POST /api/fuites/<id>/classer` | Sans suite, mairie seulement |
 | `GET /api/export/onea` | Bordereau CSV des fuites à transmettre (`?tout=1` pour toutes) |
 
+## Autres nuisances : caniveaux, abattoirs, eaux usées
+
+Quatre natures de plus, une seule chaîne, et c'est la nature qui désigne le service :
+
+```
+  signalé   ──►  confirmé et orienté  ──►  traité
+ (habitant)      (agent de la mairie)      (le service que la nature désigne)
+```
+
+| Nature | Service | Ce qu'il fait |
+|---|---|---|
+| `caniveau_bouche` | équipe de collecte | cure le caniveau |
+| `abattoir_clandestin` | brigade Laabal | constate, sensibilise, verbalise |
+| `toilettes_plein_air` | ONEA | intervient (assainissement, vidange) |
+| `eaux_usees_animales` | brigade Laabal | constate et verbalise |
+
+Répartition **à confirmer avec la mairie** : une ligne `poste` par nature dans la table
+`NATURES` de `application/nuisances.py`, rien d'autre à toucher. Ajouter une cinquième nature
+demain, c'est ajouter une entrée dans cette même table.
+
+Le poste attendu à l'étape `confirme` n'est donc pas écrit dans la chaîne : il est posé
+dossier par dossier par `Nuisances._enrichir`, d'après la nature. C'est le seul endroit du
+code où une étape n'a pas un poste fixe, et c'est volontaire.
+
+Gravité : `leger`, `moyen`, `grave` — trois niveaux qu'on juge à l'œil, formulés au téléphone
+dans les mots de chaque nature (« un peu bouché » pour un caniveau, « quelques seaux » pour des
+eaux usées). La gravité retenue est la **plus forte** signalée. Le regroupement ne vaut qu'à
+**nature égale**, dans un rayon de 60 m.
+
+| Méthode et adresse | Rôle |
+|---|---|
+| `POST /api/signalements` avec `nature=caniveau_bouche`… | Un signalement de nuisance |
+| `GET /api/nuisances` | Liste ; `?pour_moi=1` filtre sur le poste, `?nature=` sur la nature |
+| `GET /api/nuisances/carte` | GeoJSON des nuisances non traitées |
+| `GET /api/nuisances/chaine` | Étapes, natures, services et comptes |
+| `GET /api/nuisances/<id>` | Détail et journal |
+| `POST /api/nuisances/<id>/avancer` | Un cran, par le poste que la nature désigne |
+| `POST /api/nuisances/<id>/classer` | Sans suite, mairie seulement |
+| `GET /api/export/nuisances` | Bordereau CSV des dossiers orientés |
+
 ## Plan de gestion
 
 1. **Demande.** Chaque carreau de `zones.geojson` reçoit une population proportionnelle à sa

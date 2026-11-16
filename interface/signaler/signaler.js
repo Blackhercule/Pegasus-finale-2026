@@ -13,7 +13,7 @@ const GUIDAGE = "guidage-moore";
    rangés dans /signaler/audio/moore/ : aucune synthèse vocale, donc rien à télécharger et une
    prononciation juste. Si un fichier manque, la page fonctionne comme avant, en silence. */
 const AUDIOS = ["bienvenue", "nature", "position", "taille", "depot", "ampleur",
-                "photo", "vocal", "identite", "merci"];
+                "gravite", "photo", "vocal", "identite", "merci"];
 let guidageActif = false;
 let lecture = null;
 
@@ -185,23 +185,69 @@ const tailleChoisie = groupeDeChoix("taille");
 const typeChoisi = groupeDeChoix("type");
 const depotChoisi = groupeDeChoix("depot");
 const ampleurChoisie = groupeDeChoix("ampleur");
+const graviteChoisie = groupeDeChoix("gravite");
 const natureChoisie = groupeDeChoix("nature");
+
+/* Ce qui change d'une nature à l'autre : le titre de la photo, et les mots des trois niveaux
+   de gravité. « Un peu bouché » et « un seau d'eau » décrivent la même graduation, mais
+   personne ne dirait l'un pour l'autre : les mots doivent être ceux de la chose signalée.
+   Le texte « pourquoi » dit à l'habitant pourquoi son signalement compte. */
+const PAR_NATURE = {
+  ordures: { photo: "Photo du tas" },
+  fuite_eau: { photo: "Photo de la fuite" },
+  caniveau_bouche: {
+    photo: "Photo du caniveau",
+    titre: "Le caniveau est bouché comment ?",
+    niveaux: ["Un peu bouché", "L'eau ne passe plus", "Ça déborde dans la rue"],
+    pourquoi: "Un caniveau bouché renvoie l'eau dans les cours dès la première pluie, "
+              + "et l'eau qui stagne élève les moustiques.",
+  },
+  toilettes_plein_air: {
+    photo: "Photo du déversement",
+    titre: "Il y en a combien ?",
+    niveaux: ["Une flaque", "Ça coule dans la rue", "Toute la rue est touchée"],
+    pourquoi: "Des matières de vidange répandues dans la rue, c'est le choléra et la fièvre "
+              + "typhoïde à portée de pied nu.",
+  },
+  abattoir_clandestin: {
+    photo: "Photo du lieu",
+    titre: "C'est à quelle fréquence ?",
+    niveaux: ["De temps en temps", "Plusieurs fois par semaine", "Tous les jours"],
+    pourquoi: "Une bête abattue hors d'un abattoir n'est pas inspectée, et le sang et les "
+              + "viscères restent sur place.",
+  },
+  eaux_usees_animales: {
+    photo: "Photo du déversement",
+    titre: "Il y en a combien ?",
+    niveaux: ["Quelques seaux", "Un fût ou plus", "Ça coule en permanence"],
+    pourquoi: "Les eaux de lavage des poissonneries et des poulaillers attirent les mouches "
+              + "et empestent tout un quartier.",
+  },
+};
 
 /* Un tas d'ordures et une fuite d'eau ne se décrivent pas pareil : on n'affiche que les
    étapes qui servent. Les autres sont retirées de la page, donc elles ne sont pas non plus
    comptées dans la numérotation des étapes (voir la feuille de style). */
 function ajusterLesEtapes() {
   const nature = natureChoisie();
+  // Un bloc peut servir à plusieurs natures : data-pour en contient la liste.
   document.querySelectorAll("[data-pour]").forEach((bloc) => {
-    bloc.hidden = bloc.dataset.pour !== nature;
+    bloc.hidden = !bloc.dataset.pour.split(" ").includes(nature);
   });
-  const fuite = nature === "fuite_eau";
-  element("titre-photo").textContent = fuite ? "Photo de la fuite" : "Photo du tas";
-  element("commentaire").placeholder = fuite
-    ? "Ou écrivez ici : la rue, le repère, depuis quand l'eau coule…"
-    : "Ou écrivez ici : repère, rue, depuis quand…";
-  element("envoyer").textContent = fuite
-    ? "Signaler la fuite à la mairie" : "Enregistrer le signalement";
+  const propre = PAR_NATURE[nature] || {};
+  element("titre-photo").textContent = propre.photo || "Photo";
+  if (propre.titre) element("titre-gravite").firstChild.textContent = propre.titre + " ";
+  if (propre.niveaux) {
+    element("gravite").querySelectorAll(".mot").forEach((mot, rang) => {
+      mot.textContent = propre.niveaux[rang];
+    });
+  }
+  element("pourquoi-nature").textContent = propre.pourquoi || "";
+  element("commentaire").placeholder = nature === "ordures"
+    ? "Ou écrivez ici : repère, rue, depuis quand…"
+    : "Ou écrivez ici : la rue, le repère, depuis quand ça dure…";
+  element("envoyer").textContent = nature === "ordures"
+    ? "Enregistrer le signalement" : "Envoyer le signalement à la mairie";
 }
 element("nature").addEventListener("click", ajusterLesEtapes);
 
@@ -383,17 +429,22 @@ element("formulaire").addEventListener("submit", async (evenement) => {
     declarant_nom: element("declarant_nom").value,
     declarant_telephone: element("declarant_telephone").value,
   };
-  const propres = nature === "fuite_eau"
-    ? { ampleur: ampleurChoisie(), quartier: element("quartier").value }
-    : { taille: tailleChoisie(), type: typeChoisi(), depot: depotChoisi(),
-        longueur_m: element("longueur_m").value, largeur_m: element("largeur_m").value };
+  let propres;
+  if (nature === "fuite_eau") {
+    propres = { ampleur: ampleurChoisie(), quartier: element("quartier").value };
+  } else if (nature === "ordures") {
+    propres = { taille: tailleChoisie(), type: typeChoisi(), depot: depotChoisi(),
+                longueur_m: element("longueur_m").value, largeur_m: element("largeur_m").value };
+  } else {
+    propres = { gravite: graviteChoisie(), quartier: element("quartier").value };
+  }
   const signalement = { champs: { ...communs, ...propres }, photo: null };
   try {
     const resultat = await envoyer({ ...signalement, ...photos, message_vocal: messageVocal });
     if (resultat.statut !== "rejete") jouer("merci");
-    const reussi = nature === "fuite_eau"
-      ? "Fuite signalée. La mairie la transmettra à l'ONEA. Merci !"
-      : "Signalement enregistré. Merci !";
+    const reussi = nature === "ordures"
+      ? "Signalement enregistré. Merci !"
+      : "Signalement enregistré. La mairie l'orientera vers le service compétent. Merci !";
     afficher(resultat.statut === "rejete"
       ? "Signalement enregistré mais écarté : " + (resultat.motifs || []).join(", ")
       : reussi, resultat.statut === "rejete" ? "erreur" : "succes");
@@ -440,7 +491,7 @@ document.querySelectorAll(".parler").forEach((bouton) =>
   bouton.addEventListener("click", () => jouer(bouton.dataset.audio, true)));
 
 /* Une étape que l'on commence se fait lire à voix haute, quand le guidage est allumé. */
-["nature", "taille", "depot", "ampleur"].forEach((id) =>
+["nature", "taille", "depot", "ampleur", "gravite"].forEach((id) =>
   element(id).addEventListener("click", () => jouer(id)));
 element("photo").addEventListener("click", () => jouer("photo"));
 element("enregistrer").addEventListener("click", () => jouer("vocal"));
