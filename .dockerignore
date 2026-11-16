@@ -1,0 +1,15 @@
+.git
+.github
+tests
+docs
+enonce
+comptes-rendus
+*.md
+.env
+ca-assainissement.crt
+donnees/outils
+donnees/*/signalements.sqlite*
+donnees/*/photos
+__pycache__
+*.pyc
+.pytest_cache
