@@ -135,3 +135,146 @@ carte.on("click", "depotoirs", (evenement) => {
 });
 carte.on("mouseenter", "depotoirs", () => { carte.getCanvas().style.cursor = "pointer"; });
 carte.on("mouseleave", "depotoirs", () => { carte.getCanvas().style.cursor = ""; });
+
+/* ------------------------------------------------------------------ plan de gestion */
+const REGLAGES = ["nb_camions", "camions_en_panne", "taux_abonnement", "frequence_collecte_jours"];
+const UNITES = { taux_abonnement: " %", frequence_collecte_jours: " j" };
+
+REGLAGES.forEach((nom) => {
+  const curseur = document.getElementById(nom);
+  const sortie = document.getElementById("sortie-" + nom);
+  const afficher = () => { sortie.textContent = curseur.value + (UNITES[nom] || ""); };
+  curseur.addEventListener("input", afficher);
+  afficher();
+});
+
+function parametresChoisis() {
+  const p = {};
+  REGLAGES.forEach((nom) => { p[nom] = Number(document.getElementById(nom).value); });
+  p.taux_abonnement = p.taux_abonnement / 100;
+  p.saison = document.getElementById("saison").checked ? "pluies" : "seche";
+  p.mode_strict = document.getElementById("mode_strict").checked;
+  return p;
+}
+
+function nombre(valeur, decimales = 0) {
+  return Number(valeur).toLocaleString("fr-FR", { minimumFractionDigits: decimales,
+                                                  maximumFractionDigits: decimales });
+}
+
+/* Les tournées deviennent des lignes sur la carte : décharge → arrêts → décharge. */
+function tourneesEnLignes(plan) {
+  const depart = [plan.decharge.longitude, plan.decharge.latitude];
+  return { type: "FeatureCollection", features: plan.tournees.map((t) => ({
+    type: "Feature",
+    properties: { camion: t.camion, rotation: t.rotation, volume: t.volume_m3, duree: t.duree_min },
+    geometry: { type: "LineString",
+                coordinates: [depart, ...t.etapes.map((e) => [e.longitude, e.latitude]), depart] },
+  })) };
+}
+
+function pointsEnGeojson(plan) {
+  return { type: "FeatureCollection", features: plan.points.map((p) => ({
+    type: "Feature",
+    properties: { id: p.id, m3: p.m3_par_passage, habitants: Math.round(p.habitants),
+                  sature: p.sature, jour: p.jour_du_cycle,
+                  desservi: !plan.non_desservis.includes("point-" + p.id) },
+    geometry: { type: "Point", coordinates: [p.longitude, p.latitude] },
+  })) };
+}
+
+function afficherResume(plan) {
+  const c = plan.couts;
+  const lignes = [
+    ["Points de regroupement", nombre(plan.points_resume.nombre)],
+    ["À vider aujourd'hui", nombre(plan.points_resume.a_vider_aujourd_hui)],
+    ["Tournées", nombre(plan.tournees.length)],
+    ["Arrêts non desservis", nombre(plan.non_desservis.length)],
+    ["Distance par jour", nombre(c.km_par_jour) + " km"],
+    ["Coût par mois", nombre(c.cout_par_mois) + " F"],
+    ["Calculé en", plan.calcule_en_s + " s"],
+  ];
+  document.getElementById("resume-plan").innerHTML = lignes
+    .map(([nom, valeur]) => `<div class="ligne"><span>${nom}</span><span>${valeur}</span></div>`).join("");
+
+  const marques = { ok: "✓", attention: "!", probleme: "✗" };
+  document.getElementById("controles").innerHTML = plan.controles.map((v) =>
+    `<li class="${v.etat}"><span class="marque">${marques[v.etat]}</span>`
+    + `<span><span class="nom">${v.nom}</span><span class="detail">${v.detail}</span></span></li>`).join("");
+  document.getElementById("bloc-controles").hidden = false;
+}
+
+async function calculerLePlan() {
+  const bouton = document.getElementById("recalculer");
+  bouton.disabled = true;
+  bouton.textContent = "Calcul en cours…";
+  etat("Calcul du plan…");
+  try {
+    const reponse = await fetch("/api/plan", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(parametresChoisis()),
+    });
+    const plan = await reponse.json();
+    if (!reponse.ok) throw new Error(plan.erreur || "Erreur " + reponse.status);
+    dessinerLePlan(plan);
+    afficherResume(plan);
+    etat(`Plan recalculé en ${plan.calcule_en_s} s · jour ${plan.jour_du_cycle} sur `
+         + `${plan.frequence_collecte_jours} du cycle.`);
+  } catch (erreur) {
+    etat("Plan impossible : " + erreur.message);
+  } finally {
+    bouton.disabled = false;
+    bouton.textContent = "Recalculer le plan";
+  }
+}
+
+function dessinerLePlan(plan) {
+  const points = pointsEnGeojson(plan);
+  const lignes = tourneesEnLignes(plan);
+  if (carte.getSource("points")) {
+    carte.getSource("points").setData(points);
+    carte.getSource("tournees").setData(lignes);
+    carte.getSource("decharge").setData(pointDecharge(plan));
+    return;
+  }
+  carte.addSource("tournees", { type: "geojson", data: lignes });
+  carte.addLayer({ id: "tournees", type: "line", source: "tournees",
+    paint: { "line-color": "#b8862b", "line-width": 1.6, "line-opacity": 0.55 } }, "depotoirs");
+
+  carte.addSource("points", { type: "geojson", data: points });
+  carte.addLayer({ id: "points", type: "circle", source: "points",
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["get", "m3"], 0, 4, 30, 8, 120, 13],
+      /* Bleu : desservi. Rouge sombre : laissé de côté faute de camions ou de temps. */
+      "circle-color": ["case", ["get", "desservi"], "#1d4f91", "#7a2f22"],
+      "circle-opacity": 0.8, "circle-stroke-width": 1.2, "circle-stroke-color": "#fff",
+    } }, "depotoirs");
+
+  carte.addSource("decharge", { type: "geojson", data: pointDecharge(plan) });
+  carte.addLayer({ id: "decharge", type: "circle", source: "decharge",
+    paint: { "circle-radius": 9, "circle-color": "#1d1d1b", "circle-stroke-width": 3,
+             "circle-stroke-color": "#b8862b" } });
+
+  carte.on("click", "points", (evenement) => {
+    const p = evenement.features[0].properties;
+    new maplibregl.Popup({ offset: 10 })
+      .setLngLat(evenement.lngLat)
+      .setHTML(`<strong>Point de regroupement ${p.id}</strong>`
+        + `${nombre(p.habitants)} habitants · ${nombre(p.m3, 1)} m³ par passage<br>`
+        + `Jour ${p.jour} du cycle · ${p.desservi ? "desservi" : "non desservi"}`
+        + `${p.sature ? "<br><em>saturé : à vider plus souvent</em>" : ""}`)
+      .addTo(carte);
+  });
+  carte.on("mouseenter", "points", () => { carte.getCanvas().style.cursor = "pointer"; });
+  carte.on("mouseleave", "points", () => { carte.getCanvas().style.cursor = ""; });
+}
+
+function pointDecharge(plan) {
+  return { type: "FeatureCollection", features: [{
+    type: "Feature", properties: { nom: plan.decharge.nom },
+    geometry: { type: "Point", coordinates: [plan.decharge.longitude, plan.decharge.latitude] },
+  }] };
+}
+
+document.getElementById("recalculer").addEventListener("click", calculerLePlan);
+carte.on("load", () => { setTimeout(() => calculerLePlan().catch(() => {}), 500); });

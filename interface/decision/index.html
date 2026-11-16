@@ -31,9 +31,38 @@
         <li><label><input type="checkbox" data-couche="depotoirs" checked> <span class="pastille" style="background:#e4572e"></span>Dépotoirs signalés</label></li>
         <li><label><input type="checkbox" data-couche="decharges" checked> <span class="pastille" style="background:#8a6a3b"></span>Sites de déchets (OpenStreetMap)</label></li>
         <li><label><input type="checkbox" data-couche="densite"> <span class="pastille" style="background:#2f6f4e"></span>Densité de bâti</label></li>
+        <li><label><input type="checkbox" data-couche="points" checked> <span class="pastille" style="background:#1d4f91"></span>Points de regroupement</label></li>
+        <li><label><input type="checkbox" data-couche="tournees" checked> <span class="pastille" style="background:#b8862b"></span>Tournées des camions</label></li>
         <li><label><input type="checkbox" data-couche="eau" checked> <span class="pastille" style="background:#3d7ea6"></span>Plans d'eau</label></li>
         <li><label><input type="checkbox" data-couche="limite" checked> <span class="pastille" style="background:#1d1d1b"></span>Limite de la commune</label></li>
       </ul>
+    </section>
+
+    <section class="bloc">
+      <h2>Plan de gestion</h2>
+      <div class="reglages" id="reglages">
+        <label>Camions
+          <span class="ligne"><input type="range" id="nb_camions" min="0" max="80" step="1" value="24">
+          <output id="sortie-nb_camions">24</output></span></label>
+        <label>Camions en panne
+          <span class="ligne"><input type="range" id="camions_en_panne" min="0" max="40" step="1" value="0">
+          <output id="sortie-camions_en_panne">0</output></span></label>
+        <label>Abonnés
+          <span class="ligne"><input type="range" id="taux_abonnement" min="0" max="100" step="5" value="35">
+          <output id="sortie-taux_abonnement">35 %</output></span></label>
+        <label>Passage tous les
+          <span class="ligne"><input type="range" id="frequence_collecte_jours" min="1" max="7" step="1" value="3">
+          <output id="sortie-frequence_collecte_jours">3 j</output></span></label>
+        <label class="case"><input type="checkbox" id="saison"> Saison des pluies</label>
+        <label class="case"><input type="checkbox" id="mode_strict"> Signalements vérifiés seulement</label>
+      </div>
+      <button type="button" id="recalculer">Recalculer le plan</button>
+      <div id="resume-plan" class="resume"></div>
+    </section>
+
+    <section class="bloc" id="bloc-controles" hidden>
+      <h2>Contrôles de cohérence</h2>
+      <ul id="controles" class="controles"></ul>
     </section>
 
     <section class="bloc" id="bloc-selection" hidden>
