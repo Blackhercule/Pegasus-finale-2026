@@ -28,7 +28,7 @@ def connecter(client, nom):
     return reponse
 
 
-def test_chaque_nature_va_au_bon_service(client):
+def test_chaque_nature_va_au_bon_service(client, agent):
     """C'est la décision centrale du module : la nature désigne le service."""
     attendus = {
         "caniveau_bouche": "collecte",
@@ -43,7 +43,7 @@ def test_chaque_nature_va_au_bon_service(client):
         assert n["service"] == attendus[n["nature"]]
 
 
-def test_deux_natures_au_meme_endroit_font_deux_dossiers(client):
+def test_deux_natures_au_meme_endroit_font_deux_dossiers(client, agent):
     """Un caniveau bouché et un abattage clandestin au même carrefour sont deux problèmes,
     deux services, donc deux dossiers — même si les points se touchent."""
     signaler(client, "caniveau_bouche", id_client="a")
@@ -53,7 +53,7 @@ def test_deux_natures_au_meme_endroit_font_deux_dossiers(client):
     assert {n["nature"] for n in liste} == {"caniveau_bouche", "abattoir_clandestin"}
 
 
-def test_deux_appareils_confirment_la_meme_nuisance(client):
+def test_deux_appareils_confirment_la_meme_nuisance(client, agent):
     signaler(client, id_client="a", source="tel-a", gravite="leger")
     deuxieme = signaler(client, id_client="b", source="tel-b", latitude=12.37145, gravite="grave")
     assert deuxieme.get_json()["nuisance_id"] == 1
@@ -64,7 +64,7 @@ def test_deux_appareils_confirment_la_meme_nuisance(client):
     assert n["nb_sources"] == 2
 
 
-def test_gravite_absente_ou_inventee_est_rejetee(client):
+def test_gravite_absente_ou_inventee_est_rejetee(client, agent):
     for mauvaise in (None, "catastrophique", 7, ""):
         corps = signaler(client, gravite=mauvaise, id_client="x%s" % mauvaise).get_json()
         assert corps["statut"] == "rejete"
@@ -72,7 +72,7 @@ def test_gravite_absente_ou_inventee_est_rejetee(client):
     assert client.get("/api/nuisances").get_json() == []
 
 
-def test_une_nature_inconnue_est_rejetee_sans_tomber(client):
+def test_une_nature_inconnue_est_rejetee_sans_tomber(client, agent):
     """Le jury peut inventer une nature : elle est écartée avec son motif, pas une erreur 500."""
     reponse = signaler(client, "depotoir_de_mars", id_client="z")
     assert reponse.status_code == 201
@@ -81,7 +81,7 @@ def test_une_nature_inconnue_est_rejetee_sans_tomber(client):
     assert client.get("/api/depotoirs").get_json()["features"] == []
 
 
-def test_les_memes_controles_de_position_s_appliquent(client):
+def test_les_memes_controles_de_position_s_appliquent(client, agent):
     pieges = [
         ({"latitude": 0, "longitude": 0}, "coordonnees_invalides"),
         ({"latitude": "abc"}, "format_invalide"),
@@ -166,7 +166,7 @@ def test_le_bordereau_liste_les_dossiers_orientes(client):
     assert "NUIS-00001" in texte and "collecte" in texte
 
 
-def test_une_nuisance_n_est_ni_un_depotoir_ni_une_fuite(client):
+def test_une_nuisance_n_est_ni_un_depotoir_ni_une_fuite(client, agent):
     signaler(client, "caniveau_bouche")
     assert client.get("/api/depotoirs").get_json()["features"] == []
     assert client.get("/api/fuites").get_json() == []
@@ -175,8 +175,8 @@ def test_une_nuisance_n_est_ni_un_depotoir_ni_une_fuite(client):
 
 def test_l_identite_du_declarant_reste_cachee_du_public(client):
     signaler(client, declarant_nom="Awa", declarant_telephone="70000000")
-    public = client.get("/api/nuisances/1").get_json()["signalements"][0]
-    assert "declarant_nom" not in public
+    # Sans connexion, la fiche n'est pas servie du tout (T13) : l'identité encore moins.
+    assert client.get("/api/nuisances/1").status_code == 401
     connecter(client, "agent")
     prive = client.get("/api/nuisances/1").get_json()["signalements"][0]
     assert prive["declarant_nom"] == "Awa"

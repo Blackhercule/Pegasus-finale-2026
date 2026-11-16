@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Connexion — Espace des services</title>
+    <link rel="stylesheet" href="/decision/connexion.css">
+    <script src="/decision/connexion.js" defer></script>
+  </head>
+  <body>
+    <main class="carte-connexion">
+      <h1>Espace des services</h1>
+      <p class="chapeau">
+        Carte de décision, plan de gestion et dossiers : réservés à la mairie, à la brigade
+        Laabal, à l'équipe de collecte et à l'ONEA.
+      </p>
+      <form id="formulaire" autocomplete="off">
+        <label for="nom">Identifiant</label>
+        <input id="nom" name="nom" type="text" required autocapitalize="none" spellcheck="false">
+        <label for="mot-de-passe">Mot de passe</label>
+        <input id="mot-de-passe" name="mot_de_passe" type="password" required>
+        <p id="erreur" class="erreur" role="alert" hidden></p>
+        <button type="submit">Se connecter</button>
+      </form>
+      <p class="public">Vous voulez signaler un dépotoir ? <a href="/signaler/">C'est ouvert à tous, ici.</a></p>
+    </main>
+  </body>
+</html>

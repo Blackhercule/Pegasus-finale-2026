@@ -24,7 +24,7 @@ def connecter(client, nom, mot_de_passe):
     return reponse
 
 
-def test_une_fuite_s_enregistre_et_n_est_pas_un_depotoir(client):
+def test_une_fuite_s_enregistre_et_n_est_pas_un_depotoir(client, agent):
     reponse = signaler(client)
     assert reponse.status_code == 201
     corps = reponse.get_json()
@@ -34,7 +34,7 @@ def test_une_fuite_s_enregistre_et_n_est_pas_un_depotoir(client):
     assert client.get("/api/comptes").get_json().get("depotoirs", 0) == 0
 
 
-def test_deux_appareils_confirment_la_meme_fuite(client):
+def test_deux_appareils_confirment_la_meme_fuite(client, agent):
     signaler(client, source="tel-a", id_client="f1")
     deuxieme = signaler(client, latitude=12.37145, source="tel-b", id_client="f2",
                         ampleur="inondation")
@@ -46,7 +46,7 @@ def test_deux_appareils_confirment_la_meme_fuite(client):
     assert fuite["nb_sources"] == 2
 
 
-def test_une_fuite_loin_ouvre_un_autre_dossier(client):
+def test_une_fuite_loin_ouvre_un_autre_dossier(client, agent):
     signaler(client, source="a", id_client="f1")
     signaler(client, latitude=12.40, longitude=-1.50, source="b", id_client="f2")
     assert len(client.get("/api/fuites").get_json()) == 2
@@ -60,7 +60,7 @@ def test_ampleur_absente_ou_inventee_est_rejetee(client):
         assert "ampleur_invalide" in corps["motifs"]
 
 
-def test_une_fuite_subit_les_memes_controles_de_position(client):
+def test_une_fuite_subit_les_memes_controles_de_position(client, agent):
     """Les pièges du jury valent aussi pour les fuites : mêmes contrôles, mêmes motifs."""
     pieges = [
         ({"latitude": 0, "longitude": 0}, "coordonnees_invalides"),
@@ -121,7 +121,7 @@ def test_seule_la_mairie_classe_sans_suite(client):
     assert fuite["etape"] == "classe"
 
 
-def test_le_bordereau_onea_est_un_csv_lisible(client):
+def test_le_bordereau_onea_est_un_csv_lisible(client, agent):
     signaler(client, source="a", id_client="f1")
     signaler(client, latitude=12.40, longitude=-1.50, source="b", id_client="f2",
              ampleur="inondation", quartier="Nioko II")
@@ -141,8 +141,8 @@ def test_le_bordereau_onea_est_un_csv_lisible(client):
 
 def test_l_identite_du_declarant_reste_cachee_du_public(client):
     signaler(client, declarant_nom="Awa", declarant_telephone="70000000")
-    public = client.get("/api/fuites/1").get_json()["signalements"][0]
-    assert "declarant_nom" not in public
+    # Sans connexion, la fiche n'est pas servie du tout (T13) : l'identité encore moins.
+    assert client.get("/api/fuites/1").status_code == 401
     connecter(client, "agent", MOT_DE_PASSE)
     prive = client.get("/api/fuites/1").get_json()["signalements"][0]
     assert prive["declarant_nom"] == "Awa"
@@ -172,7 +172,7 @@ def test_le_meme_envoi_deux_fois_ne_compte_qu_une_fois(client):
     assert len(client.get("/api/fuites").get_json()) == 1
 
 
-def test_un_signalement_d_ordures_n_apparait_pas_dans_les_fuites(client):
+def test_un_signalement_d_ordures_n_apparait_pas_dans_les_fuites(client, agent):
     client.post("/api/signalements", json={
         "latitude": 12.3714, "longitude": -1.5197, "taille": "grand",
         "source": "a", "id_client": "o1"})

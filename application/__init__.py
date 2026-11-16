@@ -50,6 +50,11 @@ def creer_application(reglages: Reglages = None) -> Flask:
     app.extensions["controleur"] = Controleur(app.extensions["geographie"], reglages.parametres)
     app.register_blueprint(vues)
 
+    @app.before_request
+    def porte_d_entree():
+        """Tout est fermé, sauf ce qui est ouvert au public (liste blanche, voir OUVERT_A_TOUS)."""
+        return filtrer_l_acces()
+
     @app.after_request
     def entetes(reponse):
         # La page ne charge que ses propres fichiers : ni script, ni police, ni carte d'ailleurs.
@@ -163,6 +168,49 @@ def agent_requis(vue=None, postes=None):
             return vue(*args, **kwargs)
         return emballage
     return decorateur(vue) if vue else decorateur
+
+
+# ------------------------------------------------------------------ qui a le droit d'entrer
+# LISTE BLANCHE : seules ces routes répondent sans connexion. Tout le reste (pages /decision/,
+# API de la carte, du plan, des scénarios, des dossiers, des exports…) demande une session.
+# Une route qu'on ajoute plus tard est donc FERMÉE par défaut : l'oubli ne peut pas ouvrir une
+# porte. Le test tests/test_acces.py échoue si une route n'est ni ici ni protégée.
+# Chaque nom est celui de la fonction Flask (« endpoint »), qui fixe aussi la méthode :
+# « recevoir » est POST /api/signalements, alors que la liste (GET) s'appelle « lister ».
+OUVERT_A_TOUS = {
+    "api.page_signaler",       # /signaler/… : la page de l'habitant, ses sons, son service worker
+    "api.bibliotheques",       # /vendor/… : polices et bibliothèques (la page de signalement en charge)
+    "api.recevoir",            # POST /api/signalements : un signalement (habitants et jury)
+    "api.recevoir_lot",        # POST /api/signalements/lot : un lot (le jury, pièges compris)
+    "api.fichier_joint",       # /api/fichiers/public/… ; les fichiers prive/ exigent déjà une session
+    "api.connecter",           # POST /api/connexion
+    "api.session_en_cours",    # GET /api/session : « suis-je connecté ? »
+    "api.deconnecter",         # POST /api/deconnexion
+}
+# La page de connexion elle-même doit pouvoir s'afficher sans être connecté.
+PAGE_DE_CONNEXION = {"connexion.html", "connexion.js", "connexion.css"}
+
+
+def filtrer_l_acces():
+    """Appelée avant chaque requête. Ne renvoie rien si l'accès est permis, sinon un refus."""
+    point = request.endpoint
+    if point is None:
+        return None                                   # adresse inconnue : Flask répondra 404
+    if point in OUVERT_A_TOUS or session.get("agent"):
+        return None
+    if point == "api.page_decision" and (request.view_args or {}).get("fichier") in PAGE_DE_CONNEXION:
+        return None
+    if request.path.startswith("/api/"):
+        # Les pages de décision savent traiter ce refus : elles affichent la connexion.
+        return jsonify({"erreur": "Connexion requise."}), 401
+    # Une page demandée sans session : on sert la page de connexion À LA MÊME ADRESSE. Une fois
+    # le mot de passe accepté, elle recharge simplement l'adresse : on arrive sur la page voulue,
+    # sans paramètre de redirection qu'un tiers pourrait détourner.
+    reponse = send_from_directory(os.path.join(reglages().dossier_interface, "decision"),
+                                  "connexion.html")
+    reponse.status_code = 401
+    reponse.headers["Cache-Control"] = "no-store"
+    return reponse
 
 
 # ------------------------------------------------------------------ interface et données

@@ -82,7 +82,7 @@ def test_un_lot_illisible_ne_fait_pas_tomber_le_serveur(client):
         assert reponse.status_code in (200, 400), contenu
 
 
-def test_un_commentaire_hostile_est_garde_comme_texte(client):
+def test_un_commentaire_hostile_est_garde_comme_texte(client, agent):
     resultat = envoyer(client, commentaire="<script>alert(1)</script>", id_client="hostile").get_json()
     assert resultat["statut"] == "recevable"
     lignes = client.get("/api/signalements").get_json()
@@ -90,7 +90,7 @@ def test_un_commentaire_hostile_est_garde_comme_texte(client):
 
 
 # ------------------------------------------------------------------ dépotoirs
-def test_deux_sources_confirment_le_meme_depotoir(client):
+def test_deux_sources_confirment_le_meme_depotoir(client, agent):
     envoyer(client, source="telephone-a", id_client="a")
     deuxieme = envoyer(client, latitude=12.37145, longitude=-1.51975,
                        source="telephone-b", id_client="b").get_json()
@@ -100,7 +100,7 @@ def test_deux_sources_confirment_le_meme_depotoir(client):
     assert depotoirs[0]["properties"]["nb_sources"] == 2
 
 
-def test_deux_dépotoirs_eloignes_restent_distincts(client):
+def test_deux_dépotoirs_eloignes_restent_distincts(client, agent):
     envoyer(client, id_client="un")
     envoyer(client, latitude=12.40, longitude=-1.48, id_client="deux")
     assert len(client.get("/api/depotoirs").get_json()["features"]) == 2
@@ -114,7 +114,7 @@ def test_le_meme_envoi_repete_ne_compte_quune_fois(client):
     assert len(client.get("/api/signalements").get_json()) == 1
 
 
-def test_un_signalement_rejete_n_entre_pas_dans_la_carte(client):
+def test_un_signalement_rejete_n_entre_pas_dans_la_carte(client, agent):
     envoyer(client, latitude=48.8566, longitude=2.3522, id_client="paris")
     assert client.get("/api/depotoirs").get_json()["features"] == []
 
@@ -159,7 +159,7 @@ def test_mot_de_passe_faux(client):
 
 
 # ------------------------------------------------------------------ plan de gestion
-def test_le_plan_se_calcule_et_se_verifie(client):
+def test_le_plan_se_calcule_et_se_verifie(client, agent):
     plan = client.get("/api/plan").get_json()
     assert plan["points"], "aucun point de regroupement"
     assert plan["tournees"], "aucune tournée"
@@ -168,7 +168,7 @@ def test_le_plan_se_calcule_et_se_verifie(client):
     assert not graves, graves
 
 
-def test_des_camions_en_panne_degradent_le_plan_sans_le_casser(client):
+def test_des_camions_en_panne_degradent_le_plan_sans_le_casser(client, agent):
     reference = client.get("/api/plan").get_json()
     degrade = client.post("/api/plan", json={"camions_en_panne": 20}).get_json()
     assert len(degrade["tournees"]) < len(reference["tournees"])
@@ -176,13 +176,13 @@ def test_des_camions_en_panne_degradent_le_plan_sans_le_casser(client):
     assert not [c for c in degrade["controles"] if c["etat"] == "probleme"]
 
 
-def test_la_saison_des_pluies_ralentit_les_tournees(client):
+def test_la_saison_des_pluies_ralentit_les_tournees(client, agent):
     seche = client.get("/api/plan").get_json()
     pluies = client.post("/api/plan", json={"saison": "pluies"}).get_json()
     assert len(pluies["tournees"]) < len(seche["tournees"])
 
 
-def test_un_nouveau_quartier_augmente_la_demande(client):
+def test_un_nouveau_quartier_augmente_la_demande(client, agent):
     reference = client.get("/api/plan").get_json()
     agrandi = client.post("/api/plan", json={"nouveaux_quartiers": [
         {"longitude": -1.47, "latitude": 12.42, "rayon_m": 3000, "population": 150000}]}).get_json()
@@ -194,13 +194,13 @@ def test_un_nouveau_quartier_augmente_la_demande(client):
     {"population": 0}, {"frequence_collecte_jours": 0}, {"saison": "neige"},
     {"heures_travail": 0}, {"distance_max_precollecte_m": 0}, {"camions_en_panne": 9999},
 ])
-def test_des_parametres_absurdes_ne_cassent_pas_le_serveur(client, parametres):
+def test_des_parametres_absurdes_ne_cassent_pas_le_serveur(client, parametres, agent):
     reponse = client.post("/api/plan", json=parametres)
     assert reponse.status_code in (200, 400), reponse.get_data(as_text=True)[:200]
 
 
 # ------------------------------------------------------------------ simulation et scénarios
-def test_la_simulation_fait_vivre_les_quatre_acteurs(client):
+def test_la_simulation_fait_vivre_les_quatre_acteurs(client, agent):
     resultat = client.post("/api/scenario", json={"jours": 10}).get_json()
     agents = resultat["simulation"]["agents"]
     assert agents["menages"] > 100 and agents["precollecteurs"] > 0
@@ -210,13 +210,13 @@ def test_la_simulation_fait_vivre_les_quatre_acteurs(client):
     assert all(j["produit_m3"] > 0 for j in journal)
 
 
-def test_la_simulation_est_reproductible(client):
+def test_la_simulation_est_reproductible(client, agent):
     premier = client.post("/api/scenario", json={"jours": 10}).get_json()["simulation"]["resume"]
     second = client.post("/api/scenario", json={"jours": 10}).get_json()["simulation"]["resume"]
     assert premier == second
 
 
-def test_passer_tous_les_jours_ameliore_la_collecte(client):
+def test_passer_tous_les_jours_ameliore_la_collecte(client, agent):
     reference = client.post("/api/scenario", json={"jours": 20}).get_json()
     ameliore = client.post("/api/scenario", json={
         "jours": 20, "parametres": {"frequence_collecte_jours": 1, "nb_camions": 45}}).get_json()
@@ -224,7 +224,7 @@ def test_passer_tous_les_jours_ameliore_la_collecte(client):
             > reference["simulation"]["resume"]["taux_collecte"])
 
 
-def test_comparer_deux_scenarios(client):
+def test_comparer_deux_scenarios(client, agent):
     reponse = client.post("/api/comparer", json={"jours": 10, "scenarios": [
         {"nom": "Aujourd'hui", "parametres": {}},
         {"nom": "Plus de camions", "parametres": {"nb_camions": 45, "frequence_collecte_jours": 1}},
@@ -235,14 +235,14 @@ def test_comparer_deux_scenarios(client):
     assert scenarios[1]["taux_collecte"] > scenarios[0]["taux_collecte"]
 
 
-def test_une_comparaison_mal_formee_est_refusee(client):
+def test_une_comparaison_mal_formee_est_refusee(client, agent):
     for envoi in ({}, {"scenarios": []}, {"scenarios": [{}]}, {"scenarios": "deux"},
                   {"scenarios": [{}, {}, {}, {}, {}]}):
         assert client.post("/api/comparer", json=envoi).status_code == 400
 
 
 # ------------------------------------------------------------------ bien commun
-def test_l_export_osm_ne_contient_que_les_depotoirs_verifies(client):
+def test_l_export_osm_ne_contient_que_les_depotoirs_verifies(client, agent):
     envoyer(client, source="telephone-a", id_client="a")               # recevable seulement
     reponse = client.get("/api/export/osm")
     assert reponse.status_code == 200
@@ -281,7 +281,7 @@ def test_chaque_poste_a_son_compte(client, monkeypatch):
     assert connecter(client, "inconnu", "x").status_code == 401
 
 
-def test_le_dossier_avance_de_poste_en_poste(client):
+def test_le_dossier_avance_de_poste_en_poste(client, agent):
     envoyer(client, source="a", id_client="a")
     envoyer(client, latitude=12.37145, source="b", id_client="b")
     assert client.get("/api/dossiers").get_json()[0]["etape"] == "signale"
@@ -328,8 +328,8 @@ def test_l_identite_du_declarant_n_est_pas_publique(client):
     client.post("/api/signalements", json={**BON, "id_client": "temoin",
                                            "declarant_nom": "Témoin Fictif",
                                            "declarant_telephone": "+226 00 00 00 00"})
-    public = client.get("/api/dossiers/1").get_json()
-    assert "declarant_nom" not in public["signalements"][0]
+    # Sans connexion, le dossier n'est pas servi du tout (T13) : l'identité encore moins.
+    assert client.get("/api/dossiers/1").status_code == 401
     connecter(client, "agent", MOT_DE_PASSE)
     prive = client.get("/api/dossiers/1").get_json()
     assert prive["signalements"][0]["declarant_nom"] == "Témoin Fictif"
@@ -343,7 +343,7 @@ def test_les_identites_s_effacent_a_la_cloture(client):
     assert client.get("/api/dossiers/1").get_json()["signalements"][0]["declarant_telephone"] is None
 
 
-def test_superficie_et_mode_de_depot(client):
+def test_superficie_et_mode_de_depot(client, agent):
     envoyer(client, depot="caniveau", longueur_m=6, largeur_m=3, source="a", id_client="a")
     envoyer(client, latitude=12.37145, depot="caniveau", longueur_m=5, largeur_m=4,
             source="b", id_client="b")
