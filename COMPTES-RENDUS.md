@@ -61,3 +61,66 @@ l'équipe qu'un « fait » qui tombe en panne devant le jury.
     les pannes du sprint sont apparues. Je ne l'ai pas fait : c'est à l'équipe de le décider.
   - Rien n'a été installé ni modifié sur le PC ou dans le dossier du socle.
 - Commit : voir `git log` de la branche `claude/taches-t0-t1-t2-1konj2` (commit « T0 : bloqué »).
+
+## Énoncé reçu (hors tâche) — 16/11 9 h 50
+
+- Réalisé : Franck m'a transmis une photo de la feuille de l'énoncé. Je l'ai rangée telle
+  quelle dans `enonce/challenge-01-assainissement-de-ouaga.jpg` et transcrite ci-dessous.
+  Aucun développement commencé : `ENONCE.md` est vide et aucune tâche ne porte sur ce sujet.
+- Transcription (mot pour mot, sans interprétation) :
+
+  > HACKATHON DES UNIVERSITÉS 2026 · FINALE
+  > **Deux challenges pour la f…** (titre coupé par le bord de la photo)
+  > Thème de l'année : **l'Open Source**. Proposition à valider par le jury.
+  >
+  > **01 — Assainissement de Ouaga**
+  > Un outil libre d'aide à la décision, du signalement des dépotoirs sauvages jusqu'au plan
+  > de gestion de la ville, avec simulation de tous les acteurs.
+  >
+  > CE QUE L'OUTIL FAIT
+  > · Cartographie des dépotoirs et signalements vérifiés
+  > · Plan de gestion : emplacement des points de regroupement, tournées optimisées
+  > · Simulation multi-agents : ménages, pré-collecteurs, brigade Laabal, mairie
+  > · Paramètres modifiables et mis à jour (population, abonnements, camions, fréquences,
+  >   budget) pour comparer des scénarios
+  >
+  > DONNÉES
+  > Carte ouverte (OpenStreetMap, Open Buildings), signalements collectés par chaque équipe
+  > dans son secteur, paramètres de départ fixés avec la mairie. Le jury garde un jeu de test
+  > caché.
+  >
+  > ÉPREUVE EN DIRECT
+  > Le jury injecte des signalements piégés, puis change les paramètres (camions en panne,
+  > saison des pluies, nouveau quartier). Le plan doit se recalculer et rester cohérent.
+  >
+  > BIEN COMMUN
+  > La première carte ouverte des dépotoirs de Ouaga, versée dans OpenStreetMap, et un
+  > simulateur réutilisable par d'autres communes.
+  >
+  > Étiquettes : Cartographie · Optimisation · Simulation multi-agents · Mobile
+  >
+  > Bandeau du bas : CHAQUE SUJET ✓ Aucune dépendance à des données indisponibles ✓ Une
+  > épreu… (coupé)
+
+- Ce qui manque sur la photo : la fin du titre, le challenge 02 en entier, la suite du bandeau
+  du bas, et tout ce qui concerne les échéances, les livrables, les critères de notation et la
+  façon de soumettre. Il faut d'autres photos pour remplir ces parties de `ENONCE.md`.
+- À savoir, pour le coordinateur :
+  - La feuille annonce le thème « l'Open Source », alors que `CLAUDE.md` parle de
+    « souveraineté technologique ».
+  - Le socle de T1 et T2 (Keycloak, second facteur, console d'enrôlement) ne répond à aucune
+    des quatre fonctions demandées par ce challenge (carte, plan de gestion, simulation,
+    scénarios). Si l'équipe choisit le challenge 01, ces deux tâches sont à revoir avant
+    d'y passer du temps.
+  - Deux règles de `CLAUDE.md` entrent en tension avec cet énoncé et demandent une décision :
+    « données fictives uniquement » (l'énoncé demande des signalements collectés sur le
+    terrain) et « aucun service en ligne tiers » (l'énoncé demande de verser la carte dans
+    OpenStreetMap, ce qui est une publication en ligne).
+  - À télécharger tant qu'il y a du réseau, si ce challenge est retenu : l'extrait
+    OpenStreetMap de Ouagadougou, les données Open Buildings de la zone, et de quoi afficher
+    un fond de carte sans Internet. Sans cela la démonstration hors ligne n'aura pas de carte.
+  - Le PC est un i5 sans carte graphique : l'optimisation des tournées et la simulation
+    devront rester légères, d'autant que le jury fait recalculer le plan en direct.
+  - T0 reste bloquée (voir plus haut) : le relevé du PC n'est toujours pas fait.
+- Commit : sur la branche `claude/taches-t0-t1-t2-1konj2` (commit « Énoncé : photo du
+  challenge 01 »).
