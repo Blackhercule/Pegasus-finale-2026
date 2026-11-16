@@ -5,7 +5,7 @@
 }
 .acteur[data-acteur="precollecteurs"] { border-top-color: #1d4f91; }
 .acteur[data-acteur="brigade"] { border-top-color: var(--or); }
-.acteur[data-acteur="mairie"] { border-top-color: #7a2f22; }
+.acteur[data-acteur="mairie"] { border-top-color: var(--rouge); }
 .acteur h2 { margin: 0 0 .2rem; font-size: .78rem; }
 .acteur .combien { font-size: 1.7rem; font-weight: 700; margin: 0; font-variant-numeric: tabular-nums; }
 .acteur .quoi { font-size: .83rem; color: var(--gris); margin: .3rem 0 .7rem; }

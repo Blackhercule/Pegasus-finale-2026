@@ -7,8 +7,8 @@ const nombre = (v, d = 0) => (v == null ? "—"
 
 const SERIES = [
   { cle: "produit_m3", nom: "Produits", couleur: "#6c7772" },
-  { cle: "collecte_m3", nom: "Collectés par les camions", couleur: "#2f6f4e" },
-  { cle: "precollecte_m3", nom: "Ramassés par les pré-collecteurs", couleur: "#1d4f91" },
+  { cle: "collecte_m3", nom: "Collectés par les camions", couleur: "#0e6b3a" },
+  { cle: "precollecte_m3", nom: "Ramassés par les pré-collecteurs", couleur: "#c8102e" },
 ];
 
 function echapper(texte) {

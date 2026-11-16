@@ -1,7 +1,7 @@
 /* Comparaison de scénarios : on change les moyens, on voit ce que ça donne (exigence E5). */
 "use strict";
 
-const COULEURS = ["#2f6f4e", "#b8862b", "#1d4f91"];
+const COULEURS = ["#0e6b3a", "#c8102e", "#1d4f91"];
 const REGLAGES = [
   { cle: "nb_camions", nom: "Camions", min: 0, max: 100, pas: 1, defaut: 24 },
   { cle: "camions_en_panne", nom: "Camions en panne", min: 0, max: 50, pas: 1, defaut: 0 },

@@ -3,7 +3,7 @@
   flex: 1 1 150px; background: #fff; border: 1px solid var(--trait); border-radius: 10px;
   padding: .6rem .7rem; border-top: 4px solid var(--trait); position: relative;
 }
-.chaine li.mon-poste { border-top-color: var(--or); background: #fffdf6; }
+.chaine li.mon-poste { border-top-color: var(--or); background: var(--or-clair); }
 .chaine li.close { opacity: .65; }
 .chaine .nombre { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; display: block; }
 .chaine .nom { font-size: .8rem; font-weight: 600; }
@@ -12,9 +12,9 @@
 .colonnes { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
 @media (max-width: 900px) { .colonnes { grid-template-columns: 1fr; } }
 #lignes tr { cursor: pointer; }
-#lignes tr:hover { background: #f7f5ef; }
-#lignes tr.choisi { background: #eaf4ee; }
-#lignes td { border-bottom: 1px solid #efece5; }
+#lignes tr:hover { background: #f6f1e4; }
+#lignes tr.choisi { background: var(--vert-clair); }
+#lignes td { border-bottom: 1px solid #eee7d8; }
 .ligne-titre { font-weight: 700; }
 .ligne-detail { font-size: .8rem; color: var(--gris); }
 
@@ -26,12 +26,12 @@
 .vignettes figure { margin: 0; }
 .vignettes figcaption { font-size: .72rem; color: var(--gris); text-align: center; }
 audio { width: 100%; margin-bottom: .7rem; }
-.prive { border-left: 3px solid var(--or); padding-left: .7rem; background: #fffdf6; margin-bottom: .8rem; }
+.prive { border-left: 3px solid var(--or); padding-left: .7rem; background: var(--or-clair); margin-bottom: .8rem; }
 .prive h3 { font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--gris); margin: .5rem 0 .4rem; }
 .prive .avertissement { font-size: .78rem; color: var(--gris); margin: .3rem 0 .5rem; }
 
 .journal { list-style: none; margin: 0; padding: 0; font-size: .84rem; }
-.journal li { padding: .35rem 0; border-bottom: 1px solid #efece5; }
+.journal li { padding: .35rem 0; border-bottom: 1px solid #eee7d8; }
 .journal .quand { color: var(--gris); font-variant-numeric: tabular-nums; }
 .journal .qui { font-weight: 600; }
 .actions-dossier { display: grid; gap: .5rem; margin-top: .9rem; }

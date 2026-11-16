@@ -8,6 +8,7 @@ paquets npm officiels, copiés tels quels le 16/11/2026.
 | `maplibre-gl/` | `maplibre-gl` 5.24.1 | BSD-3-Clause (`LICENSE.txt`) | https://github.com/maplibre/maplibre-gl-js |
 | `pmtiles/` | `pmtiles` 4.5.0 | BSD-3-Clause | https://github.com/protomaps/PMTiles |
 | `protomaps-basemaps/` | `@protomaps/basemaps` 5.7.2 | BSD-3-Clause | https://github.com/protomaps/basemaps |
+| `polices/inter/` | `@fontsource/inter` 5.3.0 (police Inter) | OFL-1.1 pour la police, MIT pour le paquet | https://github.com/rsms/inter |
 | `polices/noto/` | `smp-noto-glyphs` 2.0.0 (police GoNotoKurrent, tirée de Noto Sans) | MIT pour le paquet, OFL-1.1 pour la police | https://github.com/digidem/styled-map-package |
 
 ## Comment les charger

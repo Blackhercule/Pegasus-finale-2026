@@ -5,7 +5,8 @@
 maplibregl.setWorkerUrl("/vendor/maplibre-gl/maplibre-gl-csp-worker.js");
 maplibregl.addProtocol("pmtiles", new pmtiles.Protocol().tile);
 
-const COULEURS = { depotoir: "#e4572e", decharge: "#8a6a3b", eau: "#3d7ea6", limite: "#1d1d1b", densite: "#2f6f4e" };
+const COULEURS = { depotoir: "#c8102e", decharge: "#6e6457", eau: "#2f7da6",
+                   limite: "#17211b", densite: "#0e6b3a" };
 const etat = (texte) => { document.getElementById("etat-chargement").textContent = texte; };
 
 /* Le style Protomaps demande trois variantes de Noto ; nous n'en embarquons qu'une, et aucune
@@ -67,7 +68,7 @@ carte.on("load", async () => {
     carte.addLayer({ id: "densite", type: "fill", source: "zones", layout: { visibility: "none" },
       paint: {
         "fill-color": ["interpolate", ["linear"], ["get", "nb_batiments"],
-          0, "#eaf2ec", 25, "#bcd9c6", 75, "#7fb996", 150, "#4b9470", 300, "#2f6f4e"],
+          0, "#e9f3ec", 25, "#b9ddc8", 75, "#79c296", 150, "#3d9a66", 300, "#0e6b3a"],
         "fill-opacity": 0.75,
       } });
 
@@ -247,21 +248,21 @@ function dessinerLePlan(plan) {
   }
   carte.addSource("tournees", { type: "geojson", data: lignes });
   carte.addLayer({ id: "tournees", type: "line", source: "tournees",
-    paint: { "line-color": "#b8862b", "line-width": 1.6, "line-opacity": 0.55 } }, "depotoirs");
+    paint: { "line-color": "#7a5c00", "line-width": 1.6, "line-opacity": 0.65 } }, "depotoirs");
 
   carte.addSource("points", { type: "geojson", data: points });
   carte.addLayer({ id: "points", type: "circle", source: "points",
     paint: {
       "circle-radius": ["interpolate", ["linear"], ["get", "m3"], 0, 4, 30, 8, 120, 13],
       /* Bleu : desservi. Rouge sombre : laissé de côté faute de camions ou de temps. */
-      "circle-color": ["case", ["get", "desservi"], "#1d4f91", "#7a2f22"],
+      "circle-color": ["case", ["get", "desservi"], "#0e6b3a", "#8d2b1e"],
       "circle-opacity": 0.8, "circle-stroke-width": 1.2, "circle-stroke-color": "#fff",
     } }, "depotoirs");
 
   carte.addSource("decharge", { type: "geojson", data: pointDecharge(plan) });
   carte.addLayer({ id: "decharge", type: "circle", source: "decharge",
-    paint: { "circle-radius": 9, "circle-color": "#1d1d1b", "circle-stroke-width": 3,
-             "circle-stroke-color": "#b8862b" } });
+    paint: { "circle-radius": 9, "circle-color": "#17211b", "circle-stroke-width": 3,
+             "circle-stroke-color": "#fcd116" } });
 
   carte.on("click", "points", (evenement) => {
     const p = evenement.features[0].properties;
