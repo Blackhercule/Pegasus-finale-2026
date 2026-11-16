@@ -130,7 +130,7 @@ Notre code est publié sous **AGPL-3.0** (`LICENSE`).
 
 ```bash
 pip install -r requirements.txt
-python -m pytest tests/ -q        # 57 tests : contrôles, pièges, plan, simulation, export
+python -m pytest tests/ -q        # 55 tests : contrôles, pièges, plan, simulation, export
 ```
 
 | Dossier | Contenu |

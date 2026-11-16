@@ -87,3 +87,6 @@ body {
 .controles .probleme .marque { color: #f0a58d; }
 .controles .nom { display: block; font-weight: 600; color: #e8eeea; }
 .controles .detail { color: #a9bdb4; }
+
+.liens { margin: .4rem 0 0; font-size: .8rem; }
+.liens a { color: var(--or); }

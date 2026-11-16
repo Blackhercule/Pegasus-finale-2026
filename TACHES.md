@@ -13,12 +13,12 @@ ne modifie pas ce fichier.
 | T3 | Données de Ouagadougou et fond de carte hors ligne | PC | **Fait** (16/11, 11 h). 526 km², 111 840 nœuds, 166 611 tronçons, 332 556 bâtiments, 440 plans d'eau, 226 sites de déchets d'OpenStreetMap, fond `fond.pmtiles` (16,7 Mo) |
 | T4 | Signalements : réception, contrôles anti-pièges, page mobile | coordinateur | **Fait**, vérifié dans un navigateur : contrôles, regroupement en dépotoirs, page mobile avec envoi différé hors ligne |
 | T5 | Carte de décision | coordinateur | **Fait**, vérifiée dans un navigateur : aucune requête vers Internet |
-| T6 | Plan de gestion : points de regroupement, tournées, cohérence | coordinateur | En cours |
-| T7 | Simulation multi-agents | coordinateur | À venir |
-| T8 | Scénarios : paramètres du jury, comparaison | coordinateur | À venir |
-| T9 | Bien commun : export OpenStreetMap, autre commune | coordinateur | À venir |
-| T10 | Installation en une commande, HTTPS, téléphones | PC | À venir, quand T6 sera là |
-| T11 | Essai complet sur le PC de l'équipe | PC | À venir |
+| T6 | Plan de gestion : points de regroupement, tournées, cohérence | coordinateur | **Fait**, vérifié dans un navigateur : recalcul en 5 s, camions en panne et saison des pluies dégradent le plan proprement |
+| T7 | Simulation multi-agents | coordinateur | **Fait** : 4 498 ménages, 224 pré-collecteurs, brigade Laabal, mairie ; 30 jours en 0,2 s, reproductible |
+| T8 | Scénarios : paramètres du jury, comparaison | coordinateur | **Fait** : page de comparaison avec tableau et graphique |
+| T9 | Bien commun : export OpenStreetMap, autre commune | coordinateur | **Fait** : export .osm des dépotoirs vérifiés, à relire avant versement ; une autre commune se prépare avec la même commande |
+| T10 | Installation en une commande, HTTPS, téléphones | PC | Écrit et poussé ; **jamais lancé sur le PC** — c'est le dernier inconnu |
+| T11 | Essai complet sur le PC de l'équipe | PC | À faire : `./installer.sh`, puis essai depuis un téléphone |
 
 **Important.** Depuis le 16/11 au matin, c'est le coordinateur qui écrit le code (les sessions de
 Claude Code se heurtaient à la limite d'utilisation). Avant de commencer quoi que ce soit : fais
