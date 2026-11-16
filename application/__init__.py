@@ -18,7 +18,9 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from .base import connexion, creer
 from .geo import Geographie
+from .plan.calcul import calculer_le_plan
 from .reglages import Reglages
+from .reseau import Reseau
 from .signalements import Controleur, Depotoirs
 
 vues = Blueprint("api", __name__)
@@ -66,6 +68,28 @@ def creer_application(reglages: Reglages = None) -> Flask:
 def reglages() -> Reglages:
     from flask import current_app
     return current_app.extensions["reglages"]
+
+
+def reseau() -> Reseau:
+    """Le réseau routier est lu une seule fois : 111 000 carrefours, c'est long à relire."""
+    from flask import current_app
+    if "reseau" not in current_app.extensions:
+        current_app.extensions["reseau"] = Reseau(current_app.extensions["reglages"].dossier_donnees)
+    return current_app.extensions["reseau"]
+
+
+def parametres_du_scenario(remplacements: dict = None) -> dict:
+    """Les paramètres de départ, avec les changements demandés par-dessus.
+
+    C'est par là que passent les modifications du jury : rien n'est écrit en dur, un paramètre
+    change et tout le plan est recalculé (exigence E11)."""
+    parametres = json.loads(json.dumps(reglages().parametres))     # copie, pour ne rien abîmer
+    for cle, valeur in (remplacements or {}).items():
+        if cle in parametres and isinstance(parametres[cle], dict) and isinstance(valeur, dict):
+            parametres[cle].update(valeur)
+        else:
+            parametres[cle] = valeur
+    return parametres
 
 
 def controleur() -> Controleur:
@@ -245,6 +269,30 @@ def carte_depotoirs():
          "properties": {k: d[k] for k in ("id", "volume_m3", "nb_signalements", "nb_sources",
                                           "premier_vu", "dernier_vu", "etat")}}
         for d in retenus]})
+
+
+@vues.route("/api/plan", methods=["GET", "POST"])
+def plan():
+    """Le plan de gestion, recalculé à chaque appel avec les paramètres donnés.
+
+    En GET : le plan de référence. En POST : le plan d'un scénario, les paramètres modifiés
+    étant envoyés dans le corps de la requête."""
+    from flask import current_app
+    remplacements = request.get_json(silent=True) if request.method == "POST" else None
+    if remplacements is not None and not isinstance(remplacements, dict):
+        return jsonify({"erreur": "Les paramètres doivent être un objet."}), 400
+    parametres = parametres_du_scenario(remplacements)
+    try:
+        resultat = calculer_le_plan(reglages(), reseau(), current_app.extensions["geographie"],
+                                    parametres, depotoirs().retenus(parametres.get("mode_strict", False)))
+    except (ValueError, KeyError, TypeError) as erreur:
+        # Un paramètre absurde envoyé par le jury ne doit pas faire tomber le serveur.
+        return jsonify({"erreur": "Plan impossible avec ces paramètres : %s" % erreur}), 400
+    resultat["parametres_utilises"] = {cle: parametres[cle] for cle in (
+        "population", "taux_abonnement", "nb_camions", "camions_en_panne", "capacite_camion_m3",
+        "heures_travail", "frequence_collecte_jours", "capacite_point_m3", "saison",
+        "budget_mensuel", "distance_max_precollecte_m")}
+    return jsonify(resultat)
 
 
 @vues.route("/api/comptes")

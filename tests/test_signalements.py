@@ -154,3 +154,44 @@ def test_un_formulaire_sans_jeton_est_refuse(agent):
 
 def test_mot_de_passe_faux(client):
     assert client.post("/api/connexion", json={"nom": "agent", "mot_de_passe": "faux"}).status_code == 401
+
+
+# ------------------------------------------------------------------ plan de gestion
+def test_le_plan_se_calcule_et_se_verifie(client):
+    plan = client.get("/api/plan").get_json()
+    assert plan["points"], "aucun point de regroupement"
+    assert plan["tournees"], "aucune tournée"
+    assert {c["nom"] for c in plan["controles"]}, "aucun contrôle de cohérence"
+    graves = [c for c in plan["controles"] if c["etat"] == "probleme"]
+    assert not graves, graves
+
+
+def test_des_camions_en_panne_degradent_le_plan_sans_le_casser(client):
+    reference = client.get("/api/plan").get_json()
+    degrade = client.post("/api/plan", json={"camions_en_panne": 20}).get_json()
+    assert len(degrade["tournees"]) < len(reference["tournees"])
+    assert len(degrade["non_desservis"]) > len(reference["non_desservis"])
+    assert not [c for c in degrade["controles"] if c["etat"] == "probleme"]
+
+
+def test_la_saison_des_pluies_ralentit_les_tournees(client):
+    seche = client.get("/api/plan").get_json()
+    pluies = client.post("/api/plan", json={"saison": "pluies"}).get_json()
+    assert len(pluies["tournees"]) < len(seche["tournees"])
+
+
+def test_un_nouveau_quartier_augmente_la_demande(client):
+    reference = client.get("/api/plan").get_json()
+    agrandi = client.post("/api/plan", json={"nouveaux_quartiers": [
+        {"longitude": -1.47, "latitude": 12.42, "rayon_m": 3000, "population": 150000}]}).get_json()
+    assert agrandi["demande"]["m3_par_jour"] > reference["demande"]["m3_par_jour"]
+
+
+@pytest.mark.parametrize("parametres", [
+    {"nb_camions": 0}, {"nb_camions": -5}, {"capacite_camion_m3": 0},
+    {"population": 0}, {"frequence_collecte_jours": 0}, {"saison": "neige"},
+    {"heures_travail": 0}, {"distance_max_precollecte_m": 0}, {"camions_en_panne": 9999},
+])
+def test_des_parametres_absurdes_ne_cassent_pas_le_serveur(client, parametres):
+    reponse = client.post("/api/plan", json=parametres)
+    assert reponse.status_code in (200, 400), reponse.get_data(as_text=True)[:200]
