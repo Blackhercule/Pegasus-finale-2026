@@ -41,6 +41,7 @@ justifie pas.
 
 L'interface est en HTML, CSS et JavaScript simples, sans étape de construction. Les
 bibliothèques JavaScript sont copiées dans `interface/vendor/` : rien n'est chargé depuis un CDN.
+Leur version, leur licence et la façon de les charger sont dans `interface/vendor/LISEZ-MOI.md`.
 
 ## Arborescence
 
@@ -71,12 +72,13 @@ rend l'outil réutilisable (E13).
 
 | Fichier | Contenu |
 |---|---|
-| `commune.json` | `nom`, `bbox` [ouest, sud, est, nord], `epsg_metrique`, date et source de l'extrait |
+| `commune.json` | `nom`, `bbox` et `emprise_avec_marge` [ouest, sud, est, nord], `epsg_metrique`, `surface_km2`, `comptes`, date et source de l'extrait |
 | `commune.geojson` | Limite de la commune (polygone) |
 | `secteurs.geojson` | Arrondissements et secteurs : propriétés `nom`, `niveau` |
-| `eau.geojson` | Plans d'eau (barrages, retenues) et lits de cours d'eau, en polygones |
-| `reseau_noeuds.csv.gz` | `id, lon, lat` |
-| `reseau_troncons.csv.gz` | `depart, arrivee, longueur_m, classe, revetu, sens_unique` — `classe` est la valeur `highway` d'OpenStreetMap, `revetu` vaut 1, 0 ou vide si inconnu |
+| `eau.geojson` | Plans d'eau (barrages, retenues), en polygones : `nom`, `intermittent`, `surface_m2` |
+| `cours_eau.geojson` | Canaux, caniveaux et cours d'eau, en lignes : `type`, `nom`. Un dépotoir au bord d'un canal est plausible : ces lignes servent à classer les priorités, pas à rejeter |
+| `reseau_noeuds.csv.gz` | `id, lon, lat` — `id` va de 0 à n−1, dans l'ordre des lignes |
+| `reseau_troncons.csv.gz` | `depart, arrivee, longueur_m, classe, revetu, sens_unique` — `classe` est la valeur `highway` d'OpenStreetMap, `revetu` vaut 1, 0 ou vide si inconnu. Si `sens_unique` vaut 0, le tronçon se parcourt aussi de `arrivee` vers `depart` |
 | `zones.geojson` | Grille de carreaux de 250 m sur la commune : `id`, `nb_batiments`, `surface_batie_m2`, `secteur` |
 | `lieux.geojson` | Points utiles : écoles, centres de santé, marchés, décharges et installations de déchets déjà cartographiées, avec `type` et `nom` |
 | `fond.pmtiles` | Fond de carte, zooms 0 à 15 |

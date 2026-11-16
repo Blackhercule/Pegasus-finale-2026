@@ -12,3 +12,8 @@ __pycache__/
 
 # Node
 node_modules/
+
+# Données brutes et outils téléchargés : hors dépôt.
+*.osm.pbf
+donnees/outils/
+telechargements/

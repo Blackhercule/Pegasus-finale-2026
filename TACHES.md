@@ -10,7 +10,7 @@ ne modifie pas ce fichier.
 | Tâche | Sujet | Où | État |
 |---|---|---|---|
 | T0, T1, T2 | Relevé du poste, socle d'identité du sprint | | Annulées : sans objet pour le challenge 01. Le relevé du poste est repris dans T3 |
-| T3 | Données de Ouagadougou et fond de carte hors ligne | PC | À faire maintenant |
+| T3 | Données de Ouagadougou et fond de carte hors ligne | PC | Scripts écrits par le coordinateur ; il reste à lancer `./preparer-ouagadougou.sh` sur le PC (Franck) |
 | T4 | Signalements : réception, contrôles anti-pièges, page mobile | cloud ou PC | À faire maintenant |
 | T5 | Carte de décision : dépotoirs, signalements, couches | cloud ou PC | Après T3 et T4 |
 | T6 | Plan de gestion : points de regroupement, tournées, cohérence | cloud ou PC | Après T3 |
@@ -24,6 +24,12 @@ T5 à T10 seront détaillées ici au fur et à mesure. Ne les commence pas avant
 ---
 
 ## T3 — Données de Ouagadougou et fond de carte hors ligne [PC]
+
+> **État au 16/11, 11 h.** La session du PC a été arrêtée par la limite d'utilisation avant
+> d'écrire le script. Le coordinateur a donc écrit et testé `donnees/preparer.py`,
+> `donnees/fond_de_carte.py` et `preparer-ouagadougou.sh`, et copié les bibliothèques de la carte
+> dans `interface/vendor/`. **Ne les réécris pas.** Il reste à lancer `./preparer-ouagadougou.sh`
+> sur le PC, ce que Franck fait à la main. La page d'essai (point 4) passe dans la tâche T5.
 
 **Pourquoi.** Rien ne fonctionne sans la carte : ni les contrôles (dans la commune ? dans un
 barrage ?), ni les tournées, ni la simulation. L'énoncé exige de ne dépendre d'aucune donnée

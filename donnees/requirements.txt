@@ -1,0 +1,6 @@
+# Préparation des données d'une commune (donnees/preparer.py).
+osmium>=4.0
+shapely>=2.0
+pyproj>=3.6
+scipy>=1.11
+numpy>=1.26
