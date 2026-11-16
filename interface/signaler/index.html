@@ -9,9 +9,29 @@
 <link rel="stylesheet" href="/signaler/style.css">
 </head>
 <body>
+<!-- Écrans d'accueil parlés. Masqués par défaut : si le JavaScript ne s'exécute pas, on
+     arrive directement sur le formulaire plutôt que sur un écran noir. -->
+<div id="accueil" class="accueil-guidage" hidden>
+  <div class="accueil-boite">
+    <p class="accueil-progression"><span id="accueil-rang">1</span> sur 4</p>
+    <p class="accueil-numero" id="accueil-numero" aria-hidden="true">1</p>
+    <h2 id="accueil-titre">Bienvenue</h2>
+    <p class="accueil-texte" id="accueil-texte"></p>
+    <button type="button" id="accueil-ecouter" class="accueil-ecouter">
+      <span aria-hidden="true">🔊</span> <span id="accueil-ecouter-mot">Réécouter</span>
+    </button>
+    <p id="accueil-etat" class="accueil-etat" aria-live="polite"></p>
+    <button type="button" id="accueil-continuer" class="accueil-continuer">Continuer</button>
+    <button type="button" id="accueil-passer" class="accueil-passer">Passer le guidage</button>
+  </div>
+</div>
+
 <header>
   <div class="entete">
     <h1>Signaler</h1>
+    <button type="button" id="revoir-accueil" class="guidage" aria-label="Revoir les messages d'accueil">
+      <span aria-hidden="true">▶</span> Accueil
+    </button>
     <button type="button" id="guidage" class="guidage" aria-pressed="false">
       <span aria-hidden="true">🔊</span> Mooré
     </button>

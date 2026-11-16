@@ -7,8 +7,25 @@ téléchargé à l'exécution — les fichiers sont servis par notre propre mach
 
 ## Ce qu'il faut enregistrer
 
-Dix fichiers, au format **MP3**, nommés exactement comme ci-dessous. Le texte français donne le
+Quatorze fichiers, au format **MP3**, nommés exactement comme ci-dessous. Le texte français donne le
 sens ; dites-le naturellement en mooré, lentement, dans un endroit calme.
+
+### Les quatre écrans d'accueil
+
+Ce sont les quatre messages qui s'enchaînent à l'ouverture de la page, avant le formulaire.
+Chacun a son écran, avec son numéro ; « Continuer » passe au suivant. Pour changer un titre
+ou un texte affiché à côté, il n'y a que la liste `ACCUEIL` en haut de `signaler.js` à modifier.
+
+| Fichier | Ce qu'il faut dire, en mooré |
+|---|---|
+| `accueil-1.mp3` | « Bonjour, bienvenue sur la plateforme d'assainissement de Ouagadougou. » |
+| `accueil-2.mp3` | « Vous pouvez signaler un tas d'ordures, ou une fuite d'eau sur une conduite. » |
+| `accueil-3.mp3` | « Touchez les grandes images, ou parlez : vous n'avez rien à écrire. » |
+| `accueil-4.mp3` | « Vous pouvez signaler sans donner votre nom ni votre numéro. Ne vous inquiétez pas, nous nous occupons du reste. » |
+
+### Le guidage étape par étape
+
+Ceux-là se déclenchent quand on touche le haut-parleur d'une étape du formulaire.
 
 | Fichier | Ce qu'il faut dire, en mooré |
 |---|---|
@@ -37,6 +54,6 @@ aucun bruit. Il n'y a donc aucun risque à n'en enregistrer que quelques-uns.
 
 ## À dire au jury
 
-Les dix messages couvrent tout le parcours, pour les deux natures de signalement. Une
+Les quatorze messages couvrent tout le parcours, pour les deux natures de signalement. Une
 personne qui ne lit pas peut signaler un dépotoir ou une fuite d'eau de bout en bout : elle
 écoute, elle touche de grands boutons illustrés, elle parle.

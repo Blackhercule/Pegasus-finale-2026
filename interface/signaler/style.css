@@ -108,3 +108,38 @@ h2 .facultatif + .parler, h2 .parler { vertical-align: middle; }
 }
 .bouton-vocal.enregistre { background: var(--rouge); border-color: var(--rouge); color: #fff; }
 #ecoute-vocal { width: 100%; margin: .6rem 0; }
+
+/* ------------------------------------------------------------------ écrans d'accueil parlés
+   Quatre écrans qui s'enchaînent à l'ouverture : chacun dit un message en mooré, et
+   « Continuer » passe au suivant. Le quatrième ouvre le formulaire. Tout est en très gros :
+   ces écrans s'adressent d'abord à quelqu'un qui ne lit pas. */
+.accueil-guidage {
+  position: fixed; inset: 0; z-index: 50; background: var(--vert);
+  display: flex; align-items: center; justify-content: center; padding: 1.2rem;
+}
+.accueil-boite { width: 100%; max-width: 420px; text-align: center; color: #fff; }
+.accueil-progression { margin: 0; font-size: .8rem; letter-spacing: .08em;
+                       text-transform: uppercase; opacity: .7; }
+.accueil-numero {
+  margin: .4rem auto .6rem; width: 5.5rem; height: 5.5rem; line-height: 5.5rem;
+  font-size: 3rem; font-weight: 700; color: var(--sur-accent); background: var(--or);
+  border-radius: 50%;
+}
+.accueil-boite h2 { color: #fff; font-size: 1.4rem; text-transform: none; letter-spacing: 0;
+                    margin: 0 0 .5rem; }
+.accueil-texte { margin: 0 0 1.2rem; font-size: 1rem; line-height: 1.5; opacity: .9; }
+.accueil-ecouter {
+  width: 100%; font: inherit; font-size: 1.05rem; font-weight: 700; padding: .9rem 1rem;
+  border-radius: 12px; border: 2px solid rgba(255, 255, 255, .5); background: transparent;
+  color: #fff; cursor: pointer; margin-bottom: .6rem;
+}
+.accueil-ecouter:active { background: rgba(255, 255, 255, .12); }
+.accueil-etat { margin: 0 0 .8rem; font-size: .85rem; min-height: 1.2em; opacity: .85; }
+.accueil-continuer {
+  width: 100%; font: inherit; font-size: 1.1rem; font-weight: 700; padding: 1rem;
+  border-radius: 12px; border: 0; background: var(--or); color: var(--sur-accent); cursor: pointer;
+}
+.accueil-passer {
+  margin-top: .9rem; background: none; border: 0; color: #fff; opacity: .75;
+  font: inherit; font-size: .9rem; text-decoration: underline; cursor: pointer; padding: .5rem;
+}

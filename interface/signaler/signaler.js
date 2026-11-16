@@ -215,6 +215,91 @@ function majSuperficie() {
 ["longueur_m", "largeur_m"].forEach((id) =>
   element(id).addEventListener("input", majSuperficie));
 
+/* ------------------------------------------------------------------ écrans d'accueil parlés
+
+   Quatre écrans s'enchaînent à l'ouverture de la page. Chacun fait entendre un message en
+   mooré, et « Continuer » passe au suivant ; après le quatrième, le formulaire s'affiche.
+   « Passer le guidage » ouvre le formulaire tout de suite.
+
+   Pour changer un titre, un texte ou un fichier, il n'y a que cette liste à modifier : les
+   écrans se fabriquent à partir d'elle, et leur nombre suit sa longueur. Les fichiers sont
+   dans /signaler/audio/moore/. Si un fichier manque, l'écran s'affiche quand même et le dit :
+   on ne bloque jamais quelqu'un qui veut signaler. */
+const ACCUEIL = [
+  { fichier: "accueil-1.mp3", titre: "Bienvenue",
+    texte: "Bienvenue sur la plateforme d'assainissement de Ouagadougou." },
+  { fichier: "accueil-2.mp3", titre: "Ce que vous pouvez signaler",
+    texte: "Un tas d'ordures, ou une fuite d'eau sur une conduite." },
+  { fichier: "accueil-3.mp3", titre: "Comment faire",
+    texte: "Touchez les grandes images, ou parlez : vous n'avez rien à écrire." },
+  { fichier: "accueil-4.mp3", titre: "Votre nom n'est pas obligatoire",
+    texte: "Vous pouvez signaler sans donner votre nom ni votre numéro." },
+];
+
+let rangAccueil = 0;
+let sonAccueil = null;
+
+function arreterLAccueil() {
+  if (sonAccueil) { sonAccueil.pause(); sonAccueil = null; }
+}
+
+/* Joue le message de l'écran courant. `automatique` distingue la lecture lancée toute seule
+   à l'arrivée sur l'écran de celle demandée par le bouton : un navigateur refuse la première
+   tant que la personne n'a rien touché, et ce refus ne doit pas ressembler à une panne. */
+function jouerLAccueil(automatique) {
+  arreterLAccueil();
+  const ecran = ACCUEIL[rangAccueil];
+  const etat = element("accueil-etat");
+  etat.textContent = "";
+  const son = new Audio("/signaler/audio/moore/" + ecran.fichier);
+  son.addEventListener("error", () => {
+    sonAccueil = null;
+    etat.textContent = "Message non enregistré pour l'instant.";
+  });
+  sonAccueil = son;
+  son.play()
+    .then(() => { etat.textContent = "Lecture en cours…"; })
+    .catch(() => {
+      sonAccueil = null;
+      // Si le fichier manque, l'événement « error » a déjà écrit le vrai motif : on ne
+      // l'écrase pas par un message qui ferait croire à un simple refus du navigateur.
+      if (etat.textContent) return;
+      etat.textContent = automatique ? "Touchez le haut-parleur pour écouter." : "";
+    });
+}
+
+function afficherLAccueil(automatique) {
+  const ecran = ACCUEIL[rangAccueil];
+  element("accueil-rang").textContent = String(rangAccueil + 1);
+  element("accueil-numero").textContent = String(rangAccueil + 1);
+  element("accueil-titre").textContent = ecran.titre;
+  element("accueil-texte").textContent = ecran.texte;
+  element("accueil-continuer").textContent =
+    rangAccueil === ACCUEIL.length - 1 ? "Commencer le signalement" : "Continuer";
+  element("accueil-ecouter-mot").textContent = "Écouter";
+  jouerLAccueil(automatique);
+}
+
+function fermerLAccueil() {
+  arreterLAccueil();
+  element("accueil").hidden = true;
+}
+
+element("accueil-ecouter").addEventListener("click", () => jouerLAccueil(false));
+element("accueil-passer").addEventListener("click", fermerLAccueil);
+element("revoir-accueil").addEventListener("click", () => ouvrirLAccueil());
+element("accueil-continuer").addEventListener("click", () => {
+  rangAccueil += 1;
+  if (rangAccueil >= ACCUEIL.length) { fermerLAccueil(); return; }
+  afficherLAccueil(true);
+});
+
+function ouvrirLAccueil() {
+  rangAccueil = 0;
+  element("accueil").hidden = false;
+  afficherLAccueil(true);
+}
+
 /* ------------------------------------------------------------------ envoi */
 function afficher(texte, genre) {
   const m = element("message");
@@ -372,6 +457,7 @@ element("guidage").setAttribute("aria-pressed", String(guidageActif));
 element("guidage").classList.toggle("actif", guidageActif);
 element("accueil-moore").hidden = !guidageActif;
 ajusterLesEtapes();
+ouvrirLAccueil();
 localiser();
 etatDuReseau();
 afficherAttente();
