@@ -20,7 +20,7 @@ import datetime
 import json
 import sqlite3
 
-from .geo import distance_m
+from .geo import distance_m, origines
 from .signalements.controles import REJET
 
 # Ampleurs, du plus petit au plus gros. L'ordre sert à trier le bordereau de l'ONEA :
@@ -99,8 +99,8 @@ class Fuites:
                 "INSERT INTO signalements (id_client, nature, latitude, longitude, precision_m,"
                 " date_observation, date_reception, ampleur, quartier, commentaire, photo, source,"
                 " statut, motifs, declarant_nom, declarant_telephone, photo_cnib, photo_visage,"
-                " message_vocal, source_position, lieu_nom)"
-                " VALUES (?,'fuite_eau',?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                " message_vocal, source_position, lieu_nom, lot)"
+                " VALUES (?,'fuite_eau',?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (examine.get("id_client"), examine.get("latitude"), examine.get("longitude"),
                  examine.get("precision_m"), examine.get("date_observation"), maintenant(),
                  examine.get("ampleur"), examine.get("quartier"), examine.get("commentaire", ""),
@@ -109,7 +109,8 @@ class Fuites:
                  examine.get("declarant_nom"), examine.get("declarant_telephone"),
                  examine.get("photo_cnib"), examine.get("photo_visage"),
                  examine.get("message_vocal"),
-                 examine.get("source_position") or "gps", examine.get("lieu_nom")))
+                 examine.get("source_position") or "gps", examine.get("lieu_nom"),
+                 examine.get("lot")))
         except sqlite3.IntegrityError:
             # Même envoi arrivé deux fois en même temps : le premier a gagné.
             self.co.rollback()
@@ -176,13 +177,13 @@ class Fuites:
         fuite. L'ampleur retenue est la PLUS GRAVE signalée — entre « ça suinte » et « la rue
         est noyée », c'est la seconde qui décide de l'urgence de l'intervention."""
         lignes = self.co.execute(
-            "SELECT latitude, longitude, source, date_observation, ampleur, quartier"
+            "SELECT latitude, longitude, source, lot, date_observation, ampleur, quartier"
             " FROM signalements WHERE fuite_id = ? AND statut <> 'rejete'", (id_fuite,)).fetchall()
         if not lignes:
             self.co.execute("DELETE FROM fuites WHERE id = ?", (id_fuite,))
             return
         milieu = lambda valeurs: sorted(valeurs)[len(valeurs) // 2]
-        sources = {l["source"] for l in lignes}
+        sources = origines(lignes)
         dates = [l["date_observation"] for l in lignes if l["date_observation"]]
         ampleurs = [l["ampleur"] for l in lignes if l["ampleur"] in URGENCE]
         ampleur = max(ampleurs, key=lambda a: URGENCE[a]) if ampleurs else None
@@ -194,7 +195,7 @@ class Fuites:
             (milieu([l["latitude"] for l in lignes]), milieu([l["longitude"] for l in lignes]),
              len(lignes), len(sources), min(dates) if dates else None,
              max(dates) if dates else None, ampleur, quartier, id_fuite))
-        # Deux appareils différents qui voient la même fuite : la confirmation vaut vérification.
+        # Deux témoins indépendants : un lot entier ne compte que pour un seul (voir origines).
         if len(sources) >= 2:
             self.co.execute("UPDATE signalements SET statut = 'verifie'"
                             " WHERE fuite_id = ? AND statut = 'recevable'", (id_fuite,))

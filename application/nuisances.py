@@ -24,7 +24,7 @@ import datetime
 import json
 import sqlite3
 
-from .geo import distance_m
+from .geo import distance_m, origines
 from .signalements.controles import REJET
 
 # Pour chaque nature : ce qu'on en dit, et surtout QUI intervient après la mairie.
@@ -144,8 +144,8 @@ class Nuisances:
                 "INSERT INTO signalements (id_client, nature, latitude, longitude, precision_m,"
                 " date_observation, date_reception, gravite, quartier, commentaire, photo,"
                 " source, statut, motifs, declarant_nom, declarant_telephone, photo_cnib,"
-                " photo_visage, message_vocal, source_position, lieu_nom)"
-                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                " photo_visage, message_vocal, source_position, lieu_nom, lot)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (examine.get("id_client"), examine.get("nature"), examine.get("latitude"),
                  examine.get("longitude"), examine.get("precision_m"),
                  examine.get("date_observation"), maintenant(), examine.get("gravite"),
@@ -155,7 +155,8 @@ class Nuisances:
                  examine.get("declarant_nom"), examine.get("declarant_telephone"),
                  examine.get("photo_cnib"), examine.get("photo_visage"),
                  examine.get("message_vocal"),
-                 examine.get("source_position") or "gps", examine.get("lieu_nom")))
+                 examine.get("source_position") or "gps", examine.get("lieu_nom"),
+                 examine.get("lot")))
         except sqlite3.IntegrityError:
             self.co.rollback()
             return self.deja_recu(examine.get("id_client")) or {
@@ -223,14 +224,14 @@ class Nuisances:
         Position au milieu (médiane) : un signalement décalé ne déplace pas le dossier. Gravité
         la PLUS forte signalée : c'est elle qui décide de l'ordre de passage du service."""
         lignes = self.co.execute(
-            "SELECT latitude, longitude, source, date_observation, gravite, quartier"
+            "SELECT latitude, longitude, source, lot, date_observation, gravite, quartier"
             " FROM signalements WHERE nuisance_id = ? AND statut <> 'rejete'",
             (id_nuisance,)).fetchall()
         if not lignes:
             self.co.execute("DELETE FROM nuisances WHERE id = ?", (id_nuisance,))
             return
         milieu = lambda valeurs: sorted(valeurs)[len(valeurs) // 2]
-        sources = {l["source"] for l in lignes}
+        sources = origines(lignes)
         dates = [l["date_observation"] for l in lignes if l["date_observation"]]
         gravites = [l["gravite"] for l in lignes if l["gravite"] in URGENCE]
         gravite = max(gravites, key=lambda g: URGENCE[g]) if gravites else None

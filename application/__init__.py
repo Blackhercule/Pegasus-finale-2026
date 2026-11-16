@@ -453,11 +453,17 @@ def recevoir_lot():
         lignes = lire_lot()
     except Exception as erreur:
         return jsonify({"erreur": f"Lot illisible : {erreur}"}), 400
+    # Tous les signalements de CE fichier partagent une seule origine. Sans cela, un lot
+    # contenant deux lignes au même endroit avec deux « source » différentes se confirmerait
+    # tout seul, et entrerait dans le plan puis dans l'export OpenStreetMap sans qu'aucun
+    # second témoin existe. Voir application/geo.py, fonction origines().
+    lot = "lot-" + secrets.token_hex(8)
     resultats = []
     for brut in lignes[:5000]:
         try:
-            resultats.append(depotoirs().enregistrer(controleur().examiner(brut),
-                                                     verifier_rafale=False))
+            examine = controleur().examiner(brut)
+            examine["lot"] = lot
+            resultats.append(depotoirs().enregistrer(examine, verifier_rafale=False))
         except Exception as erreur:        # une ligne piégée n'interrompt pas le lot
             resultats.append({"statut": "rejete", "motifs": ["format_invalide"], "detail": str(erreur)[:200]})
     comptes = {}

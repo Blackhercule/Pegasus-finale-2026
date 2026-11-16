@@ -30,6 +30,9 @@ CREATE TABLE IF NOT EXISTS signalements (
     fuite_id          INTEGER REFERENCES fuites(id),
     ampleur           TEXT,                 -- fuites : suintement | jet | inondation
     quartier          TEXT,                 -- quartier donné par le déclarant
+    -- Identifiant de l'envoi groupé d'où vient ce signalement, s'il en vient d'un. Tous les
+    -- signalements d'un même lot partagent une seule origine : voir « origines » plus bas.
+    lot               TEXT,
     nuisance_id       INTEGER REFERENCES nuisances(id),
     gravite           TEXT,                 -- nuisances : leger | moyen | grave
     -- Dépôt : à même le sol, dans un bac, dans un caniveau… et dimensions estimées au sol.

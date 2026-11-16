@@ -51,3 +51,17 @@ class Geographie:
         # L'arbre donne les quelques polygones dont le rectangle englobant contient le point ;
         # on ne teste vraiment que ceux-là.
         return any(self.eaux[i].contains(point) for i in self._arbre_eaux.query(point))
+
+
+def origines(lignes) -> set:
+    """Qui a confirmé, en comptant un envoi groupé pour UN SEUL témoin.
+
+    Deux appareils différents qui voient le même tas valent vérification : c'est notre meilleure
+    protection contre un signalement inventé. Mais un fichier envoyé en lot peut contenir autant
+    de « sources » différentes que son auteur veut écrire — il se confirmerait donc tout seul, et
+    entrerait dans le plan puis dans l'export OpenStreetMap sans qu'aucun second témoin existe.
+
+    D'où la règle : tout ce qui vient d'un même lot compte pour une origine unique, celle du lot.
+    Un signalement envoyé depuis un téléphone garde la sienne.
+    """
+    return {(l["lot"] if l["lot"] else l["source"]) for l in lignes}

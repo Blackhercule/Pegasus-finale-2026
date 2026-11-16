@@ -9,7 +9,7 @@ import datetime
 import json
 import sqlite3
 
-from ..geo import distance_m
+from ..geo import distance_m, origines
 from .controles import REJET
 
 
@@ -43,8 +43,8 @@ class Depotoirs:
                 "INSERT INTO signalements (id_client, latitude, longitude, precision_m, date_observation,"
                 " date_reception, taille, volume_m3, type, commentaire, photo, source, statut, motifs,"
                 " depot, longueur_m, largeur_m, declarant_nom, declarant_telephone, photo_cnib,"
-                " photo_visage, message_vocal, source_position, lieu_nom)"
-                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                " photo_visage, message_vocal, source_position, lieu_nom, lot)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (examine.get("id_client"), examine.get("latitude"), examine.get("longitude"),
                  examine.get("precision_m"), examine.get("date_observation"), recu,
                  examine.get("taille"), examine.get("volume_m3"), examine.get("type"),
@@ -53,7 +53,8 @@ class Depotoirs:
                  examine.get("depot"), examine.get("longueur_m"), examine.get("largeur_m"),
                  examine.get("declarant_nom"), examine.get("declarant_telephone"),
                  examine.get("photo_cnib"), examine.get("photo_visage"), examine.get("message_vocal"),
-                 examine.get("source_position") or "gps", examine.get("lieu_nom")))
+                 examine.get("source_position") or "gps", examine.get("lieu_nom"),
+                 examine.get("lot")))
         except sqlite3.IntegrityError:
             # Le même envoi est arrivé deux fois en même temps (réseau qui revient, double appui) :
             # le premier a gagné, on renvoie simplement son résultat.
@@ -117,7 +118,7 @@ class Depotoirs:
         Position et volume sont pris au milieu (médiane) : un signalement très décalé ou un
         volume exagéré ne déplace pas le dépotoir ni ne gonfle le total."""
         lignes = self.co.execute(
-            "SELECT latitude, longitude, volume_m3, source, date_observation, depot,"
+            "SELECT latitude, longitude, volume_m3, source, lot, date_observation, depot,"
             " longueur_m, largeur_m FROM signalements"
             " WHERE depotoir_id = ? AND statut <> 'rejete'", (id_depotoir,)).fetchall()
         if not lignes:
@@ -125,7 +126,7 @@ class Depotoirs:
             return
         milieu = lambda valeurs: sorted(valeurs)[len(valeurs) // 2]
         volumes = [l["volume_m3"] for l in lignes if l["volume_m3"] is not None]
-        sources = {l["source"] for l in lignes}
+        sources = origines(lignes)
         dates = [l["date_observation"] for l in lignes if l["date_observation"]]
         # Superficie estimée : longueur × largeur, quand elles ont été données.
         surfaces = [l["longueur_m"] * l["largeur_m"] for l in lignes
@@ -140,7 +141,8 @@ class Depotoirs:
              milieu(volumes) if volumes else 0, len(lignes), len(sources),
              min(dates) if dates else None, max(dates) if dates else None,
              round(milieu(surfaces), 1) if surfaces else None, depot, id_depotoir))
-        # Deux appareils différents qui voient le même tas : la confirmation vaut vérification.
+        # Deux témoins indépendants qui voient le même tas : la confirmation vaut
+        # vérification. Un lot entier ne compte que pour un seul témoin (voir origines).
         if len(sources) >= 2:
             self.co.execute("UPDATE signalements SET statut = 'verifie'"
                             " WHERE depotoir_id = ? AND statut = 'recevable'", (id_depotoir,))

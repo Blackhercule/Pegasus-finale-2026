@@ -146,6 +146,23 @@ signalements à `verifie`.
 | `POST /api/signalements/<id>/verifier` et `/rejeter` | Décision d'un agent connecté |
 | `GET /api/export/osm` | Dépotoirs vérifiés au format `.osm`, pour relecture avant versement (E12) |
 
+## Qui confirme un signalement
+
+Un dépotoir est **vérifié** quand deux témoins indépendants l'ont signalé. C'est notre
+meilleure protection contre un signalement inventé, et elle commande deux choses : l'entrée
+dans l'export OpenStreetMap (qui ne prend que les dépotoirs vérifiés) et le plan en mode
+strict.
+
+Mais celui qui envoie un lot écrit lui-même le champ `source` de chaque ligne. Il lui suffirait
+d'en mettre deux différentes au même endroit pour se confirmer tout seul. D'où la règle, dans
+`application/geo.py`, fonction `origines()` : **tout ce qui vient d'un même lot compte pour une
+seule origine**, celle du lot. Chaque envoi à `POST /api/signalements/lot` reçoit un
+identifiant, rangé dans la colonne `lot` des signalements ; un signalement venu d'un téléphone
+n'en a pas et garde sa propre source.
+
+Un lot vaut donc un témoin : combiné à un signalement venu d'un téléphone, il en fait bien deux.
+Trois lignes d'un même fichier au même endroit n'en font qu'un.
+
 ## Fuites d'eau (ONEA)
 
 Une fuite sur une conduite d'eau potable n'est pas un tas à ramasser : elle n'entre jamais dans

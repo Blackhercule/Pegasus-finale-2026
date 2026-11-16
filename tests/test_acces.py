@@ -217,3 +217,49 @@ def test_les_essais_de_mot_de_passe_sont_limites(client):
         client.post("/api/connexion", json={"nom": "inconnu", "mot_de_passe": "x"})
     assert client.post("/api/connexion",
                        json={"nom": "inconnu", "mot_de_passe": "x"}).status_code == 429
+
+
+# --------------------------------------------------------- un lot ne se confirme pas tout seul
+# « Deux appareils différents qui voient le même tas » est notre meilleure protection contre un
+# signalement inventé : c'est elle qui décide qu'un dépotoir est vérifié, donc qu'il entre dans
+# le plan de ramassage ET dans l'export vers OpenStreetMap. Or celui qui envoie un lot écrit
+# lui-même le champ « source » de chaque ligne : sans précaution, il lui suffit d'en mettre deux
+# différentes au même endroit pour se confirmer tout seul.
+
+MEME_ENDROIT = {"latitude": 12.3714, "longitude": -1.5197, "taille": "grand"}
+
+
+def test_un_lot_ne_peut_pas_confirmer_son_propre_depotoir(agent):
+    lot = [{**MEME_ENDROIT, "source": "temoin-a", "id_client": "l1"},
+           {**MEME_ENDROIT, "source": "temoin-b", "id_client": "l2"},
+           {**MEME_ENDROIT, "source": "temoin-c", "id_client": "l3"}]
+    assert agent.post("/api/signalements/lot", json=lot).status_code == 200
+
+    depotoirs = agent.get("/api/depotoirs").get_json()["features"]
+    assert len(depotoirs) == 1, "les trois lignes sont bien au même endroit"
+    d = depotoirs[0]["properties"]
+    # Trois lignes reçues, mais un seul témoin : le fichier lui-même.
+    assert d["nb_signalements"] == 3
+    assert d["nb_sources"] == 1
+    # Et il ne part donc pas dans OpenStreetMap, qui ne prend que les dépotoirs vérifiés.
+    assert "waste_dump_site" not in agent.get("/api/export/osm").get_data(as_text=True)
+
+
+def test_un_vrai_second_temoin_confirme_toujours(agent):
+    """La protection ne doit pas casser le cas normal : deux téléphones, deux témoins."""
+    agent.post("/api/signalements", json={**MEME_ENDROIT, "source": "tel-a", "id_client": "v1"})
+    agent.post("/api/signalements", json={**MEME_ENDROIT, "source": "tel-b", "id_client": "v2"})
+    d = agent.get("/api/depotoirs").get_json()["features"][0]["properties"]
+    assert d["nb_sources"] == 2
+    # Confirmé par deux témoins : il est vérifié, donc exportable vers OpenStreetMap.
+    assert "waste_dump_site" in agent.get("/api/export/osm").get_data(as_text=True)
+
+
+def test_un_lot_et_un_telephone_se_confirment(agent):
+    """Un lot vaut un témoin : avec un signalement venu d'un téléphone, cela fait bien deux."""
+    agent.post("/api/signalements/lot",
+               json=[{**MEME_ENDROIT, "source": "fichier", "id_client": "m1"}])
+    agent.post("/api/signalements", json={**MEME_ENDROIT, "source": "tel-a", "id_client": "m2"})
+    d = agent.get("/api/depotoirs").get_json()["features"][0]["properties"]
+    assert d["nb_sources"] == 2
+    assert "waste_dump_site" in agent.get("/api/export/osm").get_data(as_text=True)
