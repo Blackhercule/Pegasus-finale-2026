@@ -17,6 +17,7 @@ from flask import (Blueprint, Flask, abort, jsonify, request, send_file,
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .base import connexion, creer
+from .export_osm import en_osm, note_d_export
 from .geo import Geographie
 from .plan import repartir_la_demande
 from .plan.calcul import calculer_le_plan, charger_geojson
@@ -361,6 +362,26 @@ def comparer():
             "controles_en_defaut": [c["nom"] for c in resultat["controles"] if c["etat"] != "ok"],
         })
     return jsonify({"jours": jours, "scenarios": resultats})
+
+
+@vues.route("/api/export/osm")
+def export_osm():
+    """Les dépotoirs VÉRIFIÉS, au format d'OpenStreetMap, à relire avant tout versement (E12)."""
+    verifies = [d for d in depotoirs().retenus(mode_strict=True)]
+    for d in verifies:
+        ligne = depotoirs().co.execute(
+            "SELECT type, dernier_vu FROM signalements s JOIN depotoirs dd ON dd.id = s.depotoir_id"
+            " WHERE dd.id = ? ORDER BY s.id DESC LIMIT 1", (d["id"],)).fetchone()
+        d["type"] = ligne["type"] if ligne else "autre"
+    fichier = en_osm(verifies, note_d_export(len(verifies)))
+    return app_reponse_osm(fichier, len(verifies))
+
+
+def app_reponse_osm(contenu: str, nombre: int):
+    from flask import Response
+    return Response(contenu, mimetype="application/xml", headers={
+        "Content-Disposition": 'attachment; filename="depotoirs-verifies.osm"',
+        "X-Depotoirs": str(nombre)})
 
 
 @vues.route("/api/comptes")

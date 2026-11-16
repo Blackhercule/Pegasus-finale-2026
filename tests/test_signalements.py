@@ -237,3 +237,28 @@ def test_une_comparaison_mal_formee_est_refusee(client):
     for envoi in ({}, {"scenarios": []}, {"scenarios": [{}]}, {"scenarios": "deux"},
                   {"scenarios": [{}, {}, {}, {}, {}]}):
         assert client.post("/api/comparer", json=envoi).status_code == 400
+
+
+# ------------------------------------------------------------------ bien commun
+def test_l_export_osm_ne_contient_que_les_depotoirs_verifies(client):
+    envoyer(client, source="telephone-a", id_client="a")               # recevable seulement
+    reponse = client.get("/api/export/osm")
+    assert reponse.status_code == 200
+    assert b"<node" not in reponse.data, "un dépotoir non vérifié est sorti dans l'export"
+
+    envoyer(client, latitude=12.37145, source="telephone-b", id_client="b")   # deuxième source
+    reponse = client.get("/api/export/osm")
+    contenu = reponse.data.decode("utf-8")
+    assert contenu.count("<node") == 1
+    assert 'k="amenity" v="waste_dump_site"' in contenu
+    assert "RELIRE" in contenu, "l'export doit rappeler qu'une relecture humaine est obligatoire"
+
+
+def test_l_export_osm_echappe_les_valeurs(client):
+    """Un commentaire hostile ne doit pas pouvoir casser le fichier XML."""
+    from application.export_osm import en_osm
+    contenu = en_osm([{"latitude": 12.37, "longitude": -1.51, "type": '"><script>',
+                       "dernier_vu": "2026-11-16"}])
+    assert "<script>" not in contenu.replace("&lt;script&gt;", "")
+    import xml.etree.ElementTree as ET
+    ET.fromstring(contenu)              # doit rester un XML valide
