@@ -12,10 +12,12 @@ COPY interface ./interface
 COPY donnees ./donnees
 
 # L'application tourne sans privilèges ; la base et les photos vont dans un volume.
-RUN useradd --uid 991 --no-create-home outil \
-    && mkdir -p /travail && chown 991:991 /travail
+# Le dossier personnel doit exister et lui appartenir : gunicorn y ouvre une socket de contrôle.
+RUN useradd --uid 991 --create-home --home-dir /home/outil outil \
+    && mkdir -p /travail && chown 991:991 /travail /home/outil
 USER 991
-ENV BASE_DONNEES=/travail/signalements.sqlite DOSSIER_PHOTOS=/travail/photos
+ENV HOME=/home/outil \
+    BASE_DONNEES=/travail/signalements.sqlite DOSSIER_PHOTOS=/travail/photos
 
 EXPOSE 8000
 # Un seul processus, plusieurs fils : le réseau routier (111 000 carrefours) n'est ainsi

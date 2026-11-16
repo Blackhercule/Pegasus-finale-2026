@@ -83,14 +83,31 @@ fi
 # que curl.exe ne sait pas écrire sous Git Bash.
 echo -n "Attente du démarrage"
 pret=""
-for _ in $(seq 1 90); do
+for _ in $(seq 1 60); do
   if docker compose cp caddy:/data/caddy/pki/authorities/local/root.crt ./ca-assainissement.crt >/dev/null 2>&1 \
      && curl -fsS --ssl-no-revoke --cacert ca-assainissement.crt "$ADRESSE/api/comptes" >/dev/null 2>&1; then
     pret="oui"; echo " : prêt."; break
   fi
   echo -n "."; sleep 4
 done
-[ -n "$pret" ] || { echo " : toujours pas prêt. Regardez « docker compose logs »."; exit 1; }
+if [ -z "$pret" ]; then
+  # On dit ce qui bloque, au lieu d'un simple « échec ».
+  echo " : pas prêt."
+  if ! docker compose ps --status running --services 2>/dev/null | grep -q application; then
+    echo "L'application ne tourne pas. Ses dernières lignes de journal :"
+    docker compose logs --tail=25 application
+  elif ! docker compose exec -T application python -c "import urllib.request;
+urllib.request.urlopen('http://127.0.0.1:8000/api/comptes', timeout=10)" >/dev/null 2>&1; then
+    echo "L'application tourne mais ne répond pas encore. Ses dernières lignes de journal :"
+    docker compose logs --tail=25 application
+  else
+    echo "L'application répond, mais pas à travers le HTTPS : c'est Caddy ou le certificat."
+    docker compose logs --tail=25 caddy
+  fi
+  echo
+  echo "Relancez ./installer.sh après avoir corrigé, ou envoyez ces lignes au coordinateur."
+  exit 1
+fi
 
 cat <<FIN
 
