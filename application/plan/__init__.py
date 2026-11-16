@@ -242,7 +242,8 @@ def calculer_les_tournees(arrets: list, depot: dict, reseau, parametres: dict) -
 
     passages = decouper_les_arrets(arrets, capacite)
     noeuds = [depot["noeud"]] + [p["noeud"] for p in passages]
-    durees = reseau.durees(noeuds, noeuds, vitesses, saison)
+    # Un seul passage de Dijkstra donne les durées ET les chemins rue par rue (T15).
+    durees, predecesseurs = reseau.durees_et_chemins(noeuds, vitesses, saison)
     durees = np.nan_to_num(durees, posinf=1e7, nan=1e7)
     service = minutes_par_arret * 60
     vidage = minutes_vidage * 60
@@ -313,6 +314,7 @@ def calculer_les_tournees(arrets: list, depot: dict, reseau, parametres: dict) -
                 "volume_m3": round(sum(passages[i - 1]["m3"] for i in ordre), 2),
                 "duree_min": round(tournee["duree"] / 60, 1),
                 "distance_km": round(distance_tournee(ordre, passages, depot) / 1000, 1),
+                "geometrie": geometrie_tournee(ordre, noeuds, predecesseurs, passages, depot, reseau),
             })
     resultat.sort(key=lambda t: (t["camion"], t["rotation"]))
 
@@ -322,6 +324,36 @@ def calculer_les_tournees(arrets: list, depot: dict, reseau, parametres: dict) -
     return {"tournees": resultat, "non_desservis": non_desservis, "camions_disponibles": camions,
             "injoignables": injoignables, "tournees_abandonnees": len(abandonnees),
             "heures_par_camion": [round(c / 3600, 1) for c in charges]}
+
+
+# Tolérance de simplification du tracé, en degrés (≈ 5 m) : une rue droite garde ses deux
+# bouts au lieu de dizaines de points, et le plan reste léger à envoyer au navigateur.
+TOLERANCE_TRACE = 0.00005
+
+
+def geometrie_tournee(ordre, noeuds, predecesseurs, passages, depot, reseau):
+    """Le tracé d'une tournée par les rues : décharge → arrêts dans l'ordre → décharge.
+
+    Chaque étape est le plus court chemin du réseau (le même que celui des durées), encadré
+    par les positions exactes de ses deux bouts, puis simplifié À PART pour que chaque arrêt
+    reste un sommet du tracé. Renvoie une liste de [lon, lat], ou None si une étape n'a pas
+    de chemin : la carte reliera alors les arrêts en trait droit, plutôt que de ne rien montrer."""
+    from shapely.geometry import LineString
+
+    # Indices dans `noeuds` : 0 est la décharge, i est le passage i.
+    suite = [0] + list(ordre) + [0]
+    position = lambda k: ((depot["longitude"], depot["latitude"]) if k == 0
+                          else (passages[k - 1]["longitude"], passages[k - 1]["latitude"]))
+    trace = [[round(c, 6) for c in position(0)]]
+    for a, b in zip(suite, suite[1:]):
+        trajet = reseau.chemin(predecesseurs[a], noeuds[a], noeuds[b])
+        if trajet is None:
+            return None
+        etape = [position(a)] + [tuple(reseau.noeuds[n]) for n in trajet] + [position(b)]
+        if len(etape) > 2:
+            etape = list(LineString(etape).simplify(TOLERANCE_TRACE).coords)
+        trace.extend([round(x, 6), round(y, 6)] for x, y in etape[1:])
+    return trace
 
 
 def fusionner(ti, tj, i, j, durees, service):

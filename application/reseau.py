@@ -98,3 +98,42 @@ class Reseau:
             distances = dijkstra(graphe, directed=True, indices=paquet)
             resultat[debut:debut + len(paquet)] = distances[:, cibles]
         return resultat
+
+    # ------------------------------------------------------------------ chemins (T15)
+    def durees_et_chemins(self, noeuds, vitesses: dict, saison: str, par_paquet: int = 48):
+        """Comme `durees(noeuds, noeuds)`, mais garde aussi, du même appel à Dijkstra, le
+        « prédécesseur » de chaque nœud du réseau : le nœud d'où l'on y arrive par le plus
+        court chemin. Remonter les prédécesseurs depuis l'arrivée redonne la route rue par rue.
+
+        Renvoie (durées, prédécesseurs). Les prédécesseurs occupent nb_départs × nb_nœuds
+        entiers (environ 77 Mo pour 173 arrêts à Ouagadougou) : ils ne vivent que le temps du
+        calcul d'un plan."""
+        noeuds = np.asarray(noeuds, dtype=int)
+        graphe = self.graphe(vitesses, saison)
+        durees = np.empty((len(noeuds), len(noeuds)), dtype=np.float32)
+        predecesseurs = np.empty((len(noeuds), self.nb_noeuds), dtype=np.int32)
+        for debut in range(0, len(noeuds), par_paquet):
+            paquet = noeuds[debut:debut + par_paquet]
+            distances, preds = dijkstra(graphe, directed=True, indices=paquet,
+                                        return_predecessors=True)
+            durees[debut:debut + len(paquet)] = distances[:, noeuds]
+            predecesseurs[debut:debut + len(paquet)] = preds
+        return durees, predecesseurs
+
+    @staticmethod
+    def chemin(predecesseurs_du_depart, depart: int, arrivee: int):
+        """Les nœuds du plus court chemin, du départ à l'arrivée ; None s'il n'y en a pas.
+
+        `predecesseurs_du_depart` est la ligne de `durees_et_chemins` pour ce départ. SciPy
+        y met -9999 là où aucun chemin n'arrive."""
+        if depart == arrivee:
+            return [depart]
+        trajet = [arrivee]
+        while trajet[-1] != depart:
+            precedent = int(predecesseurs_du_depart[trajet[-1]])
+            if precedent < 0 or len(trajet) > len(predecesseurs_du_depart):
+                return None                       # pas de chemin (ou données incohérentes)
+            trajet.append(precedent)
+        trajet.reverse()
+        return trajet
+

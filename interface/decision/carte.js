@@ -196,8 +196,11 @@ function tourneesEnLignes(plan) {
   return { type: "FeatureCollection", features: plan.tournees.map((t) => ({
     type: "Feature",
     properties: { camion: t.camion, rotation: t.rotation, volume: t.volume_m3, duree: t.duree_min },
+    // T15 : le tracé par les rues, calculé par le serveur. S'il manque (aucun chemin trouvé),
+    // on garde le trait droit d'arrêt en arrêt : la tournée reste visible.
     geometry: { type: "LineString",
-                coordinates: [depart, ...t.etapes.map((e) => [e.longitude, e.latitude]), depart] },
+                coordinates: t.geometrie && t.geometrie.length > 1 ? t.geometrie
+                  : [depart, ...t.etapes.map((e) => [e.longitude, e.latitude]), depart] },
   })) };
 }
 
