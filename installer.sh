@@ -68,14 +68,38 @@ if [ -n "$CHANGEMENT_ADRESSE" ]; then
   echo "Nouvelle adresse : $CHANGEMENT_ADRESSE (signalements et certificat conservés)."
 fi
 
+port_voulu="${PORT_HTTPS:-}"
 set -a; . ./.env; set +a
+if [ -n "$port_voulu" ] && [ "$port_voulu" != "$PORT_HTTPS" ]; then
+  sed -i.precedent -e "s#^PORT_HTTPS=.*#PORT_HTTPS=$port_voulu#" .env
+  rm -f .env.precedent
+  PORT_HTTPS="$port_voulu"
+  echo "Nouveau port : $PORT_HTTPS."
+fi
 ADRESSE="https://$DOMAINE:$PORT_HTTPS"
+
+# Un autre conteneur occupe-t-il déjà notre port ? (la messagerie du sprint utilisait le 8443)
+occupant=$(docker ps --filter "publish=$PORT_HTTPS" --format "{{.Names}}" 2>/dev/null \
+           | grep -v "^assainissement-ouaga" || true)
+if [ -n "$occupant" ]; then
+  echo "Le port $PORT_HTTPS est déjà pris par : $occupant"
+  echo "Arrêtez-le (rien n'est effacé, il redémarre avec « docker compose start ») :"
+  echo "    docker stop $occupant"
+  echo "Ou choisissez un autre port :  PORT_HTTPS=8444 ./installer.sh"
+  exit 1
+fi
 
 echo "Construction et démarrage (la première fois : quelques minutes)…"
 if ! docker compose up -d --build; then
-  # Le jour de la présentation, sans Internet : les images déjà construites suffisent.
-  echo "Reconstruction impossible (pas d'Internet ?) : démarrage avec les images existantes…"
-  docker compose up -d
+  # Deux causes possibles : pas d'Internet pour reconstruire, ou un port occupé. Dans le
+  # second cas, repartir sans rien dire donnerait un démarrage à moitié fait.
+  if docker compose up -d 2>&1 | tee /tmp/assainissement-demarrage.txt | grep -qi "already allocated\|port is already"; then
+    echo "Le port $PORT_HTTPS est occupé. Voyez quel programme le tient :"
+    echo "    docker ps --filter publish=$PORT_HTTPS"
+    echo "Ou choisissez un autre port :  PORT_HTTPS=8444 ./installer.sh"
+    exit 1
+  fi
+  echo "(Reconstruction impossible — pas d'Internet ? — démarrage avec les images existantes.)"
 fi
 
 # --ssl-no-revoke : sous Windows, curl veut vérifier la révocation auprès d'un service extérieur ;
