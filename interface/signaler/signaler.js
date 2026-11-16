@@ -12,7 +12,8 @@ const GUIDAGE = "guidage-moore";
 /* Guidage parlé en mooré, pour qui ne lit pas le français. Ce sont de vrais enregistrements
    rangés dans /signaler/audio/moore/ : aucune synthèse vocale, donc rien à télécharger et une
    prononciation juste. Si un fichier manque, la page fonctionne comme avant, en silence. */
-const AUDIOS = ["bienvenue", "position", "taille", "depot", "photo", "vocal", "identite", "merci"];
+const AUDIOS = ["bienvenue", "nature", "position", "taille", "depot", "ampleur",
+                "photo", "vocal", "identite", "merci"];
 let guidageActif = false;
 let lecture = null;
 
@@ -183,6 +184,26 @@ function groupeDeChoix(id) {
 const tailleChoisie = groupeDeChoix("taille");
 const typeChoisi = groupeDeChoix("type");
 const depotChoisi = groupeDeChoix("depot");
+const ampleurChoisie = groupeDeChoix("ampleur");
+const natureChoisie = groupeDeChoix("nature");
+
+/* Un tas d'ordures et une fuite d'eau ne se décrivent pas pareil : on n'affiche que les
+   étapes qui servent. Les autres sont retirées de la page, donc elles ne sont pas non plus
+   comptées dans la numérotation des étapes (voir la feuille de style). */
+function ajusterLesEtapes() {
+  const nature = natureChoisie();
+  document.querySelectorAll("[data-pour]").forEach((bloc) => {
+    bloc.hidden = bloc.dataset.pour !== nature;
+  });
+  const fuite = nature === "fuite_eau";
+  element("titre-photo").textContent = fuite ? "Photo de la fuite" : "Photo du tas";
+  element("commentaire").placeholder = fuite
+    ? "Ou écrivez ici : la rue, le repère, depuis quand l'eau coule…"
+    : "Ou écrivez ici : repère, rue, depuis quand…";
+  element("envoyer").textContent = fuite
+    ? "Signaler la fuite à la mairie" : "Enregistrer le signalement";
+}
+element("nature").addEventListener("click", ajusterLesEtapes);
 
 /* Superficie : on la montre pendant la saisie, pour que la personne voie ce qu'elle déclare. */
 function majSuperficie() {
@@ -263,35 +284,41 @@ async function viderLAttente() {
 
 element("formulaire").addEventListener("submit", async (evenement) => {
   evenement.preventDefault();
-  if (!position) { afficher("Position inconnue : impossible d'enregistrer le dépotoir.", "erreur"); return; }
+  if (!position) { afficher("Position inconnue : impossible d'enregistrer le signalement.", "erreur"); return; }
   const bouton = element("envoyer");
   bouton.disabled = true;
-  const signalement = {
-    champs: {
-      id_client: identifiantUnique(),
-      latitude: position.latitude, longitude: position.longitude,
-      precision_m: Math.round(position.precision_m),
-      date_observation: new Date().toISOString(),
-      taille: tailleChoisie(), type: typeChoisi(), depot: depotChoisi(),
-      longueur_m: element("longueur_m").value, largeur_m: element("largeur_m").value,
-      commentaire: element("commentaire").value, source: pseudonyme(),
-      declarant_nom: element("declarant_nom").value,
-      declarant_telephone: element("declarant_telephone").value,
-    },
-    photo: null,
+  const nature = natureChoisie();
+  const communs = {
+    id_client: identifiantUnique(),
+    nature,
+    latitude: position.latitude, longitude: position.longitude,
+    precision_m: Math.round(position.precision_m),
+    date_observation: new Date().toISOString(),
+    commentaire: element("commentaire").value, source: pseudonyme(),
+    declarant_nom: element("declarant_nom").value,
+    declarant_telephone: element("declarant_telephone").value,
   };
+  const propres = nature === "fuite_eau"
+    ? { ampleur: ampleurChoisie(), quartier: element("quartier").value }
+    : { taille: tailleChoisie(), type: typeChoisi(), depot: depotChoisi(),
+        longueur_m: element("longueur_m").value, largeur_m: element("largeur_m").value };
+  const signalement = { champs: { ...communs, ...propres }, photo: null };
   try {
     const resultat = await envoyer({ ...signalement, ...photos, message_vocal: messageVocal });
     if (resultat.statut !== "rejete") jouer("merci");
+    const reussi = nature === "fuite_eau"
+      ? "Fuite signalée. La mairie la transmettra à l'ONEA. Merci !"
+      : "Signalement enregistré. Merci !";
     afficher(resultat.statut === "rejete"
       ? "Signalement enregistré mais écarté : " + (resultat.motifs || []).join(", ")
-      : "Signalement enregistré. Merci !", resultat.statut === "rejete" ? "erreur" : "succes");
+      : reussi, resultat.statut === "rejete" ? "erreur" : "succes");
   } catch {
     mettreEnAttente(signalement);          // sans réseau : il partira tout seul
     afficher("Pas de réseau : le signalement est gardé et partira automatiquement.", "attente");
   } finally {
     bouton.disabled = false;
     element("commentaire").value = "";
+    element("quartier").value = "";
     Object.keys(photos).forEach((cle) => { photos[cle] = null; });
     messageVocal = null;
     ["apercu", "apercu-cnib", "apercu-visage", "ecoute-vocal"].forEach((id) => {
@@ -328,7 +355,7 @@ document.querySelectorAll(".parler").forEach((bouton) =>
   bouton.addEventListener("click", () => jouer(bouton.dataset.audio, true)));
 
 /* Une étape que l'on commence se fait lire à voix haute, quand le guidage est allumé. */
-["taille", "depot"].forEach((id) =>
+["nature", "taille", "depot", "ampleur"].forEach((id) =>
   element(id).addEventListener("click", () => jouer(id)));
 element("photo").addEventListener("click", () => jouer("photo"));
 element("enregistrer").addEventListener("click", () => jouer("vocal"));
@@ -344,6 +371,7 @@ guidageActif = stockage.lire(GUIDAGE, false) === true;
 element("guidage").setAttribute("aria-pressed", String(guidageActif));
 element("guidage").classList.toggle("actif", guidageActif);
 element("accueil-moore").hidden = !guidageActif;
+ajusterLesEtapes();
 localiser();
 etatDuReseau();
 afficherAttente();

@@ -25,6 +25,11 @@ CREATE TABLE IF NOT EXISTS signalements (
     statut            TEXT NOT NULL,
     motifs            TEXT NOT NULL DEFAULT '',
     depotoir_id       INTEGER REFERENCES depotoirs(id),
+    -- Ce qui est signalé : un tas d'ordures, ou une fuite sur une conduite d'eau (ONEA).
+    nature            TEXT NOT NULL DEFAULT 'ordures',
+    fuite_id          INTEGER REFERENCES fuites(id),
+    ampleur           TEXT,                 -- fuites : suintement | jet | inondation
+    quartier          TEXT,                 -- quartier donné par le déclarant
     -- Dépôt : à même le sol, dans un bac, dans un caniveau… et dimensions estimées au sol.
     depot             TEXT,
     longueur_m        REAL,
@@ -68,6 +73,35 @@ CREATE TABLE IF NOT EXISTS journal_dossier (
     detail      TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS i_journal_depotoir ON journal_dossier(depotoir_id);
+
+-- Fuites sur le réseau d'eau potable. Elles ne vont pas dans les tournées des camions : elles
+-- sont transmises à l'ONEA, qui seul intervient sur ses conduites. Une fuite qui coule des
+-- jours fait une mare, et une mare dans un quartier, ce sont des moustiques et une chaussée
+-- qui se creuse : c'est pourquoi l'assainissement s'en occupe.
+CREATE TABLE IF NOT EXISTS fuites (
+    id              INTEGER PRIMARY KEY,
+    latitude        REAL NOT NULL,
+    longitude       REAL NOT NULL,
+    quartier        TEXT,
+    ampleur         TEXT,                           -- suintement | jet | inondation
+    nb_signalements INTEGER NOT NULL DEFAULT 0,
+    nb_sources      INTEGER NOT NULL DEFAULT 0,
+    premier_vu      TEXT,
+    dernier_vu      TEXT,
+    etat            TEXT NOT NULL DEFAULT 'active', -- active | reparee
+    etape           TEXT NOT NULL DEFAULT 'signale',
+    reference_onea  TEXT                            -- numéro rendu par l'ONEA à la transmission
+);
+CREATE TABLE IF NOT EXISTS journal_fuite (
+    id        INTEGER PRIMARY KEY,
+    fuite_id  INTEGER NOT NULL REFERENCES fuites(id) ON DELETE CASCADE,
+    date      TEXT NOT NULL,
+    poste     TEXT NOT NULL,                        -- mairie | onea
+    auteur    TEXT NOT NULL,
+    etape     TEXT NOT NULL,
+    detail    TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS i_journal_fuite ON journal_fuite(fuite_id);
 """
 
 
@@ -84,10 +118,17 @@ def connexion(chemin: str) -> sqlite3.Connection:
 AJOUTS = {
     "signalements": [("depot", "TEXT"), ("longueur_m", "REAL"), ("largeur_m", "REAL"),
                      ("declarant_nom", "TEXT"), ("declarant_telephone", "TEXT"),
-                     ("photo_cnib", "TEXT"), ("photo_visage", "TEXT"), ("message_vocal", "TEXT")],
+                     ("photo_cnib", "TEXT"), ("photo_visage", "TEXT"), ("message_vocal", "TEXT"),
+                     ("nature", "TEXT NOT NULL DEFAULT 'ordures'"), ("fuite_id", "INTEGER"),
+                     ("ampleur", "TEXT"), ("quartier", "TEXT")],
     "depotoirs": [("etape", "TEXT NOT NULL DEFAULT 'signale'"), ("surface_m2", "REAL"),
                   ("depot", "TEXT")],
 }
+
+
+INDEX_APRES_AJOUTS = (
+    "CREATE INDEX IF NOT EXISTS i_signalements_fuite ON signalements(fuite_id)",
+)
 
 
 def creer(chemin: str) -> None:
@@ -99,4 +140,8 @@ def creer(chemin: str) -> None:
             for nom, genre in colonnes:
                 if nom not in existantes:
                     co.execute(f"ALTER TABLE {table} ADD COLUMN {nom} {genre}")
+        # Ces index portent sur des colonnes ajoutées après coup : ils se créent une fois les
+        # colonnes en place, sinon une base déjà installée refuserait de s'ouvrir.
+        for index in INDEX_APRES_AJOUTS:
+            co.execute(index)
     co.close()

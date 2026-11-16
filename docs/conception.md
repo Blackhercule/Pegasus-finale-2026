@@ -146,6 +146,59 @@ signalements à `verifie`.
 | `POST /api/signalements/<id>/verifier` et `/rejeter` | Décision d'un agent connecté |
 | `GET /api/export/osm` | Dépotoirs vérifiés au format `.osm`, pour relecture avant versement (E12) |
 
+## Fuites d'eau (ONEA)
+
+Une fuite sur une conduite d'eau potable n'est pas un tas à ramasser : elle n'entre jamais dans
+les tournées des camions. Elle suit sa propre chaîne, et c'est l'ONEA qui intervient.
+
+```
+  signalée  ──►  transmise à l'ONEA  ──►  réparée        (+ classée sans suite, par la mairie)
+ (habitant)      (agent de la mairie)      (ONEA)
+```
+
+**Pourquoi c'est dans l'outil.** L'eau qui coule des jours fait une mare : moustiques, chaussée
+qui se creuse, et le jus des tas d'ordures emporté dans les caniveaux. C'est de l'assainissement.
+La mairie ne touchant pas aux conduites, l'outil reçoit, fait confirmer, transmet, et trace.
+
+**Ce qui est partagé avec les dépotoirs**, et volontairement : la même page de signalement, les
+mêmes contrôles de position et de date (`Controleur._position`, `_date`, `_precision`), le même
+principe de regroupement (deux appareils confirment), la même règle sur l'identité facultative
+du déclarant, le même journal daté et signé.
+
+**Ce qui diffère** :
+
+| | Dépotoir | Fuite |
+|---|---|---|
+| Rayon de regroupement | `rayon_regroupement_m` (paramètre) | 40 m, en dur : une fuite est un point sur une conduite |
+| Grandeur décrite | taille, volume, superficie, mode de dépôt | ampleur : `suintement`, `jet`, `inondation` |
+| Agrégation | médiane (position, volume, superficie) | médiane pour la position, **maximum** pour l'ampleur |
+| Chaîne | 4 étapes, 3 postes | 2 étapes, 2 postes |
+| Sortie | tournées des camions, export `.osm` | bordereau CSV pour l'ONEA |
+
+L'ampleur retenue est la plus grave signalée, et non la médiane : entre « ça suinte » et « la
+rue est noyée », c'est la seconde qui décide de l'urgence de l'intervention.
+
+Table `fuites` : `id`, `latitude`, `longitude`, `quartier`, `ampleur`, `nb_signalements`,
+`nb_sources`, `premier_vu`, `dernier_vu`, `etat` (`active` | `reparee`), `etape`,
+`reference_onea` (le numéro que l'ONEA rend à la transmission). Table `journal_fuite` : qui, 
+quand, quoi. Les signalements de fuite vivent dans la table `signalements`, distingués par
+`nature = 'fuite_eau'` et rattachés par `fuite_id`.
+
+Le quartier est **donné par le déclarant**, pas déduit : l'extrait OpenStreetMap utilisé ne
+contient pas les limites des quartiers de Ouagadougou. Le plan de réseau de l'ONEA étant rangé
+par quartier et non par coordonnées, c'est le renseignement le plus utile du bordereau.
+
+| Méthode et adresse | Rôle |
+|---|---|
+| `POST /api/signalements` avec `nature=fuite_eau` | Un signalement de fuite — même adresse que les ordures |
+| `GET /api/fuites` | Liste, triée par gravité ; `?pour_moi=1` filtre sur le poste connecté |
+| `GET /api/fuites/carte` | GeoJSON des fuites non réparées |
+| `GET /api/fuites/chaine` | Étapes, ampleurs et comptes |
+| `GET /api/fuites/<id>` | Détail et journal ; l'identité du déclarant seulement si agent connecté |
+| `POST /api/fuites/<id>/avancer` | Un cran, par le poste attendu seulement (`mairie` puis `onea`) |
+| `POST /api/fuites/<id>/classer` | Sans suite, mairie seulement |
+| `GET /api/export/onea` | Bordereau CSV des fuites à transmettre (`?tout=1` pour toutes) |
+
 ## Plan de gestion
 
 1. **Demande.** Chaque carreau de `zones.geojson` reçoit une population proportionnelle à sa

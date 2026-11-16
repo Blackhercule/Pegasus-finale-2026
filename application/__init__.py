@@ -19,6 +19,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from .base import connexion, creer
 from .dossiers import CHAINE, POSTES, Dossiers, ErreurDossier
 from .export_osm import en_osm, note_d_export
+from .fuites import AMPLEUR_NOMS, CHAINE_EAU, ErreurFuite, Fuites
 from .geo import Geographie
 from .plan import repartir_la_demande
 from .plan.calcul import calculer_le_plan, charger_geojson
@@ -129,6 +130,14 @@ def dossiers() -> Dossiers:
     return g.dossiers
 
 
+def fuites() -> Fuites:
+    from flask import current_app, g
+    depotoirs()                       # ouvre la connexion si besoin
+    if "fuites" not in g:
+        g.fuites = Fuites(g.co, current_app.extensions["reglages"].parametres)
+    return g.fuites
+
+
 def agent_requis(vue=None, postes=None):
     """Seul un agent connecté agit, et seulement depuis le poste qui en a le droit."""
     def decorateur(vue):
@@ -228,7 +237,12 @@ def recevoir():
         for _, (cle, _genre, _prive) in FICHIERS_JOINTS.items():
             if brut.get(cle):
                 examine[cle] = brut[cle]
-    resultat = depotoirs().enregistrer(examine)
+    # Une fuite d'eau suit sa propre chaîne (mairie → ONEA) : elle n'entre pas dans les
+    # tournées des camions, et ne devient donc jamais un dépotoir.
+    if examine.get("nature") == "fuite_eau":
+        resultat = fuites().enregistrer(examine)
+    else:
+        resultat = depotoirs().enregistrer(examine)
     return jsonify(resultat), 201 if resultat["nouveau"] else 200
 
 
@@ -484,6 +498,97 @@ def classer_dossier(identifiant):
 def effacer_identites(identifiant):
     """Efface les pièces d'identité d'un dossier clos : elles n'ont plus de raison d'être là."""
     return jsonify({"signalements_nettoyes": dossiers().effacer_identites(identifiant)})
+
+
+# --------------------------------------------------------------------- fuites d'eau (ONEA)
+
+@vues.route("/api/fuites/chaine")
+def chaine_eau():
+    """Les étapes de la chaîne d'une fuite, et combien de dossiers y sont."""
+    return jsonify({"etapes": CHAINE_EAU, "ampleurs": AMPLEUR_NOMS,
+                    "comptes": fuites().comptes_par_etape(), "resume": fuites().comptes()})
+
+
+@vues.route("/api/fuites")
+def lister_fuites():
+    poste = session.get("poste")
+    etape = request.args.get("etape")
+    pour_moi = request.args.get("pour_moi") in ("1", "oui", "true")
+    return jsonify(fuites().liste(etape=etape, poste=poste if pour_moi else None))
+
+
+@vues.route("/api/fuites/carte")
+def carte_fuites():
+    """Les fuites non réparées, en GeoJSON, pour la carte de décision."""
+    entites = [{"type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [f["longitude"], f["latitude"]]},
+                "properties": {"id": f["id"], "ampleur": f["ampleur"] or "inconnue",
+                               "quartier": f["quartier"], "etape": f["etape"],
+                               "etape_nom": f["etape_nom"],
+                               "nb_signalements": f["nb_signalements"]}}
+               for f in fuites().carte()]
+    return jsonify({"type": "FeatureCollection", "features": entites})
+
+
+@vues.route("/api/fuites/<int:identifiant>")
+def detail_fuite(identifiant):
+    try:
+        # L'identité facultative du déclarant n'est servie qu'aux agents connectés.
+        return jsonify(fuites().detail(identifiant, avec_declarants=bool(session.get("agent"))))
+    except ErreurFuite as erreur:
+        return jsonify({"erreur": str(erreur)}), 404
+
+
+@vues.route("/api/fuites/<int:identifiant>/avancer", methods=["POST"])
+@agent_requis(postes=("mairie", "onea"))
+def avancer_fuite(identifiant):
+    envoi = request.get_json(silent=True) or {}
+    try:
+        return jsonify(fuites().avancer(identifiant, session["poste"], session["agent"],
+                                        str(envoi.get("detail", ""))))
+    except ErreurFuite as erreur:
+        return jsonify({"erreur": str(erreur)}), 400
+
+
+@vues.route("/api/fuites/<int:identifiant>/classer", methods=["POST"])
+@agent_requis(postes=("mairie",))
+def classer_fuite(identifiant):
+    envoi = request.get_json(silent=True) or {}
+    try:
+        return jsonify(fuites().classer(identifiant, session["poste"], session["agent"],
+                                        str(envoi.get("motif", ""))))
+    except ErreurFuite as erreur:
+        return jsonify({"erreur": str(erreur)}), 400
+
+
+@vues.route("/api/export/onea")
+def export_onea():
+    """Le bordereau des fuites à transmettre à l'ONEA, en CSV.
+
+    Pourquoi un fichier et non un envoi automatique : l'outil ne sort pas de la machine
+    (exigence E14), et l'ONEA n'a pas d'interface publique où déposer un signalement. Un agent
+    de la mairie imprime ce bordereau ou l'envoie, et note en retour le numéro que l'ONEA lui
+    donne. C'est exactement ce que font les deux services aujourd'hui, en plus traçable."""
+    a_transmettre = request.args.get("tout") not in ("1", "oui", "true")
+    lignes = fuites().liste(etape="signale" if a_transmettre else None, limite=1000)
+    tampon = io.StringIO()
+    # Point-virgule : c'est ce qu'attend un tableur configuré en français.
+    plume = csv.writer(tampon, delimiter=";")
+    plume.writerow(["Reference", "Quartier", "Ampleur", "Latitude", "Longitude",
+                    "Premier signalement", "Dernier signalement", "Nombre de signalements",
+                    "Appareils distincts", "Etape", "Reference ONEA"])
+    for f in lignes:
+        plume.writerow([f"FUITE-{f['id']:05d}", f["quartier"] or "non précisé",
+                        f["ampleur"] or "non précisée",
+                        round(f["latitude"], 6), round(f["longitude"], 6),
+                        f["premier_vu"] or "", f["dernier_vu"] or "",
+                        f["nb_signalements"], f["nb_sources"], f["etape_nom"],
+                        f["reference_onea"] or ""])
+    contenu = "﻿" + tampon.getvalue()          # BOM : les accents s'affichent dans Excel
+    return contenu, 200, {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": 'attachment; filename="bordereau-fuites-onea.csv"',
+        "X-Fuites": str(len(lignes))}
 
 
 @vues.route("/api/export/osm")

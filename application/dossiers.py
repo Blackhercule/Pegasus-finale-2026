@@ -53,6 +53,7 @@ POSTES = {
     "mairie": "Mairie — confirmation et programmation",
     "brigade": "Brigade Laabal — constat sur place",
     "collecte": "Équipe de collecte — ramassage",
+    "onea": "ONEA — réparation des conduites d'eau",
 }
 
 

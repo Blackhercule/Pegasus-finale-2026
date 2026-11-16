@@ -13,9 +13,10 @@ challenge 01.
 
 | Étape | Ce qu'on obtient |
 |---|---|
-| **Signaler** | Une page qui s'ouvre sur n'importe quel téléphone : position, photo, taille et superficie du tas, mode de dépôt. On peut **parler plutôt qu'écrire**, et se faire **guider en mooré**. Elle fonctionne **sans réseau** et envoie toute seule au retour de la connexion. |
+| **Signaler** | Une page qui s'ouvre sur n'importe quel téléphone : un **tas d'ordures** (position, photo, taille et superficie, mode de dépôt) ou une **fuite d'eau** (ampleur, quartier). On peut **parler plutôt qu'écrire**, et se faire **guider en mooré**. Elle fonctionne **sans réseau** et envoie toute seule au retour de la connexion. |
 | **Vérifier** | Chaque signalement passe treize contrôles automatiques. Un signalement douteux est écarté **avec son motif**, jamais silencieusement. Un agent tranche les cas limites. |
 | **Traiter** | Le signalement ouvre un dossier qui passe de poste en poste : mairie, brigade Laabal, mairie, équipe de collecte. Chaque passage est daté et signé. |
+| **Alerter l'ONEA** | Une fuite d'eau suit sa propre chaîne : la mairie la confirme et la transmet, l'ONEA déclare la réparation. Un **bordereau CSV** se télécharge pour l'envoi. |
 | **Cartographier** | Les dépotoirs sur un fond OpenStreetMap servi par notre propre machine, avec les 226 sites de déchets déjà cartographiés. |
 | **Planifier** | Emplacement des points de regroupement, tournées des camions, jour par jour, avec les coûts. |
 | **Simuler** | Ménages, pré-collecteurs, brigade Laabal et mairie, un jour par pas de temps. |
@@ -37,6 +38,31 @@ Un poste ne peut faire avancer un dossier que d'un cran, et seulement quand c'es
 la brigade qui tenterait de confirmer à la place de la mairie se voit refuser. La mairie peut
 aussi classer un dossier sans suite, avec son motif. Tout est relisible dans le journal du
 dossier : qui, quand, quoi.
+
+## Les fuites d'eau, et pourquoi elles sont là
+
+Une conduite percée n'est pas qu'une affaire de plomberie. L'eau qui coule des jours durant
+fait une mare : la mare élève des moustiques, détrempe la chaussée qui se creuse, et quand elle
+atteint un tas d'ordures elle en emporte le jus dans les caniveaux. C'est un problème
+d'assainissement avant d'être un problème de réseau.
+
+Mais la mairie ne touche pas aux conduites : seul l'**ONEA** intervient sur les siennes. L'outil
+fait donc ce qu'il peut faire — recevoir, confirmer, transmettre, et garder la trace :
+
+```
+  signalée  ──►  transmise à l'ONEA  ──►  réparée
+ (habitant)      (agent de la mairie)      (ONEA)
+```
+
+Une fuite n'entre **jamais** dans les tournées des camions : ce n'est pas un tas à ramasser.
+Elle est signalée depuis la même page que les dépotoirs, elle subit **les mêmes contrôles** de
+position et de date, et deux appareils qui signalent la même fuite la confirment, comme pour un
+dépotoir. L'ampleur retenue est la **plus grave** signalée : entre « ça suinte » et « la rue est
+noyée », c'est la seconde qui décide de l'urgence.
+
+Le bordereau à transmettre est un fichier **CSV** (`/api/export/onea`), pas un envoi
+automatique : l'outil ne sort pas de la machine (E14), et l'ONEA n'a pas d'interface publique de
+dépôt. Un agent l'imprime ou l'envoie, et note en retour le numéro que l'ONEA lui donne.
 
 ## Parler plutôt qu'écrire, et comprendre le mooré
 
@@ -80,6 +106,7 @@ L'installateur affiche ensuite les adresses et le mot de passe de l'agent :
 
 - carte de décision : `https://<adresse>:8443/decision/`
 - postes de travail (mairie, brigade, collecte) : `https://<adresse>:8443/decision/dossiers.html`
+- fuites d'eau (mairie et ONEA) : `https://<adresse>:8443/decision/fuites.html`
 - vérification des signalements : `https://<adresse>:8443/decision/verifier.html`
 - simulation : `https://<adresse>:8443/decision/simulation.html`
 - comparaison de scénarios : `https://<adresse>:8443/decision/scenarios.html`
@@ -127,7 +154,7 @@ briques éprouvées, on les adapte à Ouagadougou, et on ajoute ce qui manque en
 
 ## Face à l'épreuve en direct
 
-- **Signalements piégés** : ils passent par les mêmes contrôles que les autres. Coordonnées
+- **Signalements piégés** : ils passent par les mêmes contrôles que les autres, fuites d'eau comprises. Coordonnées
   inversées, point (0, 0), latitude « abc », date dans le futur, volume négatif ou démesuré,
   point au milieu d'un barrage, mille copies du même tas, champs manquants ou de mauvais type,
   fichier audio qui n'en est pas un : chacun est écarté avec son motif, et le serveur ne tombe
@@ -174,12 +201,12 @@ Notre code est publié sous **AGPL-3.0** (`LICENSE`).
 
 ```bash
 pip install -r requirements.txt
-python -m pytest tests/ -q        # 64 tests : contrôles, pièges, chaîne, plan, simulation, export
+python -m pytest tests/ -q        # 79 tests : contrôles, pièges, chaînes, plan, simulation, fuites, export
 ```
 
 | Dossier | Contenu |
 |---|---|
-| `application/` | l'application : `geo.py`, `reseau.py`, `signalements/`, `dossiers.py`, `plan/`, `simulation/` |
+| `application/` | l'application : `geo.py`, `reseau.py`, `signalements/`, `dossiers.py`, `fuites.py`, `plan/`, `simulation/` |
 | `interface/` | pages servies telles quelles ; `vendor/` contient les bibliothèques de la carte |
 | `donnees/` | préparation des données d'une commune et fichiers produits |
 | `tests/` | tests automatisés, dont le jeu de 42 signalements piégés |

@@ -6,7 +6,7 @@ maplibregl.setWorkerUrl("/vendor/maplibre-gl/maplibre-gl-csp-worker.js");
 maplibregl.addProtocol("pmtiles", new pmtiles.Protocol().tile);
 
 const COULEURS = { depotoir: "#c8102e", decharge: "#6e6457", eau: "#2f7da6",
-                   limite: "#1b2033", densite: "#1e2455" };
+                   limite: "#1b2033", densite: "#1e2455", fuite: "#0090d4" };
 const etat = (texte) => { document.getElementById("etat-chargement").textContent = texte; };
 
 /* Le style Protomaps demande trois variantes de Noto ; nous n'en embarquons qu'une, et aucune
@@ -85,6 +85,15 @@ carte.on("load", async () => {
       paint: {
         "circle-radius": ["interpolate", ["linear"], ["get", "volume_m3"], 0, 6, 20, 11, 100, 20],
         "circle-color": COULEURS.depotoir, "circle-opacity": 0.75,
+        "circle-stroke-width": 2, "circle-stroke-color": "#fff",
+      } });
+
+    carte.addSource("fuites", { type: "geojson", data: await json("/api/fuites/carte") });
+    carte.addLayer({ id: "fuites", type: "circle", source: "fuites",
+      paint: {
+        "circle-radius": ["match", ["get", "ampleur"],
+          "inondation", 11, "jet", 8, "suintement", 6, 6],
+        "circle-color": COULEURS.fuite, "circle-opacity": 0.85,
         "circle-stroke-width": 2, "circle-stroke-color": "#fff",
       } });
 

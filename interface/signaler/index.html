@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#12302a">
-<title>Signaler un dépotoir</title>
+<meta name="theme-color" content="#1e2455">
+<title>Signaler — assainissement de Ouaga</title>
 <link rel="manifest" href="/signaler/manifeste.webmanifest">
 <link rel="stylesheet" href="/signaler/style.css">
 </head>
 <body>
 <header>
   <div class="entete">
-    <h1>Signaler un dépotoir</h1>
+    <h1>Signaler</h1>
     <button type="button" id="guidage" class="guidage" aria-pressed="false">
       <span aria-hidden="true">🔊</span> Mooré
     </button>
@@ -27,14 +27,25 @@
 
   <form id="formulaire" novalidate>
     <section class="carte-bloc">
-      <h2>1 · Position <button type="button" class="parler" data-audio="position"
+      <h2>Que signalez-vous ? <button type="button" class="parler" data-audio="nature"
+          aria-label="Écouter la consigne">🔊</button></h2>
+      <div class="choix nature" id="nature" role="radiogroup" aria-label="Que signalez-vous">
+        <button type="button" data-valeur="ordures" class="actif">
+          <span class="icone" aria-hidden="true">🗑</span>Un tas d'ordures<small>dépotoir sauvage</small></button>
+        <button type="button" data-valeur="fuite_eau">
+          <span class="icone" aria-hidden="true">💧</span>Une fuite d'eau<small>conduite percée (ONEA)</small></button>
+      </div>
+    </section>
+
+    <section class="carte-bloc">
+      <h2>Position <button type="button" class="parler" data-audio="position"
           aria-label="Écouter la consigne">🔊</button></h2>
       <p id="position" class="position">Recherche de votre position…</p>
       <button type="button" id="relancer-position" class="secondaire">Relancer la localisation</button>
     </section>
 
-    <section class="carte-bloc">
-      <h2>2 · Taille du tas <button type="button" class="parler" data-audio="taille"
+    <section class="carte-bloc" data-pour="ordures">
+      <h2>Taille du tas <button type="button" class="parler" data-audio="taille"
           aria-label="Écouter la consigne">🔊</button></h2>
       <div class="choix" id="taille" role="radiogroup" aria-label="Taille du tas">
         <button type="button" data-valeur="petit"><span class="icone">▪</span>Petit<small>un sac</small></button>
@@ -53,8 +64,8 @@
       </details>
     </section>
 
-    <section class="carte-bloc">
-      <h2>3 · Où sont les ordures ? <button type="button" class="parler" data-audio="depot"
+    <section class="carte-bloc" data-pour="ordures">
+      <h2>Où sont les ordures ? <button type="button" class="parler" data-audio="depot"
           aria-label="Écouter la consigne">🔊</button></h2>
       <div class="choix compact" id="depot" role="radiogroup" aria-label="Où sont les ordures">
         <button type="button" data-valeur="plein_air" class="actif">À même le sol</button>
@@ -66,8 +77,25 @@
       </div>
     </section>
 
-    <section class="carte-bloc">
-      <h2>4 · Type de déchets</h2>
+    <section class="carte-bloc" data-pour="fuite_eau" hidden>
+      <h2>Quelle est l'ampleur ? <button type="button" class="parler" data-audio="ampleur"
+          aria-label="Écouter la consigne">🔊</button></h2>
+      <div class="choix" id="ampleur" role="radiogroup" aria-label="Ampleur de la fuite">
+        <button type="button" data-valeur="suintement"><span class="icone" aria-hidden="true">💦</span>Ça suinte<small>le sol est humide</small></button>
+        <button type="button" data-valeur="jet" class="actif"><span class="icone" aria-hidden="true">🚿</span>Ça gicle<small>un jet d'eau sort</small></button>
+        <button type="button" data-valeur="inondation"><span class="icone" aria-hidden="true">🌊</span>C'est inondé<small>la rue est noyée</small></button>
+      </div>
+    </section>
+
+    <section class="carte-bloc" data-pour="fuite_eau" hidden>
+      <h2>Dans quel quartier ? <span class="facultatif">(conseillé)</span></h2>
+      <p class="aide">Le nom du quartier aide l'ONEA à trouver la conduite : son plan de réseau
+        est rangé par quartier, pas par coordonnées.</p>
+      <input type="text" id="quartier" maxlength="80" placeholder="Tanghin, Dassasgho, Nioko II…">
+    </section>
+
+    <section class="carte-bloc" data-pour="ordures">
+      <h2>Type de déchets</h2>
       <div class="choix compact" id="type" role="radiogroup" aria-label="Type de déchets">
         <button type="button" data-valeur="menager" class="actif">Ménagers</button>
         <button type="button" data-valeur="gravats">Gravats</button>
@@ -77,7 +105,7 @@
     </section>
 
     <section class="carte-bloc">
-      <h2>5 · Photo du tas <span class="facultatif">(conseillé)</span>
+      <h2><span id="titre-photo">Photo du tas</span> <span class="facultatif">(conseillé)</span>
         <button type="button" class="parler" data-audio="photo" aria-label="Écouter la consigne">🔊</button></h2>
       <label class="bouton-photo" for="photo">Prendre une photo</label>
       <input type="file" id="photo" accept="image/*" capture="environment" hidden>
@@ -85,7 +113,7 @@
     </section>
 
     <section class="carte-bloc">
-      <h2>6 · Parler plutôt qu'écrire <span class="facultatif">(facultatif)</span>
+      <h2>Parler plutôt qu'écrire <span class="facultatif">(facultatif)</span>
         <button type="button" class="parler" data-audio="vocal" aria-label="Écouter la consigne">🔊</button></h2>
       <p class="aide">Dites où se trouve le tas et depuis quand. Vous pouvez parler en mooré,
         en dioula ou en français : un agent de la mairie vous écoutera.</p>
@@ -97,7 +125,7 @@
     </section>
 
     <section class="carte-bloc">
-      <h2>7 · Vous identifier <span class="facultatif">(facultatif)</span>
+      <h2>Vous identifier <span class="facultatif">(facultatif)</span>
         <button type="button" class="parler" data-audio="identite" aria-label="Écouter la consigne">🔊</button></h2>
       <p class="aide">Le signalement fonctionne <strong>sans donner votre nom</strong>. Ne
         remplissez cette partie que si vous acceptez d'être témoin dans une procédure : la
@@ -132,8 +160,8 @@
     <button type="button" id="envoyer-attente" class="secondaire">Envoyer maintenant</button>
   </section>
 
-  <p class="mentions">Sans la partie 7, aucun nom ni numéro n'est enregistré : seulement le
-    lieu, la taille et la photo du dépotoir.</p>
+  <p class="mentions">Sans l'étape « Vous identifier », aucun nom ni numéro n'est enregistré :
+    seulement le lieu, ce que vous avez vu, et la photo.</p>
 </main>
 
 <script src="/signaler/signaler.js"></script>

@@ -21,4 +21,4 @@
 #journal { font-size: .82rem; margin-top: .7rem; }
 #journal td, #journal th { padding: .3rem .5rem; text-align: right; }
 #journal td:first-child, #journal th:first-child { text-align: left; }
-details summary { cursor: pointer; color: var(--vert); font-weight: 600; margin-top: 1rem; }
+details summary { cursor: pointer; color: var(--panneau); font-weight: 700; margin-top: 1rem; }

@@ -168,10 +168,11 @@ class Depotoirs:
 
     # ------------------------------------------------------------------ lecture
     def liste(self, statut: str = None, limite: int = 500) -> list:
-        requete = "SELECT * FROM signalements"
+        # Seuls les tas d'ordures : les fuites d'eau ont leur propre page et leur propre chaîne.
+        requete = "SELECT * FROM signalements WHERE nature = 'ordures'"
         valeurs = []
         if statut:
-            requete += " WHERE statut = ?"
+            requete += " AND statut = ?"
             valeurs.append(statut)
         requete += " ORDER BY id DESC LIMIT ?"
         valeurs.append(limite)
@@ -190,7 +191,8 @@ class Depotoirs:
             " ORDER BY d.volume_m3 DESC", statuts)]
 
     def comptes(self) -> dict:
-        lignes = self.co.execute("SELECT statut, COUNT(*) n FROM signalements GROUP BY statut").fetchall()
+        lignes = self.co.execute("SELECT statut, COUNT(*) n FROM signalements"
+                                 " WHERE nature = 'ordures' GROUP BY statut").fetchall()
         comptes = {l["statut"]: l["n"] for l in lignes}
         (comptes["depotoirs"],) = self.co.execute("SELECT COUNT(*) FROM depotoirs WHERE etat = 'actif'").fetchone()
         return comptes

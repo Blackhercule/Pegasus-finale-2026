@@ -19,6 +19,8 @@ services:
       BRIGADE_MOT_DE_PASSE: ${BRIGADE_MOT_DE_PASSE:-}
       COLLECTE_NOM: ${COLLECTE_NOM:-collecte}
       COLLECTE_MOT_DE_PASSE: ${COLLECTE_MOT_DE_PASSE:-}
+      ONEA_NOM: ${ONEA_NOM:-onea}
+      ONEA_MOT_DE_PASSE: ${ONEA_MOT_DE_PASSE:-}
       SECRET_SESSION: ${SECRET_SESSION:?à définir dans .env}
     volumes:
       - travail:/travail

@@ -7,19 +7,24 @@ téléchargé à l'exécution — les fichiers sont servis par notre propre mach
 
 ## Ce qu'il faut enregistrer
 
-Huit fichiers, au format **MP3**, nommés exactement comme ci-dessous. Le texte français donne le
+Dix fichiers, au format **MP3**, nommés exactement comme ci-dessous. Le texte français donne le
 sens ; dites-le naturellement en mooré, lentement, dans un endroit calme.
 
 | Fichier | Ce qu'il faut dire, en mooré |
 |---|---|
-| `bienvenue.mp3` | « Bonjour, bienvenue sur la plateforme d'assainissement. Vous pouvez dire où se trouve le tas d'ordures et dans quel quartier. Donner votre nom n'est pas obligatoire. » |
+| `bienvenue.mp3` | « Bonjour, bienvenue sur la plateforme d'assainissement. Vous pouvez dire où se trouve le tas d'ordures, ou bien une fuite d'eau, et dans quel quartier. Donner votre nom n'est pas obligatoire. » |
+| `nature.mp3` | « Que voulez-vous signaler ? Un tas d'ordures, ou une fuite d'eau sur une conduite ? Touchez l'image qui correspond. » |
 | `position.mp3` | « Nous cherchons l'endroit où vous êtes. Sortez à l'air libre et patientez un instant. » |
 | `taille.mp3` | « Quelle est la taille du tas ? Un sac, une brouette, une charrette, ou un camion ? » |
 | `depot.mp3` | « Où sont les ordures ? À même le sol, dans un bac, dans un caniveau, dans une fosse, ou au bord de l'eau ? » |
+| `ampleur.mp3` | « Quelle est l'ampleur de la fuite ? L'eau suinte seulement, elle gicle, ou bien la rue est inondée ? » |
 | `photo.mp3` | « Prenez une photo du tas d'ordures. » |
 | `vocal.mp3` | « Appuyez sur le bouton et dites où se trouve le tas, et depuis combien de temps il est là. Parlez en mooré si vous préférez. » |
 | `identite.mp3` | « Si vous acceptez d'être témoin, préparez votre CNIB pour une photo, puis positionnez bien le téléphone pour vous prendre en photo. Ne vous inquiétez pas, nous nous occupons du reste. Cette partie n'est pas obligatoire. » |
 | `merci.mp3` | « Merci. Votre signalement est enregistré. La mairie va le vérifier. » |
+
+Les deux fichiers `nature.mp3` et `ampleur.mp3` servent au signalement des fuites d'eau :
+une fuite se transmet à l'ONEA, pas aux camions.
 
 ## Comment enregistrer
 
@@ -32,5 +37,6 @@ aucun bruit. Il n'y a donc aucun risque à n'en enregistrer que quelques-uns.
 
 ## À dire au jury
 
-Les huit messages couvrent tout le parcours. Une personne qui ne lit pas peut signaler un
-dépotoir de bout en bout : elle écoute, elle touche de grands boutons illustrés, elle parle.
+Les dix messages couvrent tout le parcours, pour les deux natures de signalement. Une
+personne qui ne lit pas peut signaler un dépotoir ou une fuite d'eau de bout en bout : elle
+écoute, elle touche de grands boutons illustrés, elle parle.

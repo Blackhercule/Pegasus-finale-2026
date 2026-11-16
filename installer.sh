@@ -52,13 +52,16 @@ if [ ! -f .env ]; then
 COMMUNE=ouagadougou
 DOMAINE=$DOMAINE
 PORT_HTTPS=$PORT_HTTPS
-# Un compte par poste de la chaîne : mairie, brigade Laabal, équipe de collecte.
+# Un compte par poste : mairie, brigade Laabal, équipe de collecte, et l'ONEA pour
+# les fuites d'eau.
 AGENT_NOM=agent
 AGENT_MOT_DE_PASSE=$(secret | cut -c1-16)
 BRIGADE_NOM=brigade
 BRIGADE_MOT_DE_PASSE=$(secret | cut -c1-16)
 COLLECTE_NOM=collecte
 COLLECTE_MOT_DE_PASSE=$(secret | cut -c1-16)
+ONEA_NOM=onea
+ONEA_MOT_DE_PASSE=$(secret | cut -c1-16)
 SECRET_SESSION=$(secret)
 FIN
   echo "Fichier .env créé, avec un mot de passe par poste, tiré au hasard."
@@ -73,10 +76,10 @@ if [ -n "$CHANGEMENT_ADRESSE" ]; then
   echo "Nouvelle adresse : $CHANGEMENT_ADRESSE (signalements et certificat conservés)."
 fi
 
-# Une installation faite avant la chaîne des postes n'a que le compte de la mairie :
-# on ajoute les deux autres sans rien effacer.
+# Une installation plus ancienne n'a pas tous les comptes : on ajoute ceux qui manquent
+# sans rien effacer, pour ne pas perdre les signalements déjà reçus.
 if [ -f .env ]; then
-  for poste in BRIGADE COLLECTE; do
+  for poste in BRIGADE COLLECTE ONEA; do
     if ! grep -q "^${poste}_MOT_DE_PASSE=" .env; then
       minuscule=$(echo "$poste" | tr "[:upper:]" "[:lower:]")
       printf '%s_NOM=%s\n%s_MOT_DE_PASSE=%s\n' "$poste" "$minuscule" "$poste" "$(secret | cut -c1-16)" >> .env
@@ -157,12 +160,14 @@ cat <<FIN
   Signaler (téléphone)   : $ADRESSE/signaler/
 
   Postes de travail     : $ADRESSE/decision/dossiers.html
+  Fuites d'eau (ONEA)   : $ADRESSE/decision/fuites.html
   Comparer des scénarios : $ADRESSE/decision/scenarios.html
 
   Un compte par poste (mots de passe dans .env) :
     Mairie            « $AGENT_NOM »     $AGENT_MOT_DE_PASSE
     Brigade Laabal    « $BRIGADE_NOM »   $BRIGADE_MOT_DE_PASSE
     Équipe de collecte « $COLLECTE_NOM » $COLLECTE_MOT_DE_PASSE
+    ONEA (fuites d'eau) « $ONEA_NOM »  $ONEA_MOT_DE_PASSE
 
   Certificat : le HTTPS utilise une autorité INTERNE. Pour que les navigateurs et les
   téléphones lui fassent confiance, installez ca-assainissement.crt :
