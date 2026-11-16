@@ -17,6 +17,18 @@ le PC de l'équipe, **sans Internet** : couper le Wi-Fi avant de commencer est l
       chaîne sans tout refaire en direct.
 - [ ] Wi-Fi du PC coupé.
 
+## Refaire la vidéo de démonstration
+
+Avec l'application qui tourne :
+
+```bash
+python outils/donnees_demonstration.py      # dossiers à toutes les étapes de la chaîne
+node outils/filmer.mjs                      # filme les sept scènes dans /tmp/video
+python outils/monter_video.py               # assemble, sous-titre, écrit le fichier
+```
+
+Rien n'est mis en scène : ce sont les vraies pages avec les vraies données.
+
 ## Déroulé
 
 | Temps | Qui | Ce qu'on montre | Ce qu'on dit |
