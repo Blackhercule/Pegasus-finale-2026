@@ -163,3 +163,58 @@ def test_la_liste_blanche_ne_nomme_que_des_routes_qui_existent(application):
     """Un nom mal orthographié dans la liste blanche ne protégerait ni n'ouvrirait rien."""
     existantes = {regle.endpoint for regle in application.url_map.iter_rules()}
     assert OUVERT_A_TOUS <= existantes
+
+
+# --------------------------------------------------------------- ce qui faisait tomber le serveur
+# Quatre entrées trouvées par une session de Claude Code en attaquant notre propre API. Trois
+# faisaient répondre 500. Une erreur 500 est exactement ce qu'un jury de cybersécurité cherche
+# à provoquer : elle prouve qu'une entrée n'a pas été contrôlée.
+
+SIGNALEMENT = {"latitude": 12.3714, "longitude": -1.5197, "taille": "grand", "source": "piege"}
+
+
+def test_un_nombre_de_400_chiffres_ne_fait_pas_tomber_le_serveur(client):
+    """float() lève OverflowError, et non ValueError, sur un entier trop grand."""
+    reponse = client.post("/api/signalements",
+                          json={**SIGNALEMENT, "volume_m3": int("9" * 400), "id_client": "a"})
+    assert reponse.status_code < 500
+    # Le volume démesuré est ignoré : le dépotoir prend le volume que sa taille suppose.
+    assert reponse.get_json()["statut"] != "rejete"
+
+
+def test_un_demi_caractere_unicode_ne_fait_pas_tomber_le_serveur(client):
+    """\\ud800 traverse JSON mais ne peut pas s'écrire en UTF-8 : il tombait en base."""
+    reponse = client.post(
+        "/api/signalements",
+        data='{"latitude":12.3714,"longitude":-1.5197,"taille":"grand",'
+             '"commentaire":"\\ud800 bonjour","source":"piege","id_client":"b"}',
+        content_type="application/json")
+    assert reponse.status_code < 500
+
+
+def test_une_limite_illisible_ne_fait_pas_tomber_le_serveur(agent):
+    for adresse in ("/api/signalements?limite=abc", "/api/signalements?limite=-5",
+                    "/api/signalements?limite=99999999999999999999",
+                    "/api/depotoirs?limite=abc"):
+        assert agent.get(adresse).status_code < 500, adresse
+
+
+def test_un_json_profondement_emboite_ne_fait_pas_tomber_le_serveur(client):
+    reponse = client.post("/api/signalements", data="[" * 2000 + "]" * 2000,
+                          content_type="application/json")
+    assert reponse.status_code < 500
+
+
+def test_les_essais_de_mot_de_passe_sont_limites(client):
+    """Toute la partie décision étant derrière un mot de passe, il ne faut pas pouvoir les
+    essayer tous. Le compte reste utilisable : seul l'identifiant malmené est freiné."""
+    for _ in range(12):
+        client.post("/api/connexion", json={"nom": "agent", "mot_de_passe": "faux"})
+    refus = client.post("/api/connexion", json={"nom": "agent", "mot_de_passe": "faux"})
+    assert refus.status_code == 429
+    assert "Réessayez" in refus.get_json()["erreur"]
+    # Un identifiant inexistant est freiné de la même façon : on n'apprend pas lesquels existent.
+    for _ in range(12):
+        client.post("/api/connexion", json={"nom": "inconnu", "mot_de_passe": "x"})
+    assert client.post("/api/connexion",
+                       json={"nom": "inconnu", "mot_de_passe": "x"}).status_code == 429

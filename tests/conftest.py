@@ -14,6 +14,16 @@ from application.reglages import Reglages          # noqa: E402
 MOT_DE_PASSE = "essai-agent"
 
 
+@pytest.fixture(autouse=True)
+def compteur_d_essais_remis_a_zero():
+    """Le compteur d'essais de mot de passe vit en mémoire, donc d'un test à l'autre : sans
+    cette remise à zéro, un test qui provoque un blocage ferait échouer les suivants."""
+    import application as paquet
+    paquet._essais.clear()
+    yield
+    paquet._essais.clear()
+
+
 @pytest.fixture
 def application(tmp_path, monkeypatch):
     monkeypatch.setenv("AGENT_MOT_DE_PASSE", MOT_DE_PASSE)

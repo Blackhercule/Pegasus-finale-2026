@@ -63,6 +63,10 @@ def nombre(valeur):
         v = float(valeur)
     except (TypeError, ValueError):
         return None
+    except OverflowError:
+        # Un entier de plusieurs centaines de chiffres ne tient pas dans un flottant. Python
+        # lève alors OverflowError et non ValueError : sans cette ligne, le serveur tombait.
+        return None
     return v if math.isfinite(v) else None
 
 
@@ -72,7 +76,11 @@ def texte(valeur, maximum: int):
         return ""
     if not isinstance(valeur, str):
         return None
-    propre = "".join(c for c in valeur if c == "\n" or c >= " ")
+    # Un « demi-caractère » Unicode (\ud800 à \udfff) traverse JSON mais ne peut pas être
+    # écrit en UTF-8 : il faisait tomber le serveur au moment de l'enregistrement en base,
+    # c'est-à-dire bien plus loin que les contrôles. On l'écarte ici, à l'entrée.
+    propre = "".join(c for c in valeur
+                     if (c == "\n" or c >= " ") and not 0xD800 <= ord(c) <= 0xDFFF)
     return propre.strip()[:maximum]
 
 
