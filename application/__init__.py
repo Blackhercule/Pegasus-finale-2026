@@ -294,7 +294,7 @@ def plan():
     resultat["parametres_utilises"] = {cle: parametres[cle] for cle in (
         "population", "taux_abonnement", "nb_camions", "camions_en_panne", "capacite_camion_m3",
         "heures_travail", "frequence_collecte_jours", "capacite_point_m3", "saison",
-        "budget_mensuel", "distance_max_precollecte_m")}
+        "budget_mensuel", "distance_max_precollecte_m", "effectif_brigade")}
     return jsonify(resultat)
 
 
@@ -324,6 +324,10 @@ def scenario():
     except (ValueError, KeyError, TypeError) as erreur:
         return jsonify({"erreur": "Scénario impossible : %s" % erreur}), 400
     resultat["nom"] = str(envoi.get("nom", "Scénario"))[:80]
+    resultat["parametres_utilises"] = {cle: parametres[cle] for cle in (
+        "population", "taux_abonnement", "nb_camions", "camions_en_panne", "capacite_camion_m3",
+        "heures_travail", "frequence_collecte_jours", "capacite_point_m3", "saison",
+        "budget_mensuel", "distance_max_precollecte_m", "effectif_brigade")}
     return jsonify(resultat)
 
 
