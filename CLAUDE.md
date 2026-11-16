@@ -144,7 +144,7 @@ des espaces (`C:\Users\YE FRANCK AHMED\…`) : mets toujours les chemins entre g
 Notre projet du sprint, `messagerie-souveraine` (dépôt `Blackhercule/Messagerie-souveraine`), est
 sur ce PC dans `Documents\hackathon2026\messagerie-souveraine`. Il fonctionne ici et ses 41 tests
 passent. Quand une tâche dit « reprendre depuis le socle », copie la brique plutôt que de la
-réécrire, après un `git pull` dans ce dossier :
+réécrire, depuis la source que la tâche indique :
 
 | Brique | Où | Ce qu'elle apporte |
 |---|---|---|
