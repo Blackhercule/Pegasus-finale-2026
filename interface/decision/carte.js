@@ -125,9 +125,17 @@ carte.on("click", "depotoirs", (evenement) => {
   const p = evenement.features[0].properties;
   const bloc = document.getElementById("bloc-selection");
   const date = (valeur) => (valeur ? String(valeur).slice(0, 10).split("-").reverse().join("/") : "—");
+  const ETAPES = { signale: "Signalé", confirme: "Confirmé par la mairie",
+                   constat: "Constat de la brigade", a_collecter: "À collecter",
+                   collecte: "Collecté", classe: "Classé sans suite" };
+  const DEPOTS = { plein_air: "à même le sol", bac: "dans un bac", caniveau: "dans un caniveau",
+                   fosse: "dans une fosse", berge: "sur une berge", autre: "autre" };
   document.getElementById("selection").innerHTML =
     `<dt>Numéro</dt><dd>${p.id}</dd>` +
+    `<dt>Étape</dt><dd>${ETAPES[p.etape] || p.etape || "—"}</dd>` +
     `<dt>Volume estimé</dt><dd>${Number(p.volume_m3).toFixed(0)} m³</dd>` +
+    (p.surface_m2 ? `<dt>Superficie</dt><dd>${Number(p.surface_m2).toFixed(0)} m²</dd>` : "") +
+    (p.depot ? `<dt>Dépôt</dt><dd>${DEPOTS[p.depot] || p.depot}</dd>` : "") +
     `<dt>Signalements</dt><dd>${p.nb_signalements} (${p.nb_sources} source${p.nb_sources > 1 ? "s" : ""})</dd>` +
     `<dt>Premier vu</dt><dd>${date(p.premier_vu)}</dd>` +
     `<dt>Dernier vu</dt><dd>${date(p.dernier_vu)}</dd>`;
