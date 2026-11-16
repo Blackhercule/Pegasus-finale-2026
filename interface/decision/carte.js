@@ -5,7 +5,8 @@
 maplibregl.setWorkerUrl("/vendor/maplibre-gl/maplibre-gl-csp-worker.js");
 maplibregl.addProtocol("pmtiles", new pmtiles.Protocol().tile);
 
-const COULEURS = { depotoir: "#e4572e", decharge: "#8a6a3b", eau: "#3d7ea6", limite: "#1d1d1b", densite: "#2f6f4e" };
+const COULEURS = { depotoir: "#c8102e", decharge: "#6e6457", eau: "#2f7da6",
+                   limite: "#1b2033", densite: "#1e2455", fuite: "#0090d4", nuisance: "#7b3fa0" };
 const etat = (texte) => { document.getElementById("etat-chargement").textContent = texte; };
 
 /* Le style Protomaps demande trois variantes de Noto ; nous n'en embarquons qu'une, et aucune
@@ -67,7 +68,7 @@ carte.on("load", async () => {
     carte.addLayer({ id: "densite", type: "fill", source: "zones", layout: { visibility: "none" },
       paint: {
         "fill-color": ["interpolate", ["linear"], ["get", "nb_batiments"],
-          0, "#eaf2ec", 25, "#bcd9c6", 75, "#7fb996", 150, "#4b9470", 300, "#2f6f4e"],
+          0, "#eceef7", 25, "#c6cbe5", 75, "#9aa2cf", 150, "#5b63a8", 300, "#1e2455"],
         "fill-opacity": 0.75,
       } });
 
@@ -84,6 +85,25 @@ carte.on("load", async () => {
       paint: {
         "circle-radius": ["interpolate", ["linear"], ["get", "volume_m3"], 0, 6, 20, 11, 100, 20],
         "circle-color": COULEURS.depotoir, "circle-opacity": 0.75,
+        "circle-stroke-width": 2, "circle-stroke-color": "#fff",
+      } });
+
+    carte.addSource("fuites", { type: "geojson", data: await json("/api/fuites/carte") });
+    carte.addLayer({ id: "fuites", type: "circle", source: "fuites",
+      paint: {
+        "circle-radius": ["match", ["get", "ampleur"],
+          "inondation", 11, "jet", 8, "suintement", 6, 6],
+        "circle-color": COULEURS.fuite, "circle-opacity": 0.85,
+        "circle-stroke-width": 2, "circle-stroke-color": "#fff",
+      } });
+
+    /* Caniveaux, abattages clandestins, déversements : un losange violet, encore une autre
+       forme, pour qu'on distingue les trois familles d'un coup d'œil sur la carte. */
+    carte.addSource("nuisances", { type: "geojson", data: await json("/api/nuisances/carte") });
+    carte.addLayer({ id: "nuisances", type: "circle", source: "nuisances",
+      paint: {
+        "circle-radius": ["match", ["get", "gravite"], "grave", 10, "moyen", 8, "leger", 6, 6],
+        "circle-color": COULEURS.nuisance, "circle-opacity": 0.85,
         "circle-stroke-width": 2, "circle-stroke-color": "#fff",
       } });
 
@@ -125,9 +145,17 @@ carte.on("click", "depotoirs", (evenement) => {
   const p = evenement.features[0].properties;
   const bloc = document.getElementById("bloc-selection");
   const date = (valeur) => (valeur ? String(valeur).slice(0, 10).split("-").reverse().join("/") : "—");
+  const ETAPES = { signale: "Signalé", confirme: "Confirmé par la mairie",
+                   constat: "Constat de la brigade", a_collecter: "À collecter",
+                   collecte: "Collecté", classe: "Classé sans suite" };
+  const DEPOTS = { plein_air: "à même le sol", bac: "dans un bac", caniveau: "dans un caniveau",
+                   fosse: "dans une fosse", berge: "sur une berge", autre: "autre" };
   document.getElementById("selection").innerHTML =
     `<dt>Numéro</dt><dd>${p.id}</dd>` +
+    `<dt>Étape</dt><dd>${ETAPES[p.etape] || p.etape || "—"}</dd>` +
     `<dt>Volume estimé</dt><dd>${Number(p.volume_m3).toFixed(0)} m³</dd>` +
+    (p.surface_m2 ? `<dt>Superficie</dt><dd>${Number(p.surface_m2).toFixed(0)} m²</dd>` : "") +
+    (p.depot ? `<dt>Dépôt</dt><dd>${DEPOTS[p.depot] || p.depot}</dd>` : "") +
     `<dt>Signalements</dt><dd>${p.nb_signalements} (${p.nb_sources} source${p.nb_sources > 1 ? "s" : ""})</dd>` +
     `<dt>Premier vu</dt><dd>${date(p.premier_vu)}</dd>` +
     `<dt>Dernier vu</dt><dd>${date(p.dernier_vu)}</dd>`;
@@ -239,21 +267,21 @@ function dessinerLePlan(plan) {
   }
   carte.addSource("tournees", { type: "geojson", data: lignes });
   carte.addLayer({ id: "tournees", type: "line", source: "tournees",
-    paint: { "line-color": "#b8862b", "line-width": 1.6, "line-opacity": 0.55 } }, "depotoirs");
+    paint: { "line-color": "#8a6a00", "line-width": 1.6, "line-opacity": 0.65 } }, "depotoirs");
 
   carte.addSource("points", { type: "geojson", data: points });
   carte.addLayer({ id: "points", type: "circle", source: "points",
     paint: {
       "circle-radius": ["interpolate", ["linear"], ["get", "m3"], 0, 4, 30, 8, 120, 13],
       /* Bleu : desservi. Rouge sombre : laissé de côté faute de camions ou de temps. */
-      "circle-color": ["case", ["get", "desservi"], "#1d4f91", "#7a2f22"],
+      "circle-color": ["case", ["get", "desservi"], "#3b47a0", "#8d2b1e"],
       "circle-opacity": 0.8, "circle-stroke-width": 1.2, "circle-stroke-color": "#fff",
     } }, "depotoirs");
 
   carte.addSource("decharge", { type: "geojson", data: pointDecharge(plan) });
   carte.addLayer({ id: "decharge", type: "circle", source: "decharge",
-    paint: { "circle-radius": 9, "circle-color": "#1d1d1b", "circle-stroke-width": 3,
-             "circle-stroke-color": "#b8862b" } });
+    paint: { "circle-radius": 9, "circle-color": "#1b2033", "circle-stroke-width": 3,
+             "circle-stroke-color": "#ffff00" } });
 
   carte.on("click", "points", (evenement) => {
     const p = evenement.features[0].properties;

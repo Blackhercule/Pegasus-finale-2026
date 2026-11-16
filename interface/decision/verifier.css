@@ -19,29 +19,29 @@ main { max-width: 1100px; margin: 0 auto; padding: 1.2rem; display: grid; gap: 1
 .connexion label { display: grid; gap: .25rem; font-size: .88rem; font-weight: 600; }
 input { font: inherit; padding: .5rem .6rem; border: 1px solid var(--trait); border-radius: 8px; }
 button { font: inherit; font-weight: 600; cursor: pointer; padding: .5rem .9rem; border-radius: 8px;
-         border: 1px solid var(--vert); background: var(--vert); color: #fff; }
+         border: 1px solid var(--panneau); background: var(--panneau); color: #fff; }
 button.secondaire, .filtres button { background: #fff; color: var(--encre); border-color: var(--trait); }
 .filtres { display: flex; gap: .4rem; flex-wrap: wrap; }
-.filtres button.actif { background: var(--vert); color: #fff; border-color: var(--vert); }
+.filtres button.actif { background: var(--panneau); color: #fff; border-color: var(--panneau); }
 .lot { display: grid; gap: .6rem; justify-items: start; }
 
 table { width: 100%; border-collapse: collapse; background: #fff;
         border: 1px solid var(--trait); border-radius: 10px; overflow: hidden; font-size: .88rem; }
-th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid #efece5; vertical-align: top; }
-th { background: #eeeae1; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: var(--gris); }
+th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid #eee7d8; vertical-align: top; }
+th { background: #f3ecdc; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: var(--gris); }
 td.vide { color: var(--gris); font-style: italic; text-align: center; padding: 1.5rem; }
 tr.rejete td { color: var(--gris); background: #faf9f6; }
 
 .etat { display: inline-block; padding: .05rem .5rem; border-radius: 999px; font-size: .74rem;
         font-weight: 700; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
-.etat.verifie { background: #dcefe3; color: #1c5e3e; }
+.etat.verifie { background: var(--vert-clair); color: var(--vert); }
 .etat.recevable { background: #e3ebf6; color: #1d4f91; }
-.etat.a_verifier { background: #fbebd7; color: #8a5a00; }
-.etat.rejete { background: #f7dcda; color: #8f2a20; }
-.motifs { display: block; color: #8f2a20; font-size: .78rem; margin-top: .2rem; }
+.etat.a_verifier { background: var(--or-clair); color: var(--or-fonce); }
+.etat.rejete { background: var(--rouge-clair); color: var(--rouge); }
+.motifs { display: block; color: var(--rouge); font-size: .78rem; margin-top: .2rem; }
 .decision { display: flex; gap: .3rem; }
 .decision button { padding: .3rem .6rem; font-size: .82rem; }
-.decision .rejeter { background: #fff; color: #8f2a20; border-color: #e5a9a4; }
+.decision .rejeter { background: #fff; color: var(--rouge); border-color: #efb3b3; }
 .message { padding: .6rem .9rem; border-radius: 8px; margin: 0; font-size: .88rem; }
-.message.succes { background: #e7f4ec; color: #1c5e3e; border: 1px solid #9fd0b2; }
-.message.erreur { background: #fcefee; color: #8f2a20; border: 1px solid #e5a9a4; }
+.message.succes { background: var(--vert-clair); color: var(--vert); border: 1px solid #a9dcc0; }
+.message.erreur { background: var(--rouge-clair); color: var(--rouge); border: 1px solid #efb3b3; }

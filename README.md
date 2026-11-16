@@ -13,13 +13,100 @@ challenge 01.
 
 | Étape | Ce qu'on obtient |
 |---|---|
-| **Signaler** | Une page qui s'ouvre sur n'importe quel téléphone : position, photo, taille du tas. Elle fonctionne **sans réseau** et envoie toute seule au retour de la connexion. |
-| **Vérifier** | Chaque signalement passe douze contrôles automatiques. Un signalement douteux est écarté **avec son motif**, jamais silencieusement. Un agent tranche les cas limites. |
+| **Signaler** | Une page qui s'ouvre sur n'importe quel téléphone : un **tas d'ordures** (position, photo, taille et superficie, mode de dépôt) ou une **fuite d'eau** (ampleur, quartier). On peut **parler plutôt qu'écrire**, et se faire **guider en mooré**. Elle fonctionne **sans réseau** et envoie toute seule au retour de la connexion. |
+| **Vérifier** | Chaque signalement passe treize contrôles automatiques. Un signalement douteux est écarté **avec son motif**, jamais silencieusement. Un agent tranche les cas limites. |
+| **Traiter** | Le signalement ouvre un dossier qui passe de poste en poste : mairie, brigade Laabal, mairie, équipe de collecte. Chaque passage est daté et signé. |
+| **Alerter l'ONEA** | Une fuite d'eau suit sa propre chaîne : la mairie la confirme et la transmet, l'ONEA déclare la réparation. Un **bordereau CSV** se télécharge pour l'envoi. |
+| **Orienter** | Caniveau bouché, abattage clandestin, toilettes vidées en pleine rue, eaux usées de poissonnerie : la mairie reçoit et **oriente vers le service compétent**, que la nature du signalement désigne. |
 | **Cartographier** | Les dépotoirs sur un fond OpenStreetMap servi par notre propre machine, avec les 226 sites de déchets déjà cartographiés. |
 | **Planifier** | Emplacement des points de regroupement, tournées des camions, jour par jour, avec les coûts. |
 | **Simuler** | Ménages, pré-collecteurs, brigade Laabal et mairie, un jour par pas de temps. |
 | **Comparer** | On change la population, les abonnements, les camions, la fréquence ou la saison, et on voit l'effet. |
 | **Partager** | Les dépotoirs vérifiés s'exportent au format d'OpenStreetMap, pour relecture puis versement. |
+
+## La chaîne de traitement
+
+Un signalement n'envoie pas directement un camion. Il ouvre un dossier qui avance d'un poste à
+l'autre, et chaque poste a son compte :
+
+```
+  signalé ──► confirmé ──► constat ──► à collecter ──► collecté
+ (habitant)   (mairie)    (brigade     (mairie)       (équipe de
+                           Laabal)                     collecte)
+```
+
+Un poste ne peut faire avancer un dossier que d'un cran, et seulement quand c'est son tour :
+la brigade qui tenterait de confirmer à la place de la mairie se voit refuser. La mairie peut
+aussi classer un dossier sans suite, avec son motif. Tout est relisible dans le journal du
+dossier : qui, quand, quoi.
+
+## Les fuites d'eau, et pourquoi elles sont là
+
+Une conduite percée n'est pas qu'une affaire de plomberie. L'eau qui coule des jours durant
+fait une mare : la mare élève des moustiques, détrempe la chaussée qui se creuse, et quand elle
+atteint un tas d'ordures elle en emporte le jus dans les caniveaux. C'est un problème
+d'assainissement avant d'être un problème de réseau.
+
+Mais la mairie ne touche pas aux conduites : seul l'**ONEA** intervient sur les siennes. L'outil
+fait donc ce qu'il peut faire — recevoir, confirmer, transmettre, et garder la trace :
+
+```
+  signalée  ──►  transmise à l'ONEA  ──►  réparée
+ (habitant)      (agent de la mairie)      (ONEA)
+```
+
+Une fuite n'entre **jamais** dans les tournées des camions : ce n'est pas un tas à ramasser.
+Elle est signalée depuis la même page que les dépotoirs, elle subit **les mêmes contrôles** de
+position et de date, et deux appareils qui signalent la même fuite la confirment, comme pour un
+dépotoir. L'ampleur retenue est la **plus grave** signalée : entre « ça suinte » et « la rue est
+noyée », c'est la seconde qui décide de l'urgence.
+
+Le bordereau à transmettre est un fichier **CSV** (`/api/export/onea`), pas un envoi
+automatique : l'outil ne sort pas de la machine (E14), et l'ONEA n'a pas d'interface publique de
+dépôt. Un agent l'imprime ou l'envoie, et note en retour le numéro que l'ONEA lui donne.
+
+## Six choses à signaler, trois destinations
+
+Tout ne se ramasse pas, et tout ne relève pas du même service. C'est la **nature** du
+signalement qui décide où il va :
+
+| Ce qu'on signale | Qui intervient après la mairie |
+|---|---|
+| Tas d'ordures | les tournées des camions |
+| Fuite d'eau sur une conduite | **ONEA** |
+| Caniveau bouché | **équipe de collecte** (curage) |
+| Déversement de toilettes en plein air | **ONEA** (assainissement) |
+| Abattage clandestin d'animaux | **brigade Laabal** (constat, verbalisation) |
+| Eaux usées de poisson et de poulet | **brigade Laabal** |
+
+Cette répartition est une hypothèse de l'équipe, **à confirmer avec la mairie** : la changer
+demande de modifier une ligne par nature dans `application/nuisances.py`, rien d'autre.
+
+Deux règles valent pour toutes les natures. Le regroupement ne se fait qu'**à nature égale** :
+un caniveau bouché et un abattage clandestin au même carrefour sont deux problèmes, deux
+services, deux dossiers. Et la gravité retenue est la **plus forte** signalée, jamais la
+moyenne : entre « un peu bouché » et « ça déborde dans la rue », c'est la seconde qui décide
+de l'ordre de passage.
+
+## Parler plutôt qu'écrire, et comprendre le mooré
+
+- **Message vocal** : on décrit le lieu à la voix, en mooré, en dioula ou en français. Un agent
+  de la mairie l'écoute depuis son poste. Aucune transcription automatique n'est tentée : il
+  n'en existe pas de fiable hors ligne pour ces langues, et une fausse transcription serait pire
+  que pas de transcription.
+- **Guidage parlé en mooré** : un bouton fait parler chaque étape. Ce sont de **vrais
+  enregistrements** faits par un locuteur natif (`interface/signaler/audio/moore/`), pas de la
+  synthèse vocale. Une personne qui ne lit pas peut ainsi signaler de bout en bout.
+
+## Identité du déclarant : facultative
+
+Le signalement fonctionne **sans donner son nom**. Qui accepte d'être témoin dans une procédure
+peut ajouter son nom, son téléphone, une photo de sa CNIB et une photo de lui-même. Ces
+renseignements :
+
+- ne sont **jamais servis au public** : il faut être un agent connecté pour les voir ;
+- sont rangés à part des photos de dépotoirs, dans un dossier servi sous contrôle ;
+- s'effacent en un clic à la clôture du dossier, depuis le poste de la mairie.
 
 ## Installation
 
@@ -42,8 +129,16 @@ Pour que les téléphones du réseau local y accèdent, donnez l'adresse IP du p
 L'installateur affiche ensuite les adresses et le mot de passe de l'agent :
 
 - carte de décision : `https://<adresse>:8443/decision/`
+- postes de travail (mairie, brigade, collecte) : `https://<adresse>:8443/decision/dossiers.html`
+- caniveaux, abattoirs, eaux usées : `https://<adresse>:8443/decision/nuisances.html`
+- fuites d'eau (mairie et ONEA) : `https://<adresse>:8443/decision/fuites.html`
 - vérification des signalements : `https://<adresse>:8443/decision/verifier.html`
+- simulation : `https://<adresse>:8443/decision/simulation.html`
+- comparaison de scénarios : `https://<adresse>:8443/decision/scenarios.html`
 - signalement (téléphone) : `https://<adresse>:8443/signaler/`
+
+L'installateur affiche un mot de passe par poste. Ils sont tirés au hasard et rangés dans
+`.env`, qui n'est jamais publié.
 
 Le HTTPS s'appuie sur une **autorité de certification interne**, créée sur la machine. Installez
 `ca-assainissement.crt` sur les postes et les téléphones (`certutil -user -addstore Root
@@ -84,11 +179,11 @@ briques éprouvées, on les adapte à Ouagadougou, et on ajoute ce qui manque en
 
 ## Face à l'épreuve en direct
 
-- **Signalements piégés** : ils passent par les mêmes contrôles que les autres. Coordonnées
+- **Signalements piégés** : ils passent par les mêmes contrôles que les autres, fuites d'eau comprises. Coordonnées
   inversées, point (0, 0), latitude « abc », date dans le futur, volume négatif ou démesuré,
-  point au milieu d'un barrage, mille copies du même tas, champs manquants ou de mauvais type :
-  chacun est écarté avec son motif, et le serveur ne tombe jamais. Le jeu d'essai
-  (`tests/pieges.json`) en contient 42.
+  point au milieu d'un barrage, mille copies du même tas, champs manquants ou de mauvais type,
+  fichier audio qui n'en est pas un : chacun est écarté avec son motif, et le serveur ne tombe
+  jamais. Le jeu d'essai (`tests/pieges.json`) en contient 42.
 - **Changement de paramètres** : camions en panne, saison des pluies, nouveau quartier sont de
   simples paramètres. Le plan se recalcule en 5 secondes et affiche ses propres contrôles de
   cohérence : capacité des camions, durée de travail, arrêts non desservis (nommés), points
@@ -105,6 +200,7 @@ briques éprouvées, on les adapte à Ouagadougou, et on ajoute ce qui manque en
 | [Mesa](https://github.com/projectmesa/mesa) | simulation multi-agents | Apache-2.0 |
 | [pyosmium](https://osmcode.org/pyosmium/) | lecture des extraits OpenStreetMap | BSD-2 |
 | [MapLibre GL JS](https://maplibre.org/), [PMTiles](https://github.com/protomaps/PMTiles), [Protomaps basemaps](https://github.com/protomaps/basemaps) | carte hors ligne | BSD-3 |
+| [Lato](https://www.latofonts.com/) | police de l'interface | OFL-1.1 |
 | [Noto Sans](https://fonts.google.com/noto) (via `smp-noto-glyphs`) | polices de la carte | OFL-1.1, paquet MIT |
 | [Caddy](https://caddyserver.com/) | HTTPS local | Apache-2.0 |
 | [Docker](https://www.docker.com/) | déploiement en une commande | Apache-2.0 |
@@ -130,12 +226,12 @@ Notre code est publié sous **AGPL-3.0** (`LICENSE`).
 
 ```bash
 pip install -r requirements.txt
-python -m pytest tests/ -q        # 55 tests : contrôles, pièges, plan, simulation, export
+python -m pytest tests/ -q        # 93 tests : contrôles, pièges, chaînes, plan, simulation, fuites, export
 ```
 
 | Dossier | Contenu |
 |---|---|
-| `application/` | l'application : `geo.py`, `reseau.py`, `signalements/`, `plan/`, `simulation/` |
+| `application/` | l'application : `geo.py`, `reseau.py`, `signalements/`, `dossiers.py`, `fuites.py`, `nuisances.py`, `plan/`, `simulation/` |
 | `interface/` | pages servies telles quelles ; `vendor/` contient les bibliothèques de la carte |
 | `donnees/` | préparation des données d'une commune et fichiers produits |
 | `tests/` | tests automatisés, dont le jeu de 42 signalements piégés |

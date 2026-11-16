@@ -18,7 +18,17 @@ ne modifie pas ce fichier.
 | T8 | Scénarios : paramètres du jury, comparaison | coordinateur | **Fait** : page de comparaison avec tableau et graphique |
 | T9 | Bien commun : export OpenStreetMap, autre commune | coordinateur | **Fait** : export .osm des dépotoirs vérifiés, à relire avant versement ; une autre commune se prépare avec la même commande |
 | T10 | Installation en une commande, HTTPS, téléphones | PC | Écrit et poussé ; **jamais lancé sur le PC** — c'est le dernier inconnu |
-| T11 | Essai complet sur le PC de l'équipe | PC | À faire : `./installer.sh`, puis essai depuis un téléphone |
+| T11 | Essai complet sur le PC de l'équipe | PC | Fait en partie : l'installation tourne sur le PC, port 8444. Reste l'essai depuis un téléphone |
+| — | Chaîne des postes (mairie, brigade Laabal, collecte), identité facultative, guidage mooré | coordinateur | **Fait** (16/11) |
+| — | Fuites d'eau et poste ONEA, bordereau CSV | coordinateur | **Fait** (16/11) |
+| — | Nuisances : caniveaux, abattage clandestin, toilettes en plein air, eaux usées animales | coordinateur | **Fait** (16/11) |
+| — | Habillage : police Lato, couleurs des portails de l'administration | coordinateur | **Fait** (16/11) |
+| — | Quatre écrans d'accueil parlés avant le formulaire de signalement | coordinateur | **Fait** (16/11). Les enregistrements mooré restent à faire par l'équipe |
+| T12 | Page d'accueil publique | cloud ou PC | **À faire** |
+| T13 | Partie décision protégée par identifiant et mot de passe | cloud ou PC | **À faire** |
+| T14 | Habillage de la partie décision : barre horizontale, menu ☰, drapeau | cloud ou PC | **À faire** |
+| T15 | Les tournées suivent les rues, comme un GPS | cloud ou PC | **À faire** |
+| T16 | Choisir un lieu connu quand la position ne marche pas | cloud ou PC | **À faire** |
 
 **Important.** Depuis le 16/11 au matin, c'est le coordinateur qui écrit le code (les sessions de
 Claude Code se heurtaient à la limite d'utilisation). Avant de commencer quoi que ce soit : fais
@@ -163,3 +173,200 @@ script écrit dans les pages.
 **À ajouter au compte rendu** : la liste des pièges et leur motif ; ce que tu n'as pas pu
 vérifier sans téléphone ni HTTPS (la position et la caméra exigent HTTPS hors de `localhost` :
 cela sera vérifié sur le PC avec T10).
+
+
+---
+
+# Tâches du 16/11 au soir — demandées par Franck
+
+Ces cinq tâches viennent d'une même demande. **Lis-les toutes avant d'en commencer une** : T12,
+T13 et T14 touchent les mêmes fichiers, et les faire dans l'ordre évite de se marcher dessus.
+
+L'ordre conseillé est **T13 → T12 → T14 → T16 → T15**, et chacune se termine par son propre
+commit : si l'une casse quelque chose, on revient dessus sans perdre les autres.
+
+Toutes sont **[cloud ou PC]**. Aucune ne demande de téléchargement. Rappel des règles du
+projet : rien ne se charge depuis Internet à l'exécution (E14), tout est en français, pas de
+cryptographie écrite par nous, et le code doit pouvoir être expliqué par n'importe quel membre
+de l'équipe au jury.
+
+## T13 — La partie décision protégée par identifiant et mot de passe
+
+**Pourquoi.** Aujourd'hui, la carte de décision, le plan de gestion et les chiffres de la ville
+sont servis à qui connaît l'adresse. Seul le **signalement** doit rester ouvert à tous : c'est
+la partie qui s'adresse à l'habitant. Tout le reste s'adresse à la mairie, à la brigade Laabal,
+à l'équipe de collecte et à l'ONEA, et doit demander à savoir qui entre.
+
+**Ne crée aucun mécanisme nouveau.** Les comptes existent déjà (`application/reglages.py`,
+quatre postes, mots de passe tirés par `installer.sh` et rangés dans `.env`), la session et le
+jeton anti-CSRF aussi, et `@agent_requis` sait déjà filtrer par poste. Il s'agit d'étendre ce
+qui marche, pas d'inventer.
+
+**Ce qui doit rester public**, sans quoi la démonstration ne marche plus :
+
+- la page `/signaler/` et tout ce qu'elle charge : son script, sa feuille de style, son
+  `service-worker.js`, son manifeste, ses audios, `/vendor/…` ;
+- `POST /api/signalements` et `POST /api/signalements/lot` — c'est par là que les habitants
+  **et le jury** envoient leurs signalements, pièges compris ;
+- `GET /api/fichiers/public/…` (les photos de dépotoirs). Les fichiers `prive/` demandent déjà
+  une session : n'y touche pas.
+
+**Ce qui doit être protégé** : toutes les pages `/decision/…` et toutes les adresses d'API
+qu'elles utilisent — `/api/depotoirs`, `/api/plan`, `/api/scenario`, `/api/comparer`,
+`/api/parametres`, `/api/comptes`, `/api/chaine`, `/api/dossiers…`, `/api/fuites…`,
+`/api/nuisances…`, `/api/export/…`.
+
+Écris le filtre **en liste blanche**, pas en liste noire : tout est protégé sauf ce qui est
+explicitement ouvert. Une liste noire laisse passer la prochaine adresse qu'on ajoutera en
+l'oubliant, et un jury de cybersécurité cherche exactement cela.
+
+Quand une page `/decision/…` est demandée sans session, sers une page de connexion
+(`interface/decision/connexion.html`) qui, une fois le mot de passe accepté, renvoie à la page
+demandée. Quand c'est une adresse d'API, réponds **401** avec un JSON : les pages savent déjà
+le traiter (`montrerConnexion`).
+
+**Réussi si** :
+
+- `python -m pytest -q` est vert, avec de nouveaux tests qui vérifient, sans session, que
+  chaque adresse protégée répond 401 et que chaque adresse publique répond normalement ;
+- un test parcourt la liste des routes de Flask et **échoue si une route n'est ni dans la liste
+  blanche ni protégée** : c'est ce test qui empêchera d'oublier la prochaine ;
+- dans un navigateur : `/decision/` sans session montre la connexion ; après connexion, la
+  carte s'affiche ; `/signaler/` fonctionne toujours sans aucune connexion.
+
+**À mettre dans le compte rendu** : la liste blanche exacte, et un rappel bien visible que
+**le jury devra se connecter pour voir la carte** — l'équipe doit avoir le mot de passe sous la
+main le jour de la démonstration.
+
+## T12 — Une page d'accueil publique
+
+**Pourquoi.** Quelqu'un qui reçoit l'adresse ne sait pas où il tombe. Aujourd'hui `/` ouvre
+directement la carte de décision — qui, après T13, demandera un mot de passe : la première
+chose que verrait un habitant serait donc un refus.
+
+**Ce qu'il faut.** Une nouvelle page servie à `/`, dans `interface/accueil/`. Elle dit en
+quelques lignes ce qu'est l'outil et à qui il s'adresse, puis offre **deux portes** :
+
+1. un grand bouton **« Signaler »** vers `/signaler/` — c'est l'action principale, il doit être
+   le plus gros élément de la page, lisible par quelqu'un qui ne lit pas bien ;
+2. un lien plus discret **« Espace des services »** vers `/decision/`, pour la mairie, la
+   brigade Laabal, l'équipe de collecte et l'ONEA.
+
+Montre aussi, sans connexion, **trois chiffres publics** : le nombre de signalements reçus, le
+nombre de dépotoirs recensés, le nombre de dossiers traités. Ajoute pour cela une seule adresse
+publique `GET /api/publics` qui ne renvoie que ces trois nombres — **jamais de position, jamais
+de détail**, sinon T13 ne sert plus à rien.
+
+**Ne change rien à la page de signalement** : ni son parcours, ni ses quatre écrans d'accueil
+parlés, ni son fonctionnement hors ligne. Franck y tient.
+
+**Réussi si** : `/` ouvre la page d'accueil sans aucune connexion ; le bouton mène au
+formulaire qui fonctionne comme avant ; les trois chiffres s'affichent ; un test vérifie que
+`/api/publics` ne renvoie que trois nombres.
+
+## T14 — Habillage de la partie décision : barre horizontale, menu ☰, drapeau
+
+**Pourquoi.** Tout est aujourd'hui dans un bandeau vertical à gauche : les sections, les
+couches, les réglages du plan, les contrôles de cohérence. C'est chargé, et sur un petit écran
+c'est inutilisable.
+
+**Ce qu'il faut.**
+
+1. **Une barre horizontale en haut**, la même sur toutes les pages `/decision/…`, qui porte les
+   sections : Carte, Dépotoirs, Fuites d'eau, Nuisances, Vérifier, Simulation, Scénarios. La
+   section ouverte est marquée. À droite de la barre : le nom du poste connecté et le bouton
+   pour en changer.
+
+2. **Un bouton ☰ en haut à droite** qui ouvre un panneau contenant **tout le reste** : les
+   couches, les réglages du plan de gestion, les contrôles de cohérence, le dépotoir
+   sélectionné, et ce qui est aujourd'hui en bas de page. Le panneau se referme en touchant à
+   côté ou sur Échap. La carte occupe alors tout l'écran.
+
+3. **Le drapeau du Burkina Faso en fond de la barre** : un dégradé du rouge vers le vert, avec
+   **l'étoile jaune à droite**.
+
+Trois précautions pour le drapeau. Dessine-le en **CSS et en SVG dans la page** — aucun fichier
+image chargé, E14 l'interdit. Pose un voile sombre par-dessus (`rgba(0,0,0,.35)` par exemple)
+pour que le texte blanc reste lisible : un drapeau illisible ne sert personne. Et garde-le
+**sobre** — c'est un symbole national, pas une décoration.
+
+Conserve la police Lato et les couleurs déjà en place, et ne touche pas à la page de
+signalement : cette tâche ne concerne que `/decision/…`.
+
+**Réussi si** : les sept pages de décision portent la même barre ; le menu ☰ ouvre et ferme
+tous les réglages ; la carte occupe tout l'écran quand le panneau est fermé ; tout reste
+utilisable sur un écran de téléphone (420 px de large) ; aucune requête ne sort vers Internet.
+
+**À mettre dans le compte rendu** : une capture d'écran de la barre, et dis comment tu as
+dessiné le drapeau.
+
+## T16 — Choisir un lieu connu quand la position ne marche pas
+
+**Pourquoi.** Le signalement repose aujourd'hui entièrement sur la géolocalisation. Elle est
+refusée, imprécise ou absente plus souvent qu'on ne croit : téléphone ancien, position coupée,
+intérieur d'un bâtiment, ou simplement un habitant qui refuse de la donner. Sans elle, il n'y a
+aucun moyen de signaler, et le signalement est perdu.
+
+**Ce qu'il faut.** Quand la position échoue — ou sur demande, par un lien « Je ne peux pas être
+localisé » toujours visible — proposer de **choisir un lieu connu** dans une liste cherchable :
+marchés, universités, collèges, écoles, centres de santé.
+
+**La bonne nouvelle : les données sont déjà là.** `donnees/ouagadougou/lieux.geojson` contient
+déjà, avec leur nom et leur position, **99 marchés**, **31 universités**, **46 collèges**,
+937 écoles et 181 lieux de santé. Rien à télécharger, rien à régénérer.
+
+Ce qu'il reste à faire :
+
+- produire, au démarrage de l'application, la liste des lieux **nommés** avec leur type et leur
+  position, servie publiquement par `GET /api/lieux` ;
+- la faire mettre en cache par le `service-worker.js` de la page de signalement, pour que le
+  choix fonctionne **hors ligne** comme le reste du formulaire ;
+- dans le formulaire, un champ de recherche qui filtre sur le nom sans accent ni casse (chercher
+  « marche gounghin » doit trouver « Marché de Gounghin ») ; choisir un lieu renseigne la
+  position ;
+- laisser la personne **préciser à côté de quoi** en texte libre (« derrière le marché, côté
+  nord ») : beaucoup de marchés non construits ne sont pas dans OpenStreetMap, et le repère
+  donné à la main vaut mieux que rien.
+
+**Le point le plus important.** Une position déduite d'un lieu n'a pas la précision d'un GPS,
+et l'agent qui la lit doit le savoir, sinon il envoie une équipe au mauvais endroit. Ajoute donc
+deux colonnes aux signalements, par le mécanisme `AJOUTS` de `application/base.py` (qui sait
+déjà faire évoluer une base déjà installée sans la casser) : `source_position` (`gps` ou
+`lieu`) et `lieu_nom`. Affiche-les clairement sur les postes de travail, et donne à ces
+signalements une `precision_m` honnête — l'ordre de 150 m, pas zéro.
+
+**Réussi si** : avec la géolocalisation refusée, on peut signaler de bout en bout en choisissant
+« Université Joseph Ki-Zerbo de Ouagadougou » ; le signalement arrive marqué `source_position =
+lieu`, sa position est celle du lieu, et le poste de la mairie l'affiche comme tel ; la
+recherche fonctionne hors ligne ; `pytest` est vert avec un test sur la recherche sans accent et
+un test sur le marquage de la provenance.
+
+## T15 — Les tournées suivent les rues, comme un GPS
+
+**Pourquoi.** Les distances et les durées des tournées sont **déjà** calculées sur le vrai
+réseau de voies (Dijkstra sur `reseau_noeuds` / `reseau_troncons`) : les chiffres sont justes.
+Mais la carte, elle, relie les arrêts par des **traits droits** (`tourneesEnLignes` dans
+`interface/decision/carte.js`). Un jury qui voit un trait traverser un quartier en diagonale
+croira que le calcul est faux. C'est un défaut d'affichage, pas de calcul — et c'est justement
+pour cela qu'il faut le corriger : il décrédibilise un travail qui est bon.
+
+**Ce qu'il faut.** Que la ligne de chaque tournée suive les rues, de la décharge au premier
+arrêt, d'un arrêt au suivant, et jusqu'au retour.
+
+**Comment.** `scipy.sparse.csgraph.dijkstra` accepte `return_predecessors=True`. La matrice des
+distances entre arrêts est déjà calculée avec lui : demande les prédécesseurs **au même appel**
+plutôt que d'en faire un second, puis remonte le chemin nœud par nœud. Ajoute à chaque tournée
+une `geometrie` (une liste de `[lon, lat]`), et fais que `carte.js` l'utilise quand elle est
+là — **en gardant le trait droit comme repli** si elle manque, pour qu'une tournée sans chemin
+trouvé reste visible au lieu de disparaître.
+
+**Surveille le temps de calcul.** Le plan se recalcule aujourd'hui en 5 secondes, et le jury
+change les paramètres en direct : c'est un budget, pas une estimation. Le PC est un i5 sans
+carte graphique. Mesure avant et après. Si tu dépasses 8 secondes, allège la géométrie
+(un point sur deux, ou Douglas-Peucker) plutôt que de renoncer — et dis-le dans le compte rendu.
+
+**Réussi si** : sur la carte, les tournées épousent les rues ; le recalcul reste sous
+8 secondes, chiffre mesuré et collé dans le compte rendu ; une tournée dont le chemin n'a pas
+été trouvé s'affiche encore en trait droit au lieu de disparaître ; `pytest` est vert, avec un
+test qui vérifie que la géométrie renvoyée commence et finit à la décharge et passe par tous les
+arrêts dans l'ordre.

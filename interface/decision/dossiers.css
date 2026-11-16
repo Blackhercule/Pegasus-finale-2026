@@ -1,0 +1,39 @@
+.chaine { list-style: none; display: flex; gap: .4rem; margin: 0 0 1rem; padding: 0; flex-wrap: wrap; }
+.chaine li {
+  flex: 1 1 150px; background: #fff; border: 1px solid var(--trait); border-radius: 10px;
+  padding: .6rem .7rem; border-top: 4px solid var(--trait); position: relative;
+}
+.chaine li.mon-poste { border-top-color: var(--or-fonce); background: var(--or-clair); }
+.chaine li.close { opacity: .65; }
+.chaine .nombre { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; display: block; }
+.chaine .nom { font-size: .8rem; font-weight: 600; }
+.chaine .qui { font-size: .74rem; color: var(--gris); }
+
+.colonnes { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+@media (max-width: 900px) { .colonnes { grid-template-columns: 1fr; } }
+#lignes tr { cursor: pointer; }
+#lignes tr:hover { background: #f6f1e4; }
+#lignes tr.choisi { background: var(--vert-clair); }
+#lignes td { border-bottom: 1px solid #eee7d8; }
+.ligne-titre { font-weight: 700; }
+.ligne-detail { font-size: .8rem; color: var(--gris); }
+
+#detail dl { display: grid; grid-template-columns: max-content 1fr; gap: .25rem .8rem; margin: 0 0 .9rem; font-size: .88rem; }
+#detail dt { color: var(--gris); }
+#detail dd { margin: 0; }
+.vignettes { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: .8rem; }
+.vignettes img { width: 110px; height: 85px; object-fit: cover; border-radius: 8px; border: 1px solid var(--trait); }
+.vignettes figure { margin: 0; }
+.vignettes figcaption { font-size: .72rem; color: var(--gris); text-align: center; }
+audio { width: 100%; margin-bottom: .7rem; }
+.prive { border-left: 3px solid var(--or-fonce); padding-left: .7rem; background: var(--or-clair); margin-bottom: .8rem; }
+.prive h3 { font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--gris); margin: .5rem 0 .4rem; }
+.prive .avertissement { font-size: .78rem; color: var(--gris); margin: .3rem 0 .5rem; }
+
+.journal { list-style: none; margin: 0; padding: 0; font-size: .84rem; }
+.journal li { padding: .35rem 0; border-bottom: 1px solid #eee7d8; }
+.journal .quand { color: var(--gris); font-variant-numeric: tabular-nums; }
+.journal .qui { font-weight: 600; }
+.actions-dossier { display: grid; gap: .5rem; margin-top: .9rem; }
+.actions-dossier textarea { font: inherit; width: 100%; border: 1px solid var(--trait); border-radius: 8px; padding: .5rem; }
+.actions-dossier .ligne { display: flex; gap: .5rem; flex-wrap: wrap; }

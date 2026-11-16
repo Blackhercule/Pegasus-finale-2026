@@ -23,6 +23,16 @@ du travail ; ce qui n'est pas fait est écrit comme tel.
 | E16 | Code sous licence libre et bien commun | `LICENSE` (AGPL-3.0), `README.md` | **Fait.** Chaque brique citée avec sa licence |
 | E17 | Cartographie, optimisation, simulation multi-agents, mobile | — | **Fait.** Les quatre sont présents, le mobile par la page de signalement |
 
+## Au-delà de l'énoncé : notre apport
+
+| Apport | Où | Pourquoi |
+|---|---|---|
+| Chaîne de traitement entre postes | `application/dossiers.py`, `interface/decision/dossiers.html` | Un signalement n'envoie pas un camion : il ouvre un dossier que la mairie confirme, que la brigade Laabal constate sur place, puis que l'équipe de collecte vide. Chaque passage est daté et signé, et les responsabilités se situent |
+| Signalement vocal | page mobile, `/api/fichiers/prive/…` | Pour qui ne sait pas écrire. Aucune transcription automatique : il n'en existe pas de fiable hors ligne pour le mooré, et une fausse transcription tromperait l'agent |
+| Guidage parlé en mooré | `interface/signaler/audio/moore/` | Huit enregistrements d'un locuteur natif couvrent tout le parcours. Aucune synthèse vocale, donc rien à télécharger |
+| Identité facultative du déclarant | `dossiers.py`, page mobile | Nécessaire pour un témoignage dans une procédure, inutile pour un simple signalement : elle reste donc facultative, invisible au public, et effaçable à la clôture |
+| Superficie et mode de dépôt | contrôles et page mobile | Un tas dans un caniveau n'appelle pas la même intervention qu'un tas à même le sol, et la superficie dit ce qu'il faut envoyer |
+
 ## Ce qui reste à faire
 
 1. **Collecter de vrais signalements** dans notre secteur (E7). C'est la seule exigence qui ne
@@ -30,3 +40,5 @@ du travail ; ce qui n'est pas fait est écrit comme tel.
 2. **Obtenir les paramètres de la mairie** (E8), et la position exacte de la décharge.
 3. **Vérifier l'installation sur le PC de l'équipe**, et l'accès depuis un téléphone.
 4. **Verser les dépotoirs vérifiés dans OpenStreetMap** après relecture (E12).
+5. **Enregistrer les huit messages en mooré** avec un locuteur natif
+   (`interface/signaler/audio/moore/LISEZ-MOI.md` dit quoi dire et comment).

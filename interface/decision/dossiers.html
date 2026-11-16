@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Poste de travail — Assainissement de Ouaga</title>
+<link rel="stylesheet" href="/decision/style.css">
+<link rel="stylesheet" href="/decision/verifier.css">
+<link rel="stylesheet" href="/decision/dossiers.css">
+</head>
+<body class="page-verifier">
+<header class="bandeau">
+  <div>
+    <h1 id="titre-poste">Poste de travail</h1>
+    <p class="sous-titre">Assainissement de Ouaga · Groupe Pegasus</p>
+  </div>
+  <nav>
+    <a href="/decision/">Carte</a>
+    <a href="/decision/fuites.html">Fuites d'eau</a>
+    <a href="/decision/nuisances.html">Nuisances</a>
+    <a href="/decision/simulation.html">Simulation</a>
+    <span id="session"></span>
+    <button type="button" id="deconnexion" class="secondaire" hidden>Changer de poste</button>
+  </nav>
+</header>
+
+<main>
+  <form id="connexion" class="carte-bloc connexion" hidden>
+    <h2>Connexion</h2>
+    <p class="aide">Chaque poste a son compte : <strong>agent</strong> pour la mairie,
+      <strong>brigade</strong> pour la brigade Laabal, <strong>collecte</strong> pour l'équipe
+      de ramassage. Les mots de passe sont dans le fichier <code>.env</code> du serveur.</p>
+    <label>Poste <input id="nom" autocomplete="username" value="agent"></label>
+    <label>Mot de passe <input id="mot-de-passe" type="password" autocomplete="current-password"></label>
+    <button type="submit">Se connecter</button>
+    <p id="erreur-connexion" class="message erreur" hidden></p>
+  </form>
+
+  <section id="travail" hidden>
+    <ol class="chaine" id="chaine"></ol>
+
+    <div class="colonnes">
+      <section class="carte-bloc">
+        <h2 id="titre-liste">Dossiers qui m'attendent</h2>
+        <div class="filtres" id="filtres">
+          <button type="button" data-filtre="pour_moi" class="actif">Qui m'attendent</button>
+          <button type="button" data-filtre="tous">Tous les dossiers</button>
+        </div>
+        <table><tbody id="lignes">
+          <tr><td class="vide">Chargement…</td></tr>
+        </tbody></table>
+      </section>
+
+      <section class="carte-bloc" id="detail">
+        <h2>Dossier</h2>
+        <p class="vide">Choisissez un dossier dans la liste.</p>
+      </section>
+    </div>
+  </section>
+</main>
+
+<script src="/decision/dossiers.js"></script>
+</body>
+</html>

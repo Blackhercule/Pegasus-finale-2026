@@ -1,0 +1,11 @@
+/* Lato (licence OFL-1.1, https://www.latofonts.com/), paquet npm @fontsource/lato.
+   Les fichiers sont dans le dépôt : rien n'est chargé depuis Internet.
+   Lato n'a pas de graisse 600 : le navigateur prend 700 là où nous demandons 600. */
+@font-face {
+  font-family: Lato; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("/vendor/polices/lato/lato-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: Lato; font-style: normal; font-weight: 700; font-display: swap;
+  src: url("/vendor/polices/lato/lato-700.woff2") format("woff2");
+}

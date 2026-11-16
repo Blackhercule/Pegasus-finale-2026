@@ -6,9 +6,9 @@ const nombre = (v, d = 0) => (v == null ? "—"
   : Number(v).toLocaleString("fr-FR", { minimumFractionDigits: d, maximumFractionDigits: d }));
 
 const SERIES = [
-  { cle: "produit_m3", nom: "Produits", couleur: "#6c7772" },
-  { cle: "collecte_m3", nom: "Collectés par les camions", couleur: "#2f6f4e" },
-  { cle: "precollecte_m3", nom: "Ramassés par les pré-collecteurs", couleur: "#1d4f91" },
+  { cle: "produit_m3", nom: "Produits", couleur: "#666e85" },
+  { cle: "collecte_m3", nom: "Collectés par les camions", couleur: "#1e2455" },
+  { cle: "precollecte_m3", nom: "Ramassés par les pré-collecteurs", couleur: "#c8102e" },
 ];
 
 function echapper(texte) {
@@ -28,9 +28,9 @@ function dessinerCourbes(journal) {
 
   const graduations = [0, 0.25, 0.5, 0.75, 1].map((part) => {
     const valeur = maximum * part;
-    return `<line x1="${marge.gauche}" x2="${largeur - marge.droite}" y1="${y(valeur)}" y2="${y(valeur)}" stroke="#e6e2d8"/>
+    return `<line x1="${marge.gauche}" x2="${largeur - marge.droite}" y1="${y(valeur)}" y2="${y(valeur)}" stroke="#dfe2ec"/>
             <text x="${marge.gauche - 8}" y="${y(valeur) + 4}" text-anchor="end" font-size="11"
-                  fill="#6c7772">${nombre(valeur)}</text>`;
+                  fill="#666e85">${nombre(valeur)}</text>`;
   }).join("");
 
   const courbes = SERIES.map((s, rang) => {
@@ -42,9 +42,9 @@ function dessinerCourbes(journal) {
     `<svg viewBox="0 0 ${largeur} ${hauteur}" role="img"
           aria-label="Déchets produits, collectés et ramassés, par jour, en mètres cubes">
        ${graduations}${courbes}
-       <text x="${marge.gauche}" y="${hauteur - 8}" font-size="11" fill="#6c7772">jour 1</text>
+       <text x="${marge.gauche}" y="${hauteur - 8}" font-size="11" fill="#666e85">jour 1</text>
        <text x="${largeur - marge.droite}" y="${hauteur - 8}" text-anchor="end" font-size="11"
-             fill="#6c7772">jour ${jours}</text>
+             fill="#666e85">jour ${jours}</text>
      </svg>
      <div class="legende">${SERIES.map((s) =>
        `<span><i style="background:${s.couleur}"></i>${s.nom}</span>`).join("")}</div>`;

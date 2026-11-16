@@ -17,7 +17,7 @@ formulaire. Responsable de la soumission dans l'équipe : _à désigner_.
   affiche ses propres contrôles de cohérence, la comparaison de scénarios, et l'export vers
   OpenStreetMap.
 - **Lien du dépôt** : https://github.com/Blackhercule/Pegasus-finale-2026  (à rendre public avant la soumission)
-- **Lien ou fichier de la vidéo** :
+- **Lien ou fichier de la vidéo** : `Demonstration-Assainissement-de-Ouaga.mp4` (2 min 12 s) — refaire avec `outils/filmer.mjs` puis `outils/monter_video.py`
 - **Présentation** :
 
 ## Avant d'envoyer

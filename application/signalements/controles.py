@@ -26,7 +26,22 @@ MOTIFS = {
     "precision_insuffisante": (A_VERIFIER, "Position trop imprécise"),
     "rafale_meme_source":     (A_VERIFIER, "Beaucoup de signalements d'un même appareil en très peu de temps"),
     "dimensions_invraisemblables": (A_VERIFIER, "Longueur ou largeur hors de proportion"),
+    "ampleur_invalide":       (REJET, "Ampleur de la fuite absente ou inconnue"),
+    "gravite_invalide":       (REJET, "Gravité absente ou inconnue"),
+    "nature_inconnue":        (REJET, "Nature du signalement inconnue"),
 }
+
+# Ce qui est signalé. Un tas d'ordures part dans les tournées des camions ; une fuite d'eau
+# part à l'ONEA, qui seul intervient sur ses conduites.
+# « ordures » part dans les tournées des camions, « fuite_eau » à l'ONEA, et les quatre
+# dernières au service que leur nature désigne (voir application/nuisances.py).
+NATURES = ("ordures", "fuite_eau", "caniveau_bouche", "abattoir_clandestin",
+           "toilettes_plein_air", "eaux_usees_animales")
+NATURES_NUISANCE = NATURES[2:]
+# Ampleur d'une fuite, telle qu'un habitant peut la décrire sans rien mesurer.
+AMPLEURS = ("suintement", "jet", "inondation")
+# Gravité d'une nuisance : trois niveaux, formulés au téléphone dans les mots de chaque nature.
+GRAVITES = ("leger", "moyen", "grave")
 
 TAILLES = ("petit", "moyen", "grand", "tres_grand")
 TYPES = ("menager", "gravats", "mixte", "autre")
@@ -94,15 +109,10 @@ class Controleur:
         self.seuils = parametres["controles"]
         self.volumes = parametres["volumes_par_taille_m3"]
 
-    def examiner(self, brut: dict) -> dict:
-        """Renvoie un signalement propre : champs normalisés, statut et motifs.
-
-        `brut` vient du téléphone ou d'un lot du jury : rien n'y est tenu pour vrai."""
-        motifs = []
-        maxi_texte = self.seuils["texte_max_caracteres"]
-        if not isinstance(brut, dict):
-            return self.resultat({}, ["format_invalide"])
-
+    # Les contrôles communs aux deux natures de signalement : où, quand, et par qui.
+    # Ils sont à part pour qu'une fuite d'eau subisse exactement les mêmes que les ordures,
+    # sans que le code soit écrit deux fois.
+    def _position(self, brut: dict, motifs: list):
         lon, lat = nombre(brut.get("longitude")), nombre(brut.get("latitude"))
         if lon is None or lat is None:
             motifs.append("format_invalide")
@@ -116,6 +126,108 @@ class Controleur:
                 motifs.append("hors_commune")
         elif self.geo.dans_l_eau(lon, lat):
             motifs.append("dans_l_eau")
+        return lon, lat
+
+    def _date(self, brut: dict, motifs: list):
+        date = lire_date(brut.get("date_observation"))
+        if date is None:
+            date = maintenant()                        # non précisée : on prend l'heure de réception
+        elif date > maintenant() + datetime.timedelta(minutes=10):
+            motifs.append("date_future")
+        elif (maintenant() - date).days > self.seuils["anciennete_max_jours"]:
+            motifs.append("date_trop_ancienne")
+        return date
+
+    def _precision(self, brut: dict, motifs: list):
+        precision = nombre(brut.get("precision_m"))
+        if precision is not None and (precision < 0 or precision > self.seuils["precision_max_m"]):
+            motifs.append("precision_insuffisante")
+        return precision
+
+    def _declarant(self, brut: dict, motifs: list) -> dict:
+        """Identité FACULTATIVE : seulement si le déclarant accepte d'être témoin.
+        Elle n'est jamais servie au public (voir Dossiers.detail)."""
+        maxi_texte = self.seuils["texte_max_caracteres"]
+        commentaire = texte(brut.get("commentaire"), maxi_texte)
+        source = texte(brut.get("source"), 64)
+        id_client = texte(brut.get("id_client"), 64)
+        if commentaire is None or source is None or id_client is None:
+            motifs.append("format_invalide")
+        return {
+            "id_client": id_client or None,
+            "commentaire": commentaire or "", "source": source or "inconnue",
+            "declarant_nom": texte(brut.get("declarant_nom"), 80) or None,
+            "declarant_telephone": texte(brut.get("declarant_telephone"), 30) or None,
+        }
+
+    def examiner_fuite(self, brut: dict) -> dict:
+        """Une fuite sur une conduite d'eau : mêmes contrôles de position et de date qu'un tas
+        d'ordures, mais ni taille ni volume. Ce qu'on demande en plus, c'est l'ampleur, que
+        n'importe qui peut décrire sans rien mesurer, et le quartier."""
+        if not isinstance(brut, dict):
+            return self.resultat({"nature": "fuite_eau"}, ["format_invalide"])
+        motifs = []
+        lon, lat = self._position(brut, motifs)
+        date = self._date(brut, motifs)
+        precision = self._precision(brut, motifs)
+
+        ampleur = brut.get("ampleur")
+        if ampleur not in AMPLEURS:
+            motifs.append("ampleur_invalide")
+            ampleur = None
+
+        propre = {"nature": "fuite_eau", "latitude": lat, "longitude": lon,
+                  "precision_m": precision, "date_observation": date.isoformat(timespec="seconds"),
+                  "ampleur": ampleur,
+                  "quartier": texte(brut.get("quartier"), 80) or None}
+        propre.update(self._declarant(brut, motifs))
+        return self.resultat(propre, motifs)
+
+    def examiner_nuisance(self, brut: dict) -> dict:
+        """Caniveau bouché, abattoir clandestin, déversement de toilettes, eaux usées.
+
+        Mêmes contrôles de position et de date que tout le reste. Ce qu'on demande en plus,
+        c'est la gravité : trois niveaux qu'on peut juger à l'œil, sans rien mesurer."""
+        if not isinstance(brut, dict):
+            return self.resultat({}, ["format_invalide"])
+        motifs = []
+        nature = brut.get("nature")
+        if nature not in NATURES_NUISANCE:
+            return self.resultat({}, ["nature_inconnue"])
+        lon, lat = self._position(brut, motifs)
+        date = self._date(brut, motifs)
+        precision = self._precision(brut, motifs)
+
+        gravite = brut.get("gravite")
+        if gravite not in GRAVITES:
+            motifs.append("gravite_invalide")
+            gravite = None
+
+        propre = {"nature": nature, "latitude": lat, "longitude": lon,
+                  "precision_m": precision, "date_observation": date.isoformat(timespec="seconds"),
+                  "gravite": gravite,
+                  "quartier": texte(brut.get("quartier"), 80) or None}
+        propre.update(self._declarant(brut, motifs))
+        return self.resultat(propre, motifs)
+
+    def examiner(self, brut: dict) -> dict:
+        """Renvoie un signalement propre : champs normalisés, statut et motifs.
+
+        `brut` vient du téléphone ou d'un lot du jury : rien n'y est tenu pour vrai.
+        Un signalement sans nature est un tas d'ordures : c'est le cas de loin le plus
+        fréquent, et c'était le seul avant que les autres natures existent."""
+        motifs = []
+        if not isinstance(brut, dict):
+            return self.resultat({}, ["format_invalide"])
+        nature = brut.get("nature")
+        if nature == "fuite_eau":
+            return self.examiner_fuite(brut)
+        if nature in NATURES_NUISANCE:
+            return self.examiner_nuisance(brut)
+        if nature is not None and nature not in NATURES:
+            return self.resultat({}, ["nature_inconnue"])
+
+        lon, lat = self._position(brut, motifs)
 
         taille = brut.get("taille")
         taille = taille if taille in TAILLES else None
@@ -127,13 +239,7 @@ class Controleur:
         elif volume is not None and not (0 < volume <= self.seuils["volume_max_m3"]):
             motifs.append("volume_invraisemblable")
 
-        date = lire_date(brut.get("date_observation"))
-        if date is None:
-            date = maintenant()                            # non précisée : on prend l'heure de réception
-        elif date > maintenant() + datetime.timedelta(minutes=10):
-            motifs.append("date_future")
-        elif (maintenant() - date).days > self.seuils["anciennete_max_jours"]:
-            motifs.append("date_trop_ancienne")
+        date = self._date(brut, motifs)
 
         # Dimensions au sol, facultatives : elles donnent une superficie estimée.
         longueur, largeur = nombre(brut.get("longueur_m")), nombre(brut.get("largeur_m"))
@@ -143,29 +249,18 @@ class Controleur:
                 longueur = largeur = None
                 break
 
-        precision = nombre(brut.get("precision_m"))
-        if precision is not None and (precision < 0 or precision > self.seuils["precision_max_m"]):
-            motifs.append("precision_insuffisante")
-
-        commentaire = texte(brut.get("commentaire"), maxi_texte)
+        precision = self._precision(brut, motifs)
         genre = brut.get("type") if brut.get("type") in TYPES else "autre"
-        source = texte(brut.get("source"), 64)
-        id_client = texte(brut.get("id_client"), 64)
-        if commentaire is None or source is None or id_client is None:
-            motifs.append("format_invalide")
 
         propre = {
-            "id_client": id_client or None, "latitude": lat, "longitude": lon,
+            "nature": "ordures", "latitude": lat, "longitude": lon,
             "precision_m": precision, "date_observation": date.isoformat(timespec="seconds"),
             "taille": taille, "volume_m3": volume, "type": genre,
             "depot": brut.get("depot") if brut.get("depot") in DEPOTS else None,
             "longueur_m": longueur, "largeur_m": largeur,
-            "commentaire": commentaire or "", "source": source or "inconnue",
-            # Identité FACULTATIVE : seulement si le déclarant accepte d'être témoin.
-            # Elle n'est jamais servie au public (voir Dossiers.detail).
-            "declarant_nom": texte(brut.get("declarant_nom"), 80) or None,
-            "declarant_telephone": texte(brut.get("declarant_telephone"), 30) or None,
+            "quartier": texte(brut.get("quartier"), 80) or None,
         }
+        propre.update(self._declarant(brut, motifs))
         return self.resultat(propre, motifs)
 
     @staticmethod

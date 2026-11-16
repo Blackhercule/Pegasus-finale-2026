@@ -24,6 +24,8 @@ class Reglages:
                 "poste": "brigade", "mot_de_passe": os.environ.get("BRIGADE_MOT_DE_PASSE", "")},
             os.environ.get("COLLECTE_NOM", "collecte"): {
                 "poste": "collecte", "mot_de_passe": os.environ.get("COLLECTE_MOT_DE_PASSE", "")},
+            os.environ.get("ONEA_NOM", "onea"): {
+                "poste": "onea", "mot_de_passe": os.environ.get("ONEA_MOT_DE_PASSE", "")},
         }
         self.secret_session = os.environ.get("SECRET_SESSION", "")
         self.parametres = self.lire_parametres()

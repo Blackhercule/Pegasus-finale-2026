@@ -1,11 +1,11 @@
 .acteurs { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; }
 .acteur {
   background: #fff; border: 1px solid var(--trait); border-radius: 10px; padding: 1rem;
-  border-top: 4px solid var(--vert); display: flex; flex-direction: column;
+  border-top: 4px solid var(--panneau); display: flex; flex-direction: column;
 }
-.acteur[data-acteur="precollecteurs"] { border-top-color: #1d4f91; }
-.acteur[data-acteur="brigade"] { border-top-color: var(--or); }
-.acteur[data-acteur="mairie"] { border-top-color: #7a2f22; }
+.acteur[data-acteur="precollecteurs"] { border-top-color: var(--or-fonce); }
+.acteur[data-acteur="brigade"] { border-top-color: var(--vert); }
+.acteur[data-acteur="mairie"] { border-top-color: var(--rouge); }
 .acteur h2 { margin: 0 0 .2rem; font-size: .78rem; }
 .acteur .combien { font-size: 1.7rem; font-weight: 700; margin: 0; font-variant-numeric: tabular-nums; }
 .acteur .quoi { font-size: .83rem; color: var(--gris); margin: .3rem 0 .7rem; }
@@ -21,4 +21,4 @@
 #journal { font-size: .82rem; margin-top: .7rem; }
 #journal td, #journal th { padding: .3rem .5rem; text-align: right; }
 #journal td:first-child, #journal th:first-child { text-align: left; }
-details summary { cursor: pointer; color: var(--vert); font-weight: 600; margin-top: 1rem; }
+details summary { cursor: pointer; color: var(--panneau); font-weight: 700; margin-top: 1rem; }

@@ -7,6 +7,27 @@
 
 const ATTENTE = "signalements-en-attente";
 const PSEUDO = "pseudonyme-appareil";
+const GUIDAGE = "guidage-moore";
+
+/* Guidage parlé en mooré, pour qui ne lit pas le français. Ce sont de vrais enregistrements
+   rangés dans /signaler/audio/moore/ : aucune synthèse vocale, donc rien à télécharger et une
+   prononciation juste. Si un fichier manque, la page fonctionne comme avant, en silence. */
+const AUDIOS = ["bienvenue", "nature", "position", "taille", "depot", "ampleur",
+                "gravite", "photo", "vocal", "identite", "merci"];
+let guidageActif = false;
+let lecture = null;
+
+function jouer(nom, force = false) {
+  if (!guidageActif && !force) return;
+  if (!AUDIOS.includes(nom)) return;
+  try {
+    if (lecture) { lecture.pause(); lecture = null; }
+    const son = new Audio(`/signaler/audio/moore/${nom}.mp3`);
+    son.addEventListener("error", () => { lecture = null; });
+    lecture = son;
+    son.play().catch(() => { lecture = null; });
+  } catch { /* un navigateur qui refuse de jouer un son ne doit rien casser */ }
+}
 
 const element = (id) => document.getElementById(id);
 const stockage = {
@@ -64,9 +85,7 @@ function localiser() {
     { enableHighAccuracy: true, timeout: 20000, maximumAge: 10000 });
 }
 
-/* ------------------------------------------------------------------ photo */
-let photo = null;
-
+/* ------------------------------------------------------------------ photos */
 /* Une photo de téléphone pèse plusieurs mégaoctets : on la réduit avant l'envoi,
    sinon rien ne part en bord de réseau faible. */
 function reduire(fichier, cote = 1280, qualite = 0.7) {
@@ -90,19 +109,67 @@ function reduire(fichier, cote = 1280, qualite = 0.7) {
   });
 }
 
-element("photo").addEventListener("change", async (evenement) => {
-  const fichier = evenement.target.files[0];
-  if (!fichier) return;
-  try {
-    photo = await reduire(fichier);
-    const apercu = element("apercu");
-    apercu.src = URL.createObjectURL(photo);
-    apercu.hidden = false;
-  } catch {
-    photo = null;
-    afficher("La photo n'a pas pu être lue. Vous pouvez envoyer sans photo.", "erreur");
+const photos = { photo: null, photo_cnib: null, photo_visage: null };
+
+function brancherPhoto(champ, apercuId) {
+  element(champ).addEventListener("change", async (evenement) => {
+    const fichier = evenement.target.files[0];
+    if (!fichier) return;
+    try {
+      photos[champ] = await reduire(fichier);
+      const apercu = element(apercuId);
+      apercu.src = URL.createObjectURL(photos[champ]);
+      apercu.hidden = false;
+      if (champ === "photo_cnib") jouer("identite");
+    } catch {
+      photos[champ] = null;
+      afficher("La photo n'a pas pu être lue. Vous pouvez envoyer sans photo.", "erreur");
+    }
+  });
+}
+brancherPhoto("photo", "apercu");
+brancherPhoto("photo_cnib", "apercu-cnib");
+brancherPhoto("photo_visage", "apercu-visage");
+
+/* ------------------------------------------------------------------ message vocal */
+let enregistreur = null;
+let morceaux = [];
+let messageVocal = null;
+
+async function basculerEnregistrement() {
+  const bouton = element("enregistrer");
+  if (enregistreur && enregistreur.state === "recording") {
+    enregistreur.stop();
+    return;
   }
-});
+  if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+    element("etat-vocal").textContent = "Ce téléphone ne permet pas d'enregistrer la voix ici.";
+    return;
+  }
+  try {
+    const flux = await navigator.mediaDevices.getUserMedia({ audio: true });
+    morceaux = [];
+    enregistreur = new MediaRecorder(flux);
+    enregistreur.addEventListener("dataavailable", (e) => { if (e.data.size) morceaux.push(e.data); });
+    enregistreur.addEventListener("stop", () => {
+      flux.getTracks().forEach((piste) => piste.stop());
+      messageVocal = new Blob(morceaux, { type: enregistreur.mimeType || "audio/webm" });
+      const ecoute = element("ecoute-vocal");
+      ecoute.src = URL.createObjectURL(messageVocal);
+      ecoute.hidden = false;
+      bouton.classList.remove("enregistre");
+      bouton.textContent = "Réenregistrer";
+      element("etat-vocal").textContent = "Message enregistré. Vous pouvez le réécouter.";
+    });
+    enregistreur.start();
+    bouton.classList.add("enregistre");
+    bouton.textContent = "Appuyer pour arrêter";
+    element("etat-vocal").textContent = "Enregistrement en cours… parlez.";
+  } catch {
+    element("etat-vocal").textContent = "Le microphone n'est pas autorisé pour ce site.";
+  }
+}
+element("enregistrer").addEventListener("click", basculerEnregistrement);
 
 /* ------------------------------------------------------------------ choix (taille, type) */
 function groupeDeChoix(id) {
@@ -116,6 +183,168 @@ function groupeDeChoix(id) {
 }
 const tailleChoisie = groupeDeChoix("taille");
 const typeChoisi = groupeDeChoix("type");
+const depotChoisi = groupeDeChoix("depot");
+const ampleurChoisie = groupeDeChoix("ampleur");
+const graviteChoisie = groupeDeChoix("gravite");
+const natureChoisie = groupeDeChoix("nature");
+
+/* Ce qui change d'une nature à l'autre : le titre de la photo, et les mots des trois niveaux
+   de gravité. « Un peu bouché » et « un seau d'eau » décrivent la même graduation, mais
+   personne ne dirait l'un pour l'autre : les mots doivent être ceux de la chose signalée.
+   Le texte « pourquoi » dit à l'habitant pourquoi son signalement compte. */
+const PAR_NATURE = {
+  ordures: { photo: "Photo du tas" },
+  fuite_eau: { photo: "Photo de la fuite" },
+  caniveau_bouche: {
+    photo: "Photo du caniveau",
+    titre: "Le caniveau est bouché comment ?",
+    niveaux: ["Un peu bouché", "L'eau ne passe plus", "Ça déborde dans la rue"],
+    pourquoi: "Un caniveau bouché renvoie l'eau dans les cours dès la première pluie, "
+              + "et l'eau qui stagne élève les moustiques.",
+  },
+  toilettes_plein_air: {
+    photo: "Photo du déversement",
+    titre: "Il y en a combien ?",
+    niveaux: ["Une flaque", "Ça coule dans la rue", "Toute la rue est touchée"],
+    pourquoi: "Des matières de vidange répandues dans la rue, c'est le choléra et la fièvre "
+              + "typhoïde à portée de pied nu.",
+  },
+  abattoir_clandestin: {
+    photo: "Photo du lieu",
+    titre: "C'est à quelle fréquence ?",
+    niveaux: ["De temps en temps", "Plusieurs fois par semaine", "Tous les jours"],
+    pourquoi: "Une bête abattue hors d'un abattoir n'est pas inspectée, et le sang et les "
+              + "viscères restent sur place.",
+  },
+  eaux_usees_animales: {
+    photo: "Photo du déversement",
+    titre: "Il y en a combien ?",
+    niveaux: ["Quelques seaux", "Un fût ou plus", "Ça coule en permanence"],
+    pourquoi: "Les eaux de lavage des poissonneries et des poulaillers attirent les mouches "
+              + "et empestent tout un quartier.",
+  },
+};
+
+/* Un tas d'ordures et une fuite d'eau ne se décrivent pas pareil : on n'affiche que les
+   étapes qui servent. Les autres sont retirées de la page, donc elles ne sont pas non plus
+   comptées dans la numérotation des étapes (voir la feuille de style). */
+function ajusterLesEtapes() {
+  const nature = natureChoisie();
+  // Un bloc peut servir à plusieurs natures : data-pour en contient la liste.
+  document.querySelectorAll("[data-pour]").forEach((bloc) => {
+    bloc.hidden = !bloc.dataset.pour.split(" ").includes(nature);
+  });
+  const propre = PAR_NATURE[nature] || {};
+  element("titre-photo").textContent = propre.photo || "Photo";
+  if (propre.titre) element("titre-gravite").firstChild.textContent = propre.titre + " ";
+  if (propre.niveaux) {
+    element("gravite").querySelectorAll(".mot").forEach((mot, rang) => {
+      mot.textContent = propre.niveaux[rang];
+    });
+  }
+  element("pourquoi-nature").textContent = propre.pourquoi || "";
+  element("commentaire").placeholder = nature === "ordures"
+    ? "Ou écrivez ici : repère, rue, depuis quand…"
+    : "Ou écrivez ici : la rue, le repère, depuis quand ça dure…";
+  element("envoyer").textContent = nature === "ordures"
+    ? "Enregistrer le signalement" : "Envoyer le signalement à la mairie";
+}
+element("nature").addEventListener("click", ajusterLesEtapes);
+
+/* Superficie : on la montre pendant la saisie, pour que la personne voie ce qu'elle déclare. */
+function majSuperficie() {
+  const longueur = Number(element("longueur_m").value);
+  const largeur = Number(element("largeur_m").value);
+  element("superficie").textContent = (longueur > 0 && largeur > 0)
+    ? `Superficie estimée : ${Math.round(longueur * largeur)} m²` : "";
+}
+["longueur_m", "largeur_m"].forEach((id) =>
+  element(id).addEventListener("input", majSuperficie));
+
+/* ------------------------------------------------------------------ écrans d'accueil parlés
+
+   Quatre écrans s'enchaînent à l'ouverture de la page. Chacun fait entendre un message en
+   mooré, et « Continuer » passe au suivant ; après le quatrième, le formulaire s'affiche.
+   « Passer le guidage » ouvre le formulaire tout de suite.
+
+   Pour changer un titre, un texte ou un fichier, il n'y a que cette liste à modifier : les
+   écrans se fabriquent à partir d'elle, et leur nombre suit sa longueur. Les fichiers sont
+   dans /signaler/audio/moore/. Si un fichier manque, l'écran s'affiche quand même et le dit :
+   on ne bloque jamais quelqu'un qui veut signaler. */
+const ACCUEIL = [
+  { fichier: "accueil-1.mp3", titre: "Bienvenue",
+    texte: "Bienvenue sur la plateforme d'assainissement de Ouagadougou." },
+  { fichier: "accueil-2.mp3", titre: "Ce que vous pouvez signaler",
+    texte: "Un tas d'ordures, ou une fuite d'eau sur une conduite." },
+  { fichier: "accueil-3.mp3", titre: "Comment faire",
+    texte: "Touchez les grandes images, ou parlez : vous n'avez rien à écrire." },
+  { fichier: "accueil-4.mp3", titre: "Votre nom n'est pas obligatoire",
+    texte: "Vous pouvez signaler sans donner votre nom ni votre numéro." },
+];
+
+let rangAccueil = 0;
+let sonAccueil = null;
+
+function arreterLAccueil() {
+  if (sonAccueil) { sonAccueil.pause(); sonAccueil = null; }
+}
+
+/* Joue le message de l'écran courant. `automatique` distingue la lecture lancée toute seule
+   à l'arrivée sur l'écran de celle demandée par le bouton : un navigateur refuse la première
+   tant que la personne n'a rien touché, et ce refus ne doit pas ressembler à une panne. */
+function jouerLAccueil(automatique) {
+  arreterLAccueil();
+  const ecran = ACCUEIL[rangAccueil];
+  const etat = element("accueil-etat");
+  etat.textContent = "";
+  const son = new Audio("/signaler/audio/moore/" + ecran.fichier);
+  son.addEventListener("error", () => {
+    sonAccueil = null;
+    etat.textContent = "Message non enregistré pour l'instant.";
+  });
+  sonAccueil = son;
+  son.play()
+    .then(() => { etat.textContent = "Lecture en cours…"; })
+    .catch(() => {
+      sonAccueil = null;
+      // Si le fichier manque, l'événement « error » a déjà écrit le vrai motif : on ne
+      // l'écrase pas par un message qui ferait croire à un simple refus du navigateur.
+      if (etat.textContent) return;
+      etat.textContent = automatique ? "Touchez le haut-parleur pour écouter." : "";
+    });
+}
+
+function afficherLAccueil(automatique) {
+  const ecran = ACCUEIL[rangAccueil];
+  element("accueil-rang").textContent = String(rangAccueil + 1);
+  element("accueil-numero").textContent = String(rangAccueil + 1);
+  element("accueil-titre").textContent = ecran.titre;
+  element("accueil-texte").textContent = ecran.texte;
+  element("accueil-continuer").textContent =
+    rangAccueil === ACCUEIL.length - 1 ? "Commencer le signalement" : "Continuer";
+  element("accueil-ecouter-mot").textContent = "Écouter";
+  jouerLAccueil(automatique);
+}
+
+function fermerLAccueil() {
+  arreterLAccueil();
+  element("accueil").hidden = true;
+}
+
+element("accueil-ecouter").addEventListener("click", () => jouerLAccueil(false));
+element("accueil-passer").addEventListener("click", fermerLAccueil);
+element("revoir-accueil").addEventListener("click", () => ouvrirLAccueil());
+element("accueil-continuer").addEventListener("click", () => {
+  rangAccueil += 1;
+  if (rangAccueil >= ACCUEIL.length) { fermerLAccueil(); return; }
+  afficherLAccueil(true);
+});
+
+function ouvrirLAccueil() {
+  rangAccueil = 0;
+  element("accueil").hidden = false;
+  afficherLAccueil(true);
+}
 
 /* ------------------------------------------------------------------ envoi */
 function afficher(texte, genre) {
@@ -132,13 +361,20 @@ function identifiantUnique() {
 
 async function envoyer(signalement) {
   const corps = new FormData();
-  Object.entries(signalement.champs).forEach(([cle, valeur]) => corps.append(cle, valeur));
+  Object.entries(signalement.champs).forEach(([cle, valeur]) => {
+    if (valeur !== "" && valeur !== null && valeur !== undefined) corps.append(cle, valeur);
+  });
   if (signalement.photo) corps.append("photo", signalement.photo, "photo.jpg");
+  if (signalement.photo_cnib) corps.append("photo_cnib", signalement.photo_cnib, "cnib.jpg");
+  if (signalement.photo_visage) corps.append("photo_visage", signalement.photo_visage, "visage.jpg");
+  if (signalement.message_vocal) corps.append("message_vocal", signalement.message_vocal, "voix.webm");
   const reponse = await fetch("/api/signalements", { method: "POST", body: corps });
   if (!reponse.ok) throw new Error("Le serveur a répondu " + reponse.status);
   return reponse.json();
 }
 
+/* L'attente ne garde que les informations essentielles : ni photo, ni voix, ni pièce
+   d'identité ne dorment dans le téléphone. */
 function mettreEnAttente(signalement) {
   const file = stockage.lire(ATTENTE, []);
   file.push(signalement);
@@ -179,33 +415,53 @@ async function viderLAttente() {
 
 element("formulaire").addEventListener("submit", async (evenement) => {
   evenement.preventDefault();
-  if (!position) { afficher("Position inconnue : impossible d'enregistrer le dépotoir.", "erreur"); return; }
+  if (!position) { afficher("Position inconnue : impossible d'enregistrer le signalement.", "erreur"); return; }
   const bouton = element("envoyer");
   bouton.disabled = true;
-  const signalement = {
-    champs: {
-      id_client: identifiantUnique(),
-      latitude: position.latitude, longitude: position.longitude,
-      precision_m: Math.round(position.precision_m),
-      date_observation: new Date().toISOString(),
-      taille: tailleChoisie(), type: typeChoisi(),
-      commentaire: element("commentaire").value, source: pseudonyme(),
-    },
-    photo: null,
+  const nature = natureChoisie();
+  const communs = {
+    id_client: identifiantUnique(),
+    nature,
+    latitude: position.latitude, longitude: position.longitude,
+    precision_m: Math.round(position.precision_m),
+    date_observation: new Date().toISOString(),
+    commentaire: element("commentaire").value, source: pseudonyme(),
+    declarant_nom: element("declarant_nom").value,
+    declarant_telephone: element("declarant_telephone").value,
   };
+  let propres;
+  if (nature === "fuite_eau") {
+    propres = { ampleur: ampleurChoisie(), quartier: element("quartier").value };
+  } else if (nature === "ordures") {
+    propres = { taille: tailleChoisie(), type: typeChoisi(), depot: depotChoisi(),
+                longueur_m: element("longueur_m").value, largeur_m: element("largeur_m").value };
+  } else {
+    propres = { gravite: graviteChoisie(), quartier: element("quartier").value };
+  }
+  const signalement = { champs: { ...communs, ...propres }, photo: null };
   try {
-    const resultat = await envoyer({ ...signalement, photo });
+    const resultat = await envoyer({ ...signalement, ...photos, message_vocal: messageVocal });
+    if (resultat.statut !== "rejete") jouer("merci");
+    const reussi = nature === "ordures"
+      ? "Signalement enregistré. Merci !"
+      : "Signalement enregistré. La mairie l'orientera vers le service compétent. Merci !";
     afficher(resultat.statut === "rejete"
       ? "Signalement enregistré mais écarté : " + (resultat.motifs || []).join(", ")
-      : "Signalement enregistré. Merci !", resultat.statut === "rejete" ? "erreur" : "succes");
+      : reussi, resultat.statut === "rejete" ? "erreur" : "succes");
   } catch {
     mettreEnAttente(signalement);          // sans réseau : il partira tout seul
     afficher("Pas de réseau : le signalement est gardé et partira automatiquement.", "attente");
   } finally {
     bouton.disabled = false;
     element("commentaire").value = "";
-    photo = null;
-    element("apercu").hidden = true;
+    element("quartier").value = "";
+    Object.keys(photos).forEach((cle) => { photos[cle] = null; });
+    messageVocal = null;
+    ["apercu", "apercu-cnib", "apercu-visage", "ecoute-vocal"].forEach((id) => {
+      element(id).hidden = true;
+    });
+    element("etat-vocal").textContent = "";
+    element("enregistrer").textContent = "Appuyer pour parler";
   }
 });
 
@@ -218,12 +474,41 @@ function etatDuReseau() {
   if (enLigne) viderLAttente().catch(() => {});
 }
 
-element("relancer-position").addEventListener("click", localiser);
+element("relancer-position").addEventListener("click", () => { localiser(); jouer("position"); });
+
+element("guidage").addEventListener("click", () => {
+  guidageActif = !guidageActif;
+  stockage.ecrire(GUIDAGE, guidageActif);
+  element("guidage").setAttribute("aria-pressed", String(guidageActif));
+  element("guidage").classList.toggle("actif", guidageActif);
+  element("accueil-moore").hidden = !guidageActif;
+  if (guidageActif) jouer("bienvenue", true);
+  else if (lecture) { lecture.pause(); lecture = null; }
+});
+
+/* Chaque étape peut être réécoutée en touchant son haut-parleur, même sans le guidage. */
+document.querySelectorAll(".parler").forEach((bouton) =>
+  bouton.addEventListener("click", () => jouer(bouton.dataset.audio, true)));
+
+/* Une étape que l'on commence se fait lire à voix haute, quand le guidage est allumé. */
+["nature", "taille", "depot", "ampleur", "gravite"].forEach((id) =>
+  element(id).addEventListener("click", () => jouer(id)));
+element("photo").addEventListener("click", () => jouer("photo"));
+element("enregistrer").addEventListener("click", () => jouer("vocal"));
+element("bloc-identite").addEventListener("toggle", () => {
+  if (element("bloc-identite").open) jouer("identite");
+});
 element("envoyer-attente").addEventListener("click", () => viderLAttente().catch(() => {}));
 window.addEventListener("online", etatDuReseau);
 window.addEventListener("offline", etatDuReseau);
 
 pseudonyme();
+guidageActif = stockage.lire(GUIDAGE, false) === true;
+element("guidage").setAttribute("aria-pressed", String(guidageActif));
+element("guidage").classList.toggle("actif", guidageActif);
+element("accueil-moore").hidden = !guidageActif;
+ajusterLesEtapes();
+ouvrirLAccueil();
 localiser();
 etatDuReseau();
 afficherAttente();

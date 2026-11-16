@@ -15,6 +15,12 @@ services:
       COMMUNE: ${COMMUNE:-ouagadougou}
       AGENT_NOM: ${AGENT_NOM:-agent}
       AGENT_MOT_DE_PASSE: ${AGENT_MOT_DE_PASSE:?à définir dans .env}
+      BRIGADE_NOM: ${BRIGADE_NOM:-brigade}
+      BRIGADE_MOT_DE_PASSE: ${BRIGADE_MOT_DE_PASSE:-}
+      COLLECTE_NOM: ${COLLECTE_NOM:-collecte}
+      COLLECTE_MOT_DE_PASSE: ${COLLECTE_MOT_DE_PASSE:-}
+      ONEA_NOM: ${ONEA_NOM:-onea}
+      ONEA_MOT_DE_PASSE: ${ONEA_MOT_DE_PASSE:-}
       SECRET_SESSION: ${SECRET_SESSION:?à définir dans .env}
     volumes:
       - travail:/travail

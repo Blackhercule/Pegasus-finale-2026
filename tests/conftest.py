@@ -19,6 +19,7 @@ def application(tmp_path, monkeypatch):
     monkeypatch.setenv("AGENT_MOT_DE_PASSE", MOT_DE_PASSE)
     monkeypatch.setenv("BRIGADE_MOT_DE_PASSE", "essai-brigade")
     monkeypatch.setenv("COLLECTE_MOT_DE_PASSE", "essai-collecte")
+    monkeypatch.setenv("ONEA_MOT_DE_PASSE", "essai-onea")
     monkeypatch.setenv("SECRET_SESSION", "secret-de-test")
     reglages = Reglages(base=str(tmp_path / "essai.sqlite"))
     app = creer_application(reglages)
