@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulation des acteurs — Assainissement de Ouaga</title>
+<link rel="stylesheet" href="/decision/style.css">
+<link rel="stylesheet" href="/decision/verifier.css">
+<link rel="stylesheet" href="/decision/scenarios.css">
+<link rel="stylesheet" href="/decision/simulation.css">
+</head>
+<body class="page-verifier">
+<header class="bandeau">
+  <div>
+    <h1>Simulation de la filière</h1>
+    <p class="sous-titre">Quatre acteurs, un jour par pas de temps · Groupe Pegasus</p>
+  </div>
+  <nav>
+    <a href="/decision/">Carte</a>
+    <a href="/decision/verifier.html">Vérifier</a>
+    <a href="/decision/scenarios.html">Comparer</a>
+  </nav>
+</header>
+
+<main>
+  <section class="acteurs">
+    <article class="acteur" data-acteur="menages">
+      <h2>Ménages</h2>
+      <p class="combien" id="n-menages">—</p>
+      <p class="quoi">Produisent les déchets. Abonnés, ils les remettent au pré-collecteur ;
+        sinon ils les portent au point de regroupement s'il est proche et pas débordé, et à
+        défaut les jettent dans un dépotoir.</p>
+      <dl><dt>Produisent</dt><dd id="a-produit">—</dd>
+          <dt>Abonnés</dt><dd id="a-abonnes">—</dd></dl>
+    </article>
+
+    <article class="acteur" data-acteur="precollecteurs">
+      <h2>Pré-collecteurs</h2>
+      <p class="combien" id="n-precollecteurs">—</p>
+      <p class="quoi">Ramassent chez leurs abonnés et déposent au point de regroupement.
+        En saison des pluies, les charrettes passent mal : ils en desservent moins.</p>
+      <dl><dt>Ramassent</dt><dd id="a-precollecte">—</dd></dl>
+    </article>
+
+    <article class="acteur" data-acteur="brigade">
+      <h2>Brigade Laabal</h2>
+      <p class="combien" id="n-brigade">—</p>
+      <p class="quoi">Patrouille là où l'on jette le plus. Sensibilise d'abord, verbalise en
+        cas de récidive : les dépôts sauvages reculent et les abonnements progressent.</p>
+      <dl><dt>Verbalisations</dt><dd id="a-verbalisations">—</dd></dl>
+    </article>
+
+    <article class="acteur" data-acteur="mairie">
+      <h2>Mairie</h2>
+      <p class="combien" id="n-mairie">—</p>
+      <p class="quoi">Fait rouler les camions selon le plan, vide les points et nettoie des
+        dépotoirs dans la limite du budget. Elle subit les pannes.</p>
+      <dl><dt>Collectent</dt><dd id="a-collecte">—</dd>
+          <dt>Pannes</dt><dd id="a-pannes">—</dd></dl>
+    </article>
+  </section>
+
+  <div class="barre-action">
+    <label>Durée
+      <select id="jours">
+        <option value="30" selected>30 jours</option>
+        <option value="90">90 jours</option>
+        <option value="180">180 jours</option>
+      </select>
+    </label>
+    <label class="case"><input type="checkbox" id="saison"> Saison des pluies</label>
+    <label class="case"><input type="checkbox" id="sans_brigade"> Sans la brigade Laabal</label>
+    <button type="button" id="lancer">Lancer la simulation</button>
+    <span id="etat"></span>
+  </div>
+
+  <section id="resultats" hidden>
+    <div class="bilan" id="bilan"></div>
+    <figure>
+      <figcaption id="titre-courbe">Déchets produits, collectés et jetés en dépotoir, par jour (m³)</figcaption>
+      <div id="courbes"></div>
+    </figure>
+    <details>
+      <summary>Voir le journal jour par jour</summary>
+      <table id="journal"></table>
+    </details>
+  </section>
+</main>
+
+<script src="/decision/simulation.js"></script>
+</body>
+</html>

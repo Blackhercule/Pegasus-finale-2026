@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vérifier les signalements — Assainissement de Ouaga</title>
+<link rel="stylesheet" href="/decision/style.css">
+<link rel="stylesheet" href="/decision/verifier.css">
+</head>
+<body class="page-verifier">
+<header class="bandeau">
+  <div>
+    <h1>Vérifier les signalements</h1>
+    <p class="sous-titre">Assainissement de Ouaga · Groupe Pegasus</p>
+  </div>
+  <nav>
+    <a href="/decision/">Carte</a> <a href="/decision/simulation.html">Simulation</a>
+    <span id="session"></span>
+  </nav>
+</header>
+
+<main>
+  <form id="connexion" class="carte-bloc connexion" hidden>
+    <h2>Connexion de l'agent</h2>
+    <label>Identifiant <input id="nom" autocomplete="username" value="agent"></label>
+    <label>Mot de passe <input id="mot-de-passe" type="password" autocomplete="current-password"></label>
+    <button type="submit">Se connecter</button>
+    <p id="erreur-connexion" class="message erreur" hidden></p>
+  </form>
+
+  <section id="travail" hidden>
+    <div class="filtres" id="filtres">
+      <button type="button" data-statut="a_verifier" class="actif">À vérifier</button>
+      <button type="button" data-statut="recevable">Recevables</button>
+      <button type="button" data-statut="verifie">Vérifiés</button>
+      <button type="button" data-statut="rejete">Écartés</button>
+      <button type="button" data-statut="">Tous</button>
+    </div>
+
+    <div class="carte-bloc lot">
+      <h2>Lot de signalements</h2>
+      <p class="aide">Un fichier JSON, GeoJSON ou CSV. Chaque ligne passe par les mêmes contrôles :
+        les signalements douteux sont écartés avec leur motif, jamais acceptés en bloc.</p>
+      <input type="file" id="fichier-lot" accept=".json,.geojson,.csv,text/csv,application/json">
+      <button type="button" id="envoyer-lot">Envoyer le lot</button>
+      <p id="resultat-lot" class="message" hidden></p>
+    </div>
+
+    <table id="tableau">
+      <thead>
+        <tr><th>N°</th><th>Reçu</th><th>Lieu</th><th>Taille</th><th>Source</th><th>Statut</th><th>Décision</th></tr>
+      </thead>
+      <tbody id="lignes"><tr><td colspan="7" class="vide">Chargement…</td></tr></tbody>
+    </table>
+  </section>
+</main>
+
+<script src="/decision/verifier.js"></script>
+</body>
+</html>

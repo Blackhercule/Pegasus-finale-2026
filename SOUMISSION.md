@@ -5,12 +5,18 @@ formulaire. Responsable de la soumission dans l'équipe : _à désigner_.
 
 ## Textes prêts à coller
 
-- **Nom du projet** :
+- **Nom du projet** : Assainissement de Ouaga — outil libre d'aide à la décision
 - **Équipe** : PEGASUS — Université Joseph Ki-Zerbo (UJKZ)
 - **Membres** : YE Franck Ahmed, TRAORE Hussen Izedine, KIEMA Abdoul-Latif
-- **Description courte** (une ou deux phrases) :
-- **Description longue** :
-- **Lien du dépôt** :
+- **Description courte** : Du signalement des dépotoirs sauvages jusqu'au plan de gestion de la ville, avec simulation de tous les acteurs. Installé en une commande sur une seule machine, il fonctionne sans Internet.
+- **Description longue** : voir `docs/proposition.md`. En résumé : nous adoptons des briques
+  open source éprouvées (OpenStreetMap, MapLibre, SciPy, Mesa), nous les adaptons à Ouagadougou
+  (limites de la commune, réseau de voies revêtues ou non, saison des pluies, acteurs réels de
+  la filière), et nous ajoutons ce qui manque entre elles : des contrôles qui écartent les
+  signalements piégés en expliquant pourquoi, un plan qui se recalcule en cinq secondes et
+  affiche ses propres contrôles de cohérence, la comparaison de scénarios, et l'export vers
+  OpenStreetMap.
+- **Lien du dépôt** : https://github.com/Blackhercule/Pegasus-finale-2026  (à rendre public avant la soumission)
 - **Lien ou fichier de la vidéo** :
 - **Présentation** :
 

@@ -1,0 +1,10 @@
+{
+  "name": "Signaler un dépotoir — Assainissement de Ouaga",
+  "short_name": "Signaler",
+  "start_url": "/signaler/",
+  "scope": "/signaler/",
+  "display": "standalone",
+  "background_color": "#f6f4ef",
+  "theme_color": "#12302a",
+  "lang": "fr"
+}

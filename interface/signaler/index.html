@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12302a">
+<title>Signaler un dépotoir</title>
+<link rel="manifest" href="/signaler/manifeste.webmanifest">
+<link rel="stylesheet" href="/signaler/style.css">
+</head>
+<body>
+<header>
+  <h1>Signaler un dépotoir</h1>
+  <p id="reseau" class="reseau">—</p>
+</header>
+
+<main>
+  <form id="formulaire" novalidate>
+    <section class="carte-bloc">
+      <h2>1 · Position</h2>
+      <p id="position" class="position">Recherche de votre position…</p>
+      <button type="button" id="relancer-position" class="secondaire">Relancer la localisation</button>
+    </section>
+
+    <section class="carte-bloc">
+      <h2>2 · Taille du tas</h2>
+      <div class="choix" id="taille" role="radiogroup" aria-label="Taille du tas">
+        <button type="button" data-valeur="petit"><span class="icone">▪</span>Petit<small>un sac</small></button>
+        <button type="button" data-valeur="moyen" class="actif"><span class="icone">▪▪</span>Moyen<small>une brouette</small></button>
+        <button type="button" data-valeur="grand"><span class="icone">▪▪▪</span>Grand<small>une charrette</small></button>
+        <button type="button" data-valeur="tres_grand"><span class="icone">▪▪▪▪</span>Très grand<small>un camion</small></button>
+      </div>
+    </section>
+
+    <section class="carte-bloc">
+      <h2>3 · Type de déchets</h2>
+      <div class="choix compact" id="type" role="radiogroup" aria-label="Type de déchets">
+        <button type="button" data-valeur="menager" class="actif">Ménagers</button>
+        <button type="button" data-valeur="gravats">Gravats</button>
+        <button type="button" data-valeur="mixte">Mélangés</button>
+        <button type="button" data-valeur="autre">Autre</button>
+      </div>
+    </section>
+
+    <section class="carte-bloc">
+      <h2>4 · Photo <span class="facultatif">(conseillé)</span></h2>
+      <label class="bouton-photo" for="photo">Prendre une photo</label>
+      <input type="file" id="photo" accept="image/*" capture="environment" hidden>
+      <img id="apercu" alt="Aperçu de la photo" hidden>
+    </section>
+
+    <section class="carte-bloc">
+      <h2>5 · Précision <span class="facultatif">(facultatif)</span></h2>
+      <textarea id="commentaire" rows="2" maxlength="500"
+                placeholder="Repère, rue, depuis quand…"></textarea>
+    </section>
+
+    <button type="submit" id="envoyer">Enregistrer le signalement</button>
+    <p id="message" class="message" hidden></p>
+  </form>
+
+  <section class="carte-bloc" id="bloc-attente" hidden>
+    <h2>En attente d'envoi</h2>
+    <p id="attente"></p>
+    <button type="button" id="envoyer-attente" class="secondaire">Envoyer maintenant</button>
+  </section>
+
+  <p class="mentions">Aucun nom, aucun numéro de téléphone n'est enregistré : seulement le lieu,
+    la taille et la photo du dépotoir.</p>
+</main>
+
+<script src="/signaler/signaler.js"></script>
+</body>
+</html>

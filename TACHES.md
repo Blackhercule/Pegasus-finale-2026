@@ -9,21 +9,44 @@ ne modifie pas ce fichier.
 
 | Tâche | Sujet | Où | État |
 |---|---|---|---|
-| T0, T1, T2 | Relevé du poste, socle d'identité du sprint | | Annulées : sans objet pour le challenge 01. Le relevé du poste est repris dans T3 |
-| T3 | Données de Ouagadougou et fond de carte hors ligne | PC | À faire maintenant |
-| T4 | Signalements : réception, contrôles anti-pièges, page mobile | cloud ou PC | À faire maintenant |
-| T5 | Carte de décision : dépotoirs, signalements, couches | cloud ou PC | Après T3 et T4 |
-| T6 | Plan de gestion : points de regroupement, tournées, cohérence | cloud ou PC | Après T3 |
-| T7 | Simulation multi-agents | cloud ou PC | Après T3 |
-| T8 | Scénarios : paramètres, changements du jury, comparaison | cloud ou PC | Après T6 et T7 |
-| T9 | Bien commun : export OpenStreetMap, autre commune | cloud ou PC | Après T5 |
-| T10 | Installation en une commande, HTTPS, téléphones, vérification complète | PC | Dès que T4 est fusionnée, puis à chaque étape |
+| T0, T1, T2 | Relevé du poste, socle d'identité du sprint | | **Annulées** : sans objet pour le challenge 01 |
+| T3 | Données de Ouagadougou et fond de carte hors ligne | PC | **Fait** (16/11, 11 h). 526 km², 111 840 nœuds, 166 611 tronçons, 332 556 bâtiments, 440 plans d'eau, 226 sites de déchets d'OpenStreetMap, fond `fond.pmtiles` (16,7 Mo) |
+| T4 | Signalements : réception, contrôles anti-pièges, page mobile | coordinateur | **Fait**, vérifié dans un navigateur : contrôles, regroupement en dépotoirs, page mobile avec envoi différé hors ligne |
+| T5 | Carte de décision | coordinateur | **Fait**, vérifiée dans un navigateur : aucune requête vers Internet |
+| T6 | Plan de gestion : points de regroupement, tournées, cohérence | coordinateur | **Fait**, vérifié dans un navigateur : recalcul en 5 s, camions en panne et saison des pluies dégradent le plan proprement |
+| T7 | Simulation multi-agents | coordinateur | **Fait** : 4 498 ménages, 224 pré-collecteurs, brigade Laabal, mairie ; 30 jours en 0,2 s, reproductible |
+| T8 | Scénarios : paramètres du jury, comparaison | coordinateur | **Fait** : page de comparaison avec tableau et graphique |
+| T9 | Bien commun : export OpenStreetMap, autre commune | coordinateur | **Fait** : export .osm des dépotoirs vérifiés, à relire avant versement ; une autre commune se prépare avec la même commande |
+| T10 | Installation en une commande, HTTPS, téléphones | PC | Écrit et poussé ; **jamais lancé sur le PC** — c'est le dernier inconnu |
+| T11 | Essai complet sur le PC de l'équipe | PC | À faire : `./installer.sh`, puis essai depuis un téléphone |
 
-T5 à T10 seront détaillées ici au fur et à mesure. Ne les commence pas avant.
+**Important.** Depuis le 16/11 au matin, c'est le coordinateur qui écrit le code (les sessions de
+Claude Code se heurtaient à la limite d'utilisation). Avant de commencer quoi que ce soit : fais
+`git pull`, lis ce tableau, et ne refais rien de ce qui est marqué « Fait ». Si une tâche t'est
+demandée alors qu'elle est déjà faite, dis-le au lieu de la refaire.
+
+## Ce qui existe déjà dans le dépôt
+
+| Dossier | Contenu |
+|---|---|
+| `donnees/preparer.py`, `donnees/fond_de_carte.py`, `preparer-ouagadougou.sh` | Préparation des données d'une commune et du fond de carte |
+| `donnees/ouagadougou/` | Les fichiers de la commune, déjà produits |
+| `application/` | Application Flask : `geo.py` (dans la commune ? dans l'eau ?), `reseau.py` (durées de trajet), `signalements/` (contrôles, dépotoirs), API |
+| `interface/signaler/` | Page mobile de signalement, utilisable hors ligne |
+| `interface/decision/` | Carte de décision |
+| `interface/vendor/` | Bibliothèques de la carte, servies par notre machine |
+
+
 
 ---
 
 ## T3 — Données de Ouagadougou et fond de carte hors ligne [PC]
+
+> **État au 16/11, 11 h.** La session du PC a été arrêtée par la limite d'utilisation avant
+> d'écrire le script. Le coordinateur a donc écrit et testé `donnees/preparer.py`,
+> `donnees/fond_de_carte.py` et `preparer-ouagadougou.sh`, et copié les bibliothèques de la carte
+> dans `interface/vendor/`. **Ne les réécris pas.** Il reste à lancer `./preparer-ouagadougou.sh`
+> sur le PC, ce que Franck fait à la main. La page d'essai (point 4) passe dans la tâche T5.
 
 **Pourquoi.** Rien ne fonctionne sans la carte : ni les contrôles (dans la commune ? dans un
 barrage ?), ni les tournées, ni la simulation. L'énoncé exige de ne dépendre d'aucune donnée
