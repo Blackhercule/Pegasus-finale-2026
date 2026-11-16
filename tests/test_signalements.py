@@ -195,3 +195,45 @@ def test_un_nouveau_quartier_augmente_la_demande(client):
 def test_des_parametres_absurdes_ne_cassent_pas_le_serveur(client, parametres):
     reponse = client.post("/api/plan", json=parametres)
     assert reponse.status_code in (200, 400), reponse.get_data(as_text=True)[:200]
+
+
+# ------------------------------------------------------------------ simulation et scénarios
+def test_la_simulation_fait_vivre_les_quatre_acteurs(client):
+    resultat = client.post("/api/scenario", json={"jours": 10}).get_json()
+    agents = resultat["simulation"]["agents"]
+    assert agents["menages"] > 100 and agents["precollecteurs"] > 0
+    assert agents["brigade"] == 1 and agents["mairie"] == 1
+    journal = resultat["simulation"]["journal"]
+    assert len(journal) == 10
+    assert all(j["produit_m3"] > 0 for j in journal)
+
+
+def test_la_simulation_est_reproductible(client):
+    premier = client.post("/api/scenario", json={"jours": 10}).get_json()["simulation"]["resume"]
+    second = client.post("/api/scenario", json={"jours": 10}).get_json()["simulation"]["resume"]
+    assert premier == second
+
+
+def test_passer_tous_les_jours_ameliore_la_collecte(client):
+    reference = client.post("/api/scenario", json={"jours": 20}).get_json()
+    ameliore = client.post("/api/scenario", json={
+        "jours": 20, "parametres": {"frequence_collecte_jours": 1, "nb_camions": 45}}).get_json()
+    assert (ameliore["simulation"]["resume"]["taux_collecte"]
+            > reference["simulation"]["resume"]["taux_collecte"])
+
+
+def test_comparer_deux_scenarios(client):
+    reponse = client.post("/api/comparer", json={"jours": 10, "scenarios": [
+        {"nom": "Aujourd'hui", "parametres": {}},
+        {"nom": "Plus de camions", "parametres": {"nb_camions": 45, "frequence_collecte_jours": 1}},
+    ]})
+    assert reponse.status_code == 200
+    scenarios = reponse.get_json()["scenarios"]
+    assert len(scenarios) == 2
+    assert scenarios[1]["taux_collecte"] > scenarios[0]["taux_collecte"]
+
+
+def test_une_comparaison_mal_formee_est_refusee(client):
+    for envoi in ({}, {"scenarios": []}, {"scenarios": [{}]}, {"scenarios": "deux"},
+                  {"scenarios": [{}, {}, {}, {}, {}]}):
+        assert client.post("/api/comparer", json=envoi).status_code == 400

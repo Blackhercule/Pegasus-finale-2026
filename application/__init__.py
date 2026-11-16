@@ -18,7 +18,9 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from .base import connexion, creer
 from .geo import Geographie
-from .plan.calcul import calculer_le_plan
+from .plan import repartir_la_demande
+from .plan.calcul import calculer_le_plan, charger_geojson
+from .simulation import simuler
 from .reglages import Reglages
 from .reseau import Reseau
 from .signalements import Controleur, Depotoirs
@@ -293,6 +295,72 @@ def plan():
         "heures_travail", "frequence_collecte_jours", "capacite_point_m3", "saison",
         "budget_mensuel", "distance_max_precollecte_m")}
     return jsonify(resultat)
+
+
+def plan_et_simulation(parametres: dict, jours: int = 0) -> dict:
+    """Calcule le plan, puis — si on le demande — fait tourner la simulation dessus."""
+    from flask import current_app
+    resultat = calculer_le_plan(reglages(), reseau(), current_app.extensions["geographie"],
+                                parametres, depotoirs().retenus(parametres.get("mode_strict", False)))
+    if jours > 0:
+        demande = repartir_la_demande(charger_geojson(reglages().fichier("zones.geojson")), parametres)
+        resultat["simulation"] = simuler(demande, resultat, parametres, jours=jours)
+    return resultat
+
+
+@vues.route("/api/scenario", methods=["POST"])
+def scenario():
+    """Un scénario complet : les paramètres donnés, le plan qui en découle, et la simulation.
+
+    C'est ce qu'appelle le jury quand il change un paramètre : rien n'est pré-calculé."""
+    envoi = request.get_json(silent=True) or {}
+    if not isinstance(envoi, dict):
+        return jsonify({"erreur": "Envoi invalide."}), 400
+    jours = max(0, min(int(envoi.get("jours", 30) or 0), 180))
+    try:
+        parametres = parametres_du_scenario(envoi.get("parametres"))
+        resultat = plan_et_simulation(parametres, jours)
+    except (ValueError, KeyError, TypeError) as erreur:
+        return jsonify({"erreur": "Scénario impossible : %s" % erreur}), 400
+    resultat["nom"] = str(envoi.get("nom", "Scénario"))[:80]
+    return jsonify(resultat)
+
+
+@vues.route("/api/comparer", methods=["POST"])
+def comparer():
+    """Deux scénarios côte à côte, avec leurs écarts (exigence E5)."""
+    envoi = request.get_json(silent=True) or {}
+    scenarios = envoi.get("scenarios") if isinstance(envoi, dict) else None
+    if not isinstance(scenarios, list) or not 2 <= len(scenarios) <= 4:
+        return jsonify({"erreur": "Donnez entre deux et quatre scénarios."}), 400
+    jours = max(0, min(int(envoi.get("jours", 30) or 0), 180))
+    resultats = []
+    for numero, demande in enumerate(scenarios, start=1):
+        if not isinstance(demande, dict):
+            return jsonify({"erreur": "Scénario %d invalide." % numero}), 400
+        try:
+            parametres = parametres_du_scenario(demande.get("parametres"))
+            resultat = plan_et_simulation(parametres, jours)
+        except (ValueError, KeyError, TypeError) as erreur:
+            return jsonify({"erreur": "Scénario %d impossible : %s" % (numero, erreur)}), 400
+        resume = resultat.get("simulation", {}).get("resume", {})
+        resultats.append({
+            "nom": str(demande.get("nom", "Scénario %d" % numero))[:80],
+            "parametres_utilises": {cle: parametres[cle] for cle in (
+                "nb_camions", "camions_en_panne", "taux_abonnement",
+                "frequence_collecte_jours", "capacite_point_m3", "saison")},
+            "points": len(resultat["points"]),
+            "tournees": len(resultat["tournees"]),
+            "non_desservis": len(resultat["non_desservis"]),
+            "km_par_jour": resultat["couts"]["km_par_jour"],
+            "cout_par_mois": resultat["couts"]["cout_par_mois"],
+            "solde_mensuel": resultat["couts"]["solde_mensuel"],
+            "taux_collecte": resume.get("taux_collecte"),
+            "volume_depotoirs_m3": resume.get("volume_depotoirs_m3"),
+            "points_satures": resume.get("points_satures"),
+            "controles_en_defaut": [c["nom"] for c in resultat["controles"] if c["etat"] != "ok"],
+        })
+    return jsonify({"jours": jours, "scenarios": resultats})
 
 
 @vues.route("/api/comptes")
