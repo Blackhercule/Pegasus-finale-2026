@@ -73,7 +73,7 @@ aucun algorithme d'optimisation réinventé.
 
 ```
  Téléphone ─┐                            ┌─ cartographie ── MapLibre + fond PMTiles (hors ligne)
-            ├─ HTTPS :8443 ─ Caddy ─ Flask ├─ contrôles ───── Shapely (dans la commune ? dans l'eau ?)
+            ├─ HTTPS :<port> ─ Caddy ─ Flask ├─ contrôles ───── Shapely (dans la commune ? dans l'eau ?)
  Navigateur ┘                  │          ├─ plan ────────── SciPy (trajets) + nos algorithmes
                                │          └─ simulation ──── Mesa (agents)
                             SQLite

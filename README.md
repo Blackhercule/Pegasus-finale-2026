@@ -158,19 +158,34 @@ Pour que les téléphones du réseau local y accèdent, donnez l'adresse IP du p
 ./installer.sh --changer-adresse 192.168.1.20
 ```
 
-L'installateur affiche ensuite les adresses et le mot de passe de l'agent :
+L'installateur affiche ensuite les adresses exactes et un mot de passe par poste :
 
-- carte de décision : `https://<adresse>:8443/decision/`
-- postes de travail (mairie, brigade, collecte) : `https://<adresse>:8443/decision/dossiers.html`
-- caniveaux, abattoirs, eaux usées : `https://<adresse>:8443/decision/nuisances.html`
-- fuites d'eau (mairie et ONEA) : `https://<adresse>:8443/decision/fuites.html`
-- vérification des signalements : `https://<adresse>:8443/decision/verifier.html`
-- simulation : `https://<adresse>:8443/decision/simulation.html`
-- comparaison de scénarios : `https://<adresse>:8443/decision/scenarios.html`
-- signalement (téléphone) : `https://<adresse>:8443/signaler/`
+- carte de décision : `https://<adresse>:<port>/decision/`
+- postes de travail (mairie, brigade, collecte) : `https://<adresse>:<port>/decision/dossiers.html`
+- caniveaux, abattoirs, eaux usées : `https://<adresse>:<port>/decision/nuisances.html`
+- fuites d'eau (mairie et ONEA) : `https://<adresse>:<port>/decision/fuites.html`
+- vérification des signalements : `https://<adresse>:<port>/decision/verifier.html`
+- simulation : `https://<adresse>:<port>/decision/simulation.html`
+- comparaison de scénarios : `https://<adresse>:<port>/decision/scenarios.html`
+- signalement (téléphone) : `https://<adresse>:<port>/signaler/`
 
-L'installateur affiche un mot de passe par poste. Ils sont tirés au hasard et rangés dans
-`.env`, qui n'est jamais publié.
+Les mots de passe sont tirés au hasard et rangés dans `.env`, qui n'est jamais publié.
+
+### Changer le port
+
+Par défaut l'outil écoute sur le port **8443**. S'il est déjà pris — par un autre projet, ou
+par une plage de ports que Windows réserve — donnez-en un autre :
+
+```bash
+PORT_HTTPS=8444 ./installer.sh
+```
+
+Le port choisi est rangé dans `.env` : les fois suivantes, `./installer.sh` tout court le
+reprend, il n'y a pas à le redonner. L'installateur refuse de démarrer si le port est occupé et
+dit par quoi, plutôt que d'échouer plus loin sans raison apparente.
+
+> Sous Windows, un port peut être refusé alors qu'il paraît libre : le système s'en réserve des
+> plages. Prenez-en simplement un autre.
 
 Le HTTPS s'appuie sur une **autorité de certification interne**, créée sur la machine. Installez
 `ca-assainissement.crt` sur les postes et les téléphones (`certutil -user -addstore Root
@@ -187,7 +202,7 @@ python donnees/preparer.py --extrait pays.osm.pbf --commune Bobo-Dioulasso
 
 ```
  Téléphone ─┐                            ┌─ cartographie ── MapLibre + fond PMTiles (hors ligne)
-            ├─ HTTPS :8443 ─ Caddy ─ Flask ├─ contrôles ───── Shapely (dans la commune ? dans l'eau ?)
+            ├─ HTTPS :<port> ─ Caddy ─ Flask ├─ contrôles ───── Shapely (dans la commune ? dans l'eau ?)
  Navigateur ┘                  │          ├─ plan ────────── SciPy (trajets) + nos algorithmes
                                │          └─ simulation ──── Mesa (agents)
                             SQLite
