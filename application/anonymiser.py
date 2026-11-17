@@ -45,6 +45,20 @@ MARGE = 0.20
 # 4000 pixels de large, et y chercher des visages prendrait plusieurs secondes pour rien.
 LARGEUR_DETECTION = 1280
 
+# Ce qui distingue une vraie zone d'une fausse. Les cascades à plaques se déclenchent sur
+# n'importe quel rectangle contrasté — une planche, une banderole, un panneau — et sur une
+# photo de dépotoir il y en a partout. Masquer au hasard effacerait le tas d'ordures lui-même,
+# c'est-à-dire la preuve que le signalement apporte. On filtre donc sur trois critères simples.
+#
+# Les seuils sont volontairement sévères pour les plaques et larges pour les visages : rater
+# une plaque est regrettable, rater un visage ne l'est pas moins, mais noyer la moitié de la
+# photo rend le signalement inutilisable. L'agent garde le masquage à la main pour le reste.
+FORMES = {
+    # (rapport largeur/hauteur minimum, maximum, part maximale de l'image, voisins exigés)
+    "visage": (0.6, 1.8, 0.40, 5),
+    "plaque": (1.8, 6.0, 0.06, 12),
+}
+
 
 def disponible() -> bool:
     """Le masquage peut-il se faire ? Si non, on refuse la photo plutôt que de la garder nue."""
@@ -65,12 +79,24 @@ def _charger():
     return _detecteurs
 
 
-def _zones(image_grise, cascades, taille_mini) -> list:
+def _zones(image_grise, cascades, genre) -> list:
+    """Les zones trouvées pour ce genre, une fois écartées les invraisemblables."""
+    rapport_mini, rapport_maxi, part_maxi, voisins = FORMES[genre]
+    hauteur, largeur = image_grise.shape[:2]
+    aire_image = float(largeur * hauteur) or 1.0
+    taille_mini = 24 if genre == "visage" else 20
     trouvees = []
     for cascade in cascades:
         for (x, y, l, h) in cascade.detectMultiScale(
-                image_grise, scaleFactor=1.1, minNeighbors=5,
+                image_grise, scaleFactor=1.1, minNeighbors=voisins,
                 minSize=(taille_mini, taille_mini)):
+            if h <= 0:
+                continue
+            rapport = l / h
+            if not rapport_mini <= rapport <= rapport_maxi:
+                continue                       # ni un visage ni une plaque n'a cette forme
+            if (l * h) / aire_image > part_maxi:
+                continue                       # trop grand pour être ce qu'on cherche
             trouvees.append((int(x), int(y), int(l), int(h)))
     return trouvees
 
@@ -115,7 +141,7 @@ def masquer(contenu: bytes) -> tuple:
     grise = cv2.equalizeHist(cv2.cvtColor(petite, cv2.COLOR_BGR2GRAY))
 
     detecteurs = _charger()
-    trouvees = {genre: _fusionner(_zones(grise, cascades, 24 if genre == "visage" else 20))
+    trouvees = {genre: _fusionner(_zones(grise, cascades, genre))
                 for genre, cascades in detecteurs.items()}
 
     for genre, zones in trouvees.items():
