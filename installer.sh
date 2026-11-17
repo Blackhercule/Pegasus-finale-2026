@@ -128,8 +128,11 @@ fi
 echo -n "Attente du démarrage"
 pret=""
 for _ in $(seq 1 60); do
+  # On interroge /api/publics, l'adresse publique de la page d'accueil. Surtout pas une
+  # adresse de la partie décision : depuis T13 elle répond 401 sans connexion, et « curl -f »
+  # prendrait ce refus pour une panne alors que l'application va très bien.
   if docker compose cp caddy:/data/caddy/pki/authorities/local/root.crt ./ca-assainissement.crt >/dev/null 2>&1 \
-     && curl -fsS --ssl-no-revoke --cacert ca-assainissement.crt "$ADRESSE/api/comptes" >/dev/null 2>&1; then
+     && curl -fsS --ssl-no-revoke --cacert ca-assainissement.crt "$ADRESSE/api/publics" >/dev/null 2>&1; then
     pret="oui"; echo " : prêt."; break
   fi
   echo -n "."; sleep 4
@@ -141,7 +144,7 @@ if [ -z "$pret" ]; then
     echo "L'application ne tourne pas. Ses dernières lignes de journal :"
     docker compose logs --tail=25 application
   elif ! docker compose exec -T application python -c "import urllib.request;
-urllib.request.urlopen('http://127.0.0.1:8000/api/comptes', timeout=10)" >/dev/null 2>&1; then
+urllib.request.urlopen('http://127.0.0.1:8000/api/publics', timeout=10)" >/dev/null 2>&1; then
     echo "L'application tourne mais ne répond pas encore. Ses dernières lignes de journal :"
     docker compose logs --tail=25 application
   else

@@ -244,7 +244,10 @@ def entier_demande(nom: str, defaut: int, maximum: int) -> int:
 OUVERT_A_TOUS = {
     "api.accueil",             # / : la page d'accueil publique (T12)
     "api.page_accueil",        # /accueil/… : son style et son script
-    "api.chiffres_publics",    # GET /api/publics : trois nombres, rien d'autre
+    # GET /api/publics : trois nombres, rien d'autre. C'est AUSSI le test de
+    # disponibilité de installer.sh : la fermer ferait échouer toute installation,
+    # alors même que l'application tourne. Un test le rappelle (tests/test_acces.py).
+    "api.chiffres_publics",
     "api.lieux_connus",        # GET /api/lieux : marchés, écoles… pour signaler sans GPS (T16)
     "api.page_signaler",       # /signaler/… : la page de l'habitant, ses sons, son service worker
     "api.bibliotheques",       # /vendor/… : polices et bibliothèques (la page de signalement en charge)

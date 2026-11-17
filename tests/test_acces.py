@@ -263,3 +263,23 @@ def test_un_lot_et_un_telephone_se_confirment(agent):
     d = agent.get("/api/depotoirs").get_json()["features"][0]["properties"]
     assert d["nb_sources"] == 2
     assert "waste_dump_site" in agent.get("/api/export/osm").get_data(as_text=True)
+
+
+def test_l_adresse_interrogee_par_l_installateur_reste_publique(client):
+    """installer.sh attend que l'application réponde sur /api/publics avant de se déclarer prêt.
+
+    Si cette adresse venait à demander une connexion, « curl -f » prendrait le 401 pour une
+    panne et AUCUNE installation n'aboutirait plus — alors que l'application tournerait très
+    bien. C'est exactement ce qui est arrivé quand la partie décision a été fermée : le test
+    de disponibilité interrogeait /api/comptes, qui venait de passer en 401."""
+    import pathlib
+    import re
+
+    installateur = pathlib.Path(__file__).resolve().parent.parent / "installer.sh"
+    adresses = set(re.findall(r"/api/[a-z_]+", installateur.read_text(encoding="utf-8")))
+    assert adresses, "le test de disponibilité de l'installateur est introuvable"
+    for adresse in adresses:
+        reponse = client.get(adresse)
+        assert reponse.status_code == 200, (
+            f"installer.sh interroge {adresse}, qui ne répond pas sans connexion "
+            f"(code {reponse.status_code}). L'installation échouerait.")
