@@ -32,9 +32,10 @@
       mairie, qui confirme la fuite et la transmet, et <strong>onea</strong> pour l'ONEA, qui
       déclare la réparation faite. Les mots de passe sont dans le fichier <code>.env</code> du
       serveur.</p>
-    <label>Poste <input id="nom" autocomplete="username" value="agent"></label>
+    <label>Identifiant <input id="nom" autocomplete="username"
+             autocapitalize="none" spellcheck="false" required></label>
     <label>Mot de passe <input id="mot-de-passe" type="password" autocomplete="current-password"></label>
-    <button type="submit">Se connecter</button>
+    <button type="submit">Me connecter</button>
     <p id="erreur-connexion" class="message erreur" hidden></p>
   </form>
 

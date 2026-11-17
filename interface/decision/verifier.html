@@ -24,9 +24,10 @@
 <main>
   <form id="connexion" class="carte-bloc connexion" hidden>
     <h2>Connexion de l'agent</h2>
-    <label>Identifiant <input id="nom" autocomplete="username" value="agent"></label>
+    <label>Identifiant <input id="nom" autocomplete="username"
+             autocapitalize="none" spellcheck="false" required></label>
     <label>Mot de passe <input id="mot-de-passe" type="password" autocomplete="current-password"></label>
-    <button type="submit">Se connecter</button>
+    <button type="submit">Me connecter</button>
     <p id="erreur-connexion" class="message erreur" hidden></p>
   </form>
 

@@ -3,6 +3,24 @@
 // fois le mot de passe accepté, il suffit de recharger cette adresse pour arriver à la bonne page.
 "use strict";
 
+/* Où chacun travaille. Quelqu'un qui se connecte depuis l'entrée générale ne doit pas tomber
+   sur une page qui ne le concerne pas : l'ONEA n'a rien à faire dans les dossiers de
+   dépotoirs, et un agent de collecte n'a rien à décider sur les fuites. */
+const PAGE_DU_POSTE = {
+  mairie: "/decision/dossiers.html",
+  brigade: "/decision/dossiers.html",
+  collecte: "/decision/dossiers.html",
+  onea: "/decision/fuites.html",
+};
+
+/* Vrai si l'on arrive par l'entrée générale, et non parce qu'on a demandé une page précise.
+   Dans ce second cas on respecte la demande : on recharge l'adresse voulue. */
+function entreeGenerale() {
+  const chemin = window.location.pathname;
+  return chemin === "/decision/" || chemin === "/decision/index.html"
+         || chemin === "/decision/connexion.html";
+}
+
 document.getElementById("formulaire").addEventListener("submit", async (evenement) => {
   evenement.preventDefault();
   const erreur = document.getElementById("erreur");
@@ -23,7 +41,13 @@ document.getElementById("formulaire").addEventListener("submit", async (evenemen
     return;
   }
   if (reponse.ok) {
-    window.location.reload();
+    const session = await reponse.json().catch(() => ({}));
+    const destination = PAGE_DU_POSTE[session.poste];
+    if (entreeGenerale() && destination) {
+      window.location.assign(destination);
+    } else {
+      window.location.reload();
+    }
     return;
   }
   const resultat = await reponse.json().catch(() => ({}));
