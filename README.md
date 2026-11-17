@@ -187,6 +187,23 @@ pas floutés. Ce sont les pièces qu'il a **choisi** de donner pour être témoi
 viderait de leur sens. Elles ne sont jamais servies au public et s'effacent à la clôture du
 dossier.
 
+## Un compte par agent, créé par la mairie
+
+Chaque agent a son propre compte, créé par la mairie depuis la page **Agents**. Le journal de
+chaque dossier dit ainsi **qui** a fait quoi — une personne, pas un service — et un agent qui
+quitte son service perd l'accès sans que ses collègues aient à changer de mot de passe.
+
+Désactiver un compte coupe l'accès **immédiatement**, même si l'agent est connecté à ce
+moment-là : sa requête suivante est refusée. Rien n'est supprimé, le journal garde son nom.
+
+Les mots de passe sont hachés par Werkzeug, la bibliothèque sur laquelle Flask repose : aucune
+cryptographie écrite par l'équipe. Le mot de passe n'est jamais enregistré, jamais renvoyé. Et
+un identifiant inconnu coûte le même calcul qu'un identifiant connu, pour que le temps de
+réponse ne permette pas de dresser la liste des agents — ce sont des noms de personnes.
+
+Les quatre comptes de démarrage (`agent`, `brigade`, `collecte`, `onea`) restent : sans eux,
+personne ne pourrait créer le premier compte individuel.
+
 ## Identité du déclarant : facultative
 
 Le signalement fonctionne **sans donner son nom**. Qui accepte d'être témoin dans une procédure
@@ -331,12 +348,12 @@ Notre code est publié sous **AGPL-3.0** (`LICENSE`).
 
 ```bash
 pip install -r requirements.txt
-python -m pytest tests/ -q        # 195 tests : contrôles, pièges, chaînes, plan, simulation, fuites, export
+python -m pytest tests/ -q        # 212 tests : contrôles, pièges, chaînes, plan, simulation, fuites, export
 ```
 
 | Dossier | Contenu |
 |---|---|
-| `application/` | l'application : `geo.py`, `reseau.py`, `signalements/`, `dossiers.py`, `fuites.py`, `nuisances.py`, `anonymiser.py`, `priorite.py`, `inspection.py`, `plan/`, `simulation/` |
+| `application/` | l'application : `geo.py`, `reseau.py`, `signalements/`, `dossiers.py`, `fuites.py`, `nuisances.py`, `anonymiser.py`, `priorite.py`, `inspection.py`, `agents.py`, `plan/`, `simulation/` |
 | `interface/` | pages servies telles quelles ; `vendor/` contient les bibliothèques de la carte |
 | `donnees/` | préparation des données d'une commune et fichiers produits |
 | `tests/` | tests automatisés, dont le jeu de 42 signalements piégés |

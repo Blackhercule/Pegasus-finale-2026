@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agents — Assainissement de Ouaga</title>
+<link rel="stylesheet" href="/decision/style.css">
+<link rel="stylesheet" href="/decision/barre.css">
+<script src="/decision/barre.js" defer></script>
+<link rel="stylesheet" href="/decision/verifier.css">
+<link rel="stylesheet" href="/decision/agents.css">
+</head>
+<body class="page-verifier">
+<main>
+  <section class="carte-bloc">
+    <h2>Les agents</h2>
+    <p class="aide">Chaque agent a son propre compte. Le journal de chaque dossier dit ainsi
+      <strong>qui</strong> a fait quoi, et un agent qui quitte son service perd l'accès sans que
+      ses collègues aient à changer de mot de passe.</p>
+    <p class="aide">Désactiver un compte coupe l'accès <strong>immédiatement</strong>, même si
+      l'agent est connecté à ce moment-là. Rien n'est supprimé : le journal garde son nom.</p>
+
+    <table class="table-agents">
+      <thead><tr><th>Nom</th><th>Identifiant</th><th>Service</th><th>État</th><th></th></tr></thead>
+      <tbody id="agents"><tr><td colspan="5" class="vide">Chargement…</td></tr></tbody>
+    </table>
+    <p id="message" class="message" hidden></p>
+  </section>
+
+  <form class="carte-bloc" id="nouveau" autocomplete="off">
+    <h2>Ajouter un agent</h2>
+    <label>Nom et prénom <input id="nom" required maxlength="80"
+           placeholder="Awa Ouédraogo"></label>
+    <label>Identifiant <input id="identifiant" required maxlength="40"
+           autocapitalize="none" spellcheck="false" placeholder="awa.ouedraogo"
+           pattern="[a-z0-9][a-z0-9.\-]{2,39}"></label>
+    <p class="aide">Lettres minuscules sans accent, chiffres, point ou tiret. C'est ce qui
+      apparaîtra dans le journal.</p>
+    <label>Service <select id="poste" required></select></label>
+    <label>Mot de passe de départ <input id="mot-de-passe" type="password" required
+           minlength="10" autocomplete="new-password"></label>
+    <p class="aide">Au moins 10 caractères. Remettez-le à l'agent en main propre, jamais par
+      message.</p>
+    <button type="submit">Créer le compte</button>
+  </form>
+</main>
+<script src="/decision/agents.js"></script>
+</body>
+</html>

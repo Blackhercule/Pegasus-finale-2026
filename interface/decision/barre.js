@@ -118,7 +118,16 @@
     .then((r) => (r.ok ? r.json() : null))
     .then((s) => { if (!s || !s.agent) return;
       // « Mairie — confirmation et programmation » : dans la barre, le premier mot suffit.
-      poste.textContent = (s.poste_nom || s.poste).split(" — ")[0] + " · " + s.agent;
+      // Le vrai nom quand le compte est individuel, l'identifiant sinon.
+      poste.textContent = (s.poste_nom || s.poste).split(" — ")[0] + " · " + (s.nom || s.agent);
+      // La gestion des comptes n'apparaît qu'à la mairie : c'est la seule qui en a le droit,
+      // et montrer un lien qui répondrait « interdit » aux autres serait inutilement confus.
+      if (s.poste === "mairie") {
+        const lien = creer("a", "", "Agents");
+        lien.href = "/decision/agents.html";
+        if (location.pathname === lien.pathname) lien.setAttribute("aria-current", "page");
+        nav.append(lien);
+      }
       poste.title = s.poste_nom || "";
     })
     .catch(() => {});

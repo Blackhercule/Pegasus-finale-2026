@@ -25,6 +25,7 @@ from .export_geojson import en_geojson
 from .fuites import AMPLEUR_NOMS, CHAINE_EAU, ErreurFuite, Fuites
 from .anonymiser import disponible as masquage_disponible, masquer
 from .inspection import base_du_service, tournees_d_inspection
+from .agents import Agents, ErreurAgent, POSTES_POSSIBLES
 from .priorite import Priorite
 from .nuisances import (CHAINE_NUISANCE, GRAVITE_NOMS, NATURES as NATURES_NUISANCE,
                         ErreurNuisance, Nuisances)
@@ -279,6 +280,11 @@ def filtrer_l_acces():
     point = request.endpoint
     if point is None:
         return None                                   # adresse inconnue : Flask répondra 404
+    # Un compte désactivé perd l'accès À LA REQUÊTE SUIVANTE, même s'il était connecté. Sans
+    # cette vérification, « désactiver » ne ferait qu'empêcher la prochaine connexion, et un
+    # agent parti garderait la main tant que son navigateur reste ouvert.
+    if session.get("individuel") and not agents().est_actif(session.get("agent", "")):
+        session.clear()
     if point in OUVERT_A_TOUS or session.get("agent"):
         return None
     if point == "api.page_decision" and (request.view_args or {}).get("fichier") in PAGE_DE_CONNEXION:
@@ -658,6 +664,56 @@ def chaine():
                     "comptes": dossiers().comptes_par_etape()})
 
 
+def agents() -> Agents:
+    from flask import g
+    depotoirs()                       # ouvre la connexion si besoin
+    if "agents" not in g:
+        g.agents = Agents(g.co)
+    return g.agents
+
+
+# ------------------------------------------------------------------ comptes des agents
+# Seule la mairie crée et désactive les comptes. Chaque agent a le sien : le journal dit
+# QUI a fait quoi, et un agent qui quitte le service perd l'accès sans que les autres aient à
+# changer de mot de passe.
+
+@vues.route("/api/agents")
+@agent_requis(postes=("mairie",))
+def lister_agents():
+    return jsonify({"agents": agents().liste(), "postes": {p: POSTES[p] for p in POSTES_POSSIBLES}})
+
+
+@vues.route("/api/agents", methods=["POST"])
+@agent_requis(postes=("mairie",))
+def creer_agent():
+    envoi = request.get_json(silent=True) or {}
+    try:
+        cree = agents().creer(str(envoi.get("identifiant", "")), str(envoi.get("nom", "")),
+                              str(envoi.get("poste", "")), envoi.get("mot_de_passe"),
+                              cree_par=session["agent"])
+    except ErreurAgent as erreur:
+        return jsonify({"erreur": str(erreur)}), 400
+    return jsonify(cree), 201
+
+
+@vues.route("/api/agents/<int:identifiant>/desactiver", methods=["POST"])
+@agent_requis(postes=("mairie",))
+def desactiver_agent(identifiant):
+    try:
+        return jsonify(agents().changer_etat(identifiant, False, session["agent"]))
+    except ErreurAgent as erreur:
+        return jsonify({"erreur": str(erreur)}), 404
+
+
+@vues.route("/api/agents/<int:identifiant>/activer", methods=["POST"])
+@agent_requis(postes=("mairie",))
+def activer_agent(identifiant):
+    try:
+        return jsonify(agents().changer_etat(identifiant, True, session["agent"]))
+    except ErreurAgent as erreur:
+        return jsonify({"erreur": str(erreur)}), 404
+
+
 def priorite() -> Priorite:
     from flask import current_app
     return current_app.extensions["priorite"]
@@ -990,14 +1046,33 @@ def connecter():
     if reste:
         return jsonify({"erreur": "Trop d'essais. Réessayez dans %d secondes." % reste}), 429
 
+    mot_de_passe = str(envoi.get("mot_de_passe", ""))
+
+    # D'abord les comptes individuels, créés par la mairie.
+    individuel = agents().verifier(nom, mot_de_passe)
+    if individuel:
+        _oublier_les_echecs(nom)
+        session.clear()
+        session["agent"] = individuel["identifiant"]
+        session["nom"] = individuel["nom"]
+        session["poste"] = individuel["poste"]
+        session["individuel"] = True
+        session["jeton"] = secrets.token_urlsafe(32)
+        return jsonify({"agent": session["agent"], "nom": session["nom"],
+                        "poste": session["poste"], "poste_nom": POSTES[session["poste"]],
+                        "jeton": session["jeton"]})
+
+    # Puis les quatre comptes de démarrage, rangés dans .env.
     compte = r.comptes.get(nom)
     if compte is None or not compte["mot_de_passe"]:
-        # Même réponse qu'un mot de passe faux : on ne dit pas quels comptes existent.
+        # Même réponse qu'un mot de passe faux : on ne dit pas quels comptes existent. La
+        # vérification ci-dessus a déjà fait le calcul de hachage, donc le temps de réponse ne
+        # le dit pas non plus.
         _noter_echec(nom)
         return jsonify({"erreur": "Identifiant ou mot de passe incorrect."}), 401
     attendu = compte["mot_de_passe"]
     empreinte = attendu if attendu.startswith(("pbkdf2:", "scrypt:")) else generate_password_hash(attendu)
-    if not check_password_hash(empreinte, str(envoi.get("mot_de_passe", ""))):
+    if not check_password_hash(empreinte, mot_de_passe):
         _noter_echec(nom)
         return jsonify({"erreur": "Identifiant ou mot de passe incorrect."}), 401
     _oublier_les_echecs(nom)
@@ -1015,7 +1090,8 @@ def session_en_cours():
     le temps du navigateur)."""
     if not session.get("agent"):
         return jsonify({"agent": None}), 401
-    return jsonify({"agent": session["agent"], "poste": session.get("poste"),
+    return jsonify({"agent": session["agent"], "nom": session.get("nom"),
+                    "poste": session.get("poste"),
                     "poste_nom": POSTES.get(session.get("poste"), ""), "jeton": session["jeton"]})
 
 

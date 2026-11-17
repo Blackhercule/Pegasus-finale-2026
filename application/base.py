@@ -141,6 +141,22 @@ CREATE TABLE IF NOT EXISTS journal_nuisance (
     detail      TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS i_journal_nuisance ON journal_nuisance(nuisance_id);
+
+-- Comptes individuels des agents, créés par la mairie (voir application/agents.py). On ne
+-- range jamais le mot de passe, seulement son empreinte. On ne supprime jamais un compte : on
+-- le désactive, pour que le journal garde le nom de qui a fait quoi.
+CREATE TABLE IF NOT EXISTS agents (
+    id            INTEGER PRIMARY KEY,
+    identifiant   TEXT NOT NULL UNIQUE,
+    nom           TEXT NOT NULL,
+    poste         TEXT NOT NULL,                  -- mairie | brigade | collecte | onea
+    empreinte     TEXT NOT NULL,
+    actif         INTEGER NOT NULL DEFAULT 1,
+    cree_le       TEXT NOT NULL,
+    cree_par      TEXT NOT NULL,
+    desactive_le  TEXT,
+    desactive_par TEXT
+);
 """
 
 

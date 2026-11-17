@@ -1,0 +1,15 @@
+/* Page de gestion des comptes d'agents. */
+main { max-width: 64rem; margin: 1.2rem auto; padding: 0 1rem; display: grid; gap: 1rem; }
+.table-agents { width: 100%; border-collapse: collapse; margin-top: .6rem; }
+.table-agents th { text-align: left; font-size: .78rem; text-transform: uppercase;
+                   letter-spacing: .05em; color: var(--gris); padding: .4rem .5rem;
+                   border-bottom: 2px solid var(--trait); }
+.table-agents td { padding: .5rem; border-bottom: 1px solid var(--trait); }
+.table-agents .identifiant { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+                             font-size: .88rem; }
+.table-agents tr.inactif td { color: var(--gris); }
+.etat-actif { color: var(--vert); font-weight: 700; }
+.etat-inactif { font-size: .85rem; }
+#nouveau label { display: grid; gap: .25rem; margin: .5rem 0; font-weight: 700; }
+#nouveau input, #nouveau select { font: inherit; padding: .5rem .6rem; border: 1px solid var(--trait);
+                                  border-radius: 8px; font-weight: 400; }
