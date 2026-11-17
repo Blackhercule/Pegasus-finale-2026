@@ -24,6 +24,7 @@ from .export_osm import en_osm, note_d_export
 from .export_geojson import en_geojson
 from .fuites import AMPLEUR_NOMS, CHAINE_EAU, ErreurFuite, Fuites
 from .anonymiser import disponible as masquage_disponible, masquer
+from .inspection import base_du_service, tournees_d_inspection
 from .priorite import Priorite
 from .nuisances import (CHAINE_NUISANCE, GRAVITE_NOMS, NATURES as NATURES_NUISANCE,
                         ErreurNuisance, Nuisances)
@@ -847,6 +848,45 @@ def classer_nuisance(identifiant):
                                            str(envoi.get("motif", ""))))
     except ErreurNuisance as erreur:
         return jsonify({"erreur": str(erreur)}), 400
+
+
+@vues.route("/api/inspection")
+@agent_requis(postes=("mairie", "brigade", "collecte", "onea"))
+def tournee_d_inspection():
+    """Les visites de terrain qui attendent ce poste, groupées en tournées.
+
+    Pourquoi : la brigade se déplaçait dossier par dossier. Dix constats, dix sorties — et deux
+    dossiers voisins visités deux jours différents parce qu'ils sont arrivés dans le désordre.
+    C'est le même algorithme que les tournées des camions, avec la journée de l'agent pour
+    seule contrainte au lieu de la benne."""
+    poste = request.args.get("poste") or session["poste"]
+    a_visiter = []
+    # Les trois familles de signalements qui attendent ce poste : un agent sort une fois pour
+    # tout ce qu'il a à voir, sans distinguer un tas d'un caniveau.
+    for dossier in dossiers().liste(poste=poste):
+        a_visiter.append({"id": "D%d" % dossier["id"], "latitude": dossier["latitude"],
+                          "longitude": dossier["longitude"], "nature": "depotoir"})
+    for fuite in fuites().liste(poste=poste):
+        a_visiter.append({"id": "F%d" % fuite["id"], "latitude": fuite["latitude"],
+                          "longitude": fuite["longitude"], "nature": "fuite_eau"})
+    for nuisance in nuisances().liste(poste=poste):
+        a_visiter.append({"id": "N%d" % nuisance["id"], "latitude": nuisance["latitude"],
+                          "longitude": nuisance["longitude"],
+                          "nature": nuisance.get("nature") or "nuisance"})
+
+    from flask import current_app
+    parametres = dict(reglages().parametres)
+    for cle in ("agents_terrain", "minutes_par_visite"):
+        valeur = request.args.get(cle)
+        if valeur is not None:
+            try:
+                parametres[cle] = float(valeur)
+            except ValueError:
+                pass
+    base = base_du_service(parametres, current_app.extensions["geographie"])
+    resultat = tournees_d_inspection(a_visiter, base, reseau(), parametres)
+    resultat["poste"] = poste
+    return jsonify(resultat)
 
 
 @vues.route("/api/export/nuisances")
