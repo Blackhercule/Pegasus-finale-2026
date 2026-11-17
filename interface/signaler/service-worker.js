@@ -1,13 +1,22 @@
 /* Garde la page utilisable sans réseau : les fichiers sont mis de côté à la première visite. */
 "use strict";
-const CACHE = "signaler-v2";
+const CACHE = "signaler-v3";
 const FICHIERS = ["/signaler/", "/signaler/index.html", "/signaler/style.css",
                   "/signaler/signaler.js", "/signaler/manifeste.webmanifest",
                   // T16 : la liste des lieux connus, pour choisir un lieu même hors ligne.
                   "/api/lieux"];
 
+/* Les messages parlés de l'accueil. Ils sont mis de côté UN PAR UN et non avec le reste :
+   tous ne sont pas encore enregistrés, et avec addAll un seul fichier manquant ferait échouer
+   toute l'installation du service worker — la page entière cesserait de marcher hors ligne. */
+const AUDIOS = ["/signaler/audio/moore/accueil-1.mp3", "/signaler/audio/moore/accueil-2.mp3",
+                "/signaler/audio/moore/accueil-3.mp3", "/signaler/audio/moore/accueil-4.mp3"];
+
 self.addEventListener("install", (evenement) => {
-  evenement.waitUntil(caches.open(CACHE).then((c) => c.addAll(FICHIERS)).then(() => self.skipWaiting()));
+  evenement.waitUntil(caches.open(CACHE)
+    .then((c) => c.addAll(FICHIERS)
+      .then(() => Promise.all(AUDIOS.map((a) => c.add(a).catch(() => {})))))
+    .then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (evenement) => {

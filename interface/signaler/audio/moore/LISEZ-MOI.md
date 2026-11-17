@@ -10,15 +10,22 @@ téléchargé à l'exécution — les fichiers sont servis par notre propre mach
 Quatorze fichiers, au format **MP3**, nommés exactement comme ci-dessous. Le texte français donne le
 sens ; dites-le naturellement en mooré, lentement, dans un endroit calme.
 
-### Les quatre écrans d'accueil
+### Les écrans d'accueil
 
-Ce sont les quatre messages qui s'enchaînent à l'ouverture de la page, avant le formulaire.
-Chacun a son écran, avec son numéro ; « Continuer » passe au suivant. Pour changer un titre
-ou un texte affiché à côté, il n'y a que la liste `ACCUEIL` en haut de `signaler.js` à modifier.
+Ce sont les messages qui s'enchaînent à l'ouverture de la page, avant le formulaire. Chacun a
+son écran ; « Continuer » passe au suivant, et le dernier ouvre le formulaire.
+
+**Le nombre d'écrans suit les fichiers réellement présents.** La page demande au chargement
+lesquels existent et n'affiche que ceux-là. Déposer `accueil-2.mp3` ici fait donc apparaître
+son écran tout seul, sans toucher au code ; tant qu'il manque, aucun écran muet n'est montré.
+Pour changer un titre ou un texte affiché à côté, il n'y a que la liste `ACCUEIL_PREVUS` en
+haut de `signaler.js` à modifier.
+
+État au 17/11 : `accueil-1.mp3` est enregistré (17 s). Les trois autres restent à faire.
 
 | Fichier | Ce qu'il faut dire, en mooré |
 |---|---|
-| `accueil-1.mp3` | « Bonjour, bienvenue sur la plateforme d'assainissement de Ouagadougou. » |
+| `accueil-1.mp3` | **enregistré** — « Bonjour, bienvenue sur la plateforme d'assainissement de Ouagadougou. » |
 | `accueil-2.mp3` | « Vous pouvez signaler un tas d'ordures, ou une fuite d'eau sur une conduite. » |
 | `accueil-3.mp3` | « Touchez les grandes images, ou parlez : vous n'avez rien à écrire. » |
 | `accueil-4.mp3` | « Vous pouvez signaler sans donner votre nom ni votre numéro. Ne vous inquiétez pas, nous nous occupons du reste. » |

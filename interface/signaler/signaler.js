@@ -354,10 +354,14 @@ function majSuperficie() {
    « Passer le guidage » ouvre le formulaire tout de suite.
 
    Pour changer un titre, un texte ou un fichier, il n'y a que cette liste à modifier : les
-   écrans se fabriquent à partir d'elle, et leur nombre suit sa longueur. Les fichiers sont
-   dans /signaler/audio/moore/. Si un fichier manque, l'écran s'affiche quand même et le dit :
-   on ne bloque jamais quelqu'un qui veut signaler. */
-const ACCUEIL = [
+   écrans se fabriquent à partir d'elle. Les fichiers sont dans /signaler/audio/moore/.
+
+   Le nombre d'écrans suit les enregistrements RÉELLEMENT présents : au chargement, on demande
+   au serveur lesquels existent et on ne garde que ceux-là. Un message pas encore enregistré ne
+   fabrique donc pas un écran muet, et le jour où on l'ajoute, son écran apparaît tout seul,
+   sans toucher au code. Si aucun n'est là, on va droit au formulaire : jamais d'écran qui
+   empêche quelqu'un de signaler. */
+const ACCUEIL_PREVUS = [
   { fichier: "accueil-1.mp3", titre: "Bienvenue",
     texte: "Bienvenue sur la plateforme d'assainissement de Ouagadougou." },
   { fichier: "accueil-2.mp3", titre: "Ce que vous pouvez signaler",
@@ -368,8 +372,31 @@ const ACCUEIL = [
     texte: "Vous pouvez signaler sans donner votre nom ni votre numéro." },
 ];
 
+let ACCUEIL = ACCUEIL_PREVUS;      // remplacé au chargement par ceux qui existent vraiment
 let rangAccueil = 0;
 let sonAccueil = null;
+
+/* Demande au serveur quels enregistrements existent. En tête (HEAD) : on ne télécharge pas le
+   son, on demande seulement s'il est là. Hors ligne, le service worker répond depuis son cache
+   pour ceux qu'il a déjà ; les autres sont simplement écartés. */
+async function accueilsDisponibles() {
+  const presents = await Promise.all(ACCUEIL_PREVUS.map(async (ecran) => {
+    const adresse = "/signaler/audio/moore/" + ecran.fichier;
+    try {
+      const r = await fetch(adresse, { method: "HEAD" });
+      if (r.ok) return ecran;
+    } catch {
+      // Pas de réseau : on regarde dans la réserve du service worker. Sans cela, l'accueil
+      // parlé disparaîtrait hors ligne, c'est-à-dire là où il est le plus utile.
+    }
+    try {
+      return (await caches.match(adresse)) ? ecran : null;
+    } catch {
+      return null;
+    }
+  }));
+  return presents.filter(Boolean);
+}
 
 function arreterLAccueil() {
   if (sonAccueil) { sonAccueil.pause(); sonAccueil = null; }
@@ -402,7 +429,8 @@ function jouerLAccueil(automatique) {
 
 function afficherLAccueil(automatique) {
   const ecran = ACCUEIL[rangAccueil];
-  element("accueil-rang").textContent = String(rangAccueil + 1);
+  element("accueil-progression").textContent =
+    ACCUEIL.length > 1 ? `${rangAccueil + 1} sur ${ACCUEIL.length}` : "";
   element("accueil-numero").textContent = String(rangAccueil + 1);
   element("accueil-titre").textContent = ecran.titre;
   element("accueil-texte").textContent = ecran.texte;
@@ -426,7 +454,9 @@ element("accueil-continuer").addEventListener("click", () => {
   afficherLAccueil(true);
 });
 
-function ouvrirLAccueil() {
+async function ouvrirLAccueil() {
+  ACCUEIL = await accueilsDisponibles();
+  if (!ACCUEIL.length) { fermerLAccueil(); return; }   // rien d'enregistré : droit au formulaire
   rangAccueil = 0;
   element("accueil").hidden = false;
   afficherLAccueil(true);
