@@ -268,4 +268,4 @@ python -m pytest tests/ -q        # 175 tests : contrôles, pièges, chaînes, p
 | `interface/` | pages servies telles quelles ; `vendor/` contient les bibliothèques de la carte |
 | `donnees/` | préparation des données d'une commune et fichiers produits |
 | `tests/` | tests automatisés, dont le jeu de 42 signalements piégés |
-| `docs/` | proposition de l'équipe, conception, note sur les données |
+| `docs/` | proposition, conception, matrice de contribution, note sur les données |
