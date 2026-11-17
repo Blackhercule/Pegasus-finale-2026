@@ -25,7 +25,13 @@ ne modifie pas ce fichier.
 | — | Habillage : police Lato, couleurs des portails de l'administration | coordinateur | **Fait** (16/11) |
 | — | Quatre écrans d'accueil parlés avant le formulaire de signalement | coordinateur | **Fait** (16/11). Les enregistrements mooré restent à faire par l'équipe |
 | C1 | Trois erreurs 500 et limite des essais de mot de passe | coordinateur | **Fait** (16/11) |
-| C2 | Un lot ne doit pas pouvoir confirmer son propre dépotoir | — | **À faire**, recommandé avant la démonstration |
+| C2 | Un lot ne doit pas pouvoir confirmer son propre dépotoir | coordinateur | **Fait** (16/11) |
+| C3 | L'installateur ne se déclarait plus prêt depuis T13 | coordinateur | **Fait** (17/11) |
+| T17 | Masquer visages et plaques sur les photos | — | **À faire — livrable officiel manquant** |
+| T18 | Matrice de contribution par membre et par couche | — | **À faire — livrable officiel manquant** |
+| T19 | Jeu de signalements en GeoJSON sous licence ouverte | — | **À faire — livrable officiel manquant** |
+| T20 | Rapport technique unique | — | **À faire** |
+| T21 | Vidéo de démonstration de 3 minutes | — | **À faire** (la nôtre est périmée) |
 | T12 | Page d'accueil publique | Claude Code | **Fait** (16/11), vérifié par le coordinateur |
 | T13 | Partie décision protégée par identifiant et mot de passe | Claude Code | **Fait** (16/11), vérifié et fusionné. Correctif C1 ajouté par-dessus |
 | T14 | Habillage de la partie décision : barre horizontale, menu ☰, drapeau | Claude Code | **Fait** (16/11), vérifié. Reste la bande grise au bord du fond de carte |
@@ -372,3 +378,114 @@ carte graphique. Mesure avant et après. Si tu dépasses 8 secondes, allège la 
 été trouvé s'affiche encore en trait droit au lieu de disparaître ; `pytest` est vert, avec un
 test qui vérifie que la géométrie renvoyée commence et finit à la décharge et passe par tous les
 arrêts dans l'ordre.
+
+---
+
+# Tâches du 17/11 — les livrables officiels
+
+L'énoncé officiel est arrivé le 17/11 au matin (`enonce/challenges-finaux-2026.pdf`). Il liste
+des livrables que la photo d'ouverture ne mentionnait pas. Trois choses nous manquent
+complètement, et ce sont des livrables **nommés**, pas des améliorations.
+
+Ordre de priorité : **T17 d'abord** (c'est une fonctionnalité, pas un document), puis T18, T19,
+T20, T21. Un commit par tâche.
+
+## T17 — Masquer automatiquement les visages et les plaques sur les photos
+
+**Pourquoi.** C'est le premier livrable du challenge, mot pour mot : « Application de
+signalement hors connexion, **qui masque automatiquement les visages et les plaques
+d'immatriculation sur les photos** ». Nous ne le faisons pas du tout. C'est aussi la règle que
+nous nous étions donnée — aucune donnée personnelle — et un jury de cybersécurité ira voir.
+
+**Faisable hors ligne, vérifié.** `opencv-python-headless==4.10.0.84` livre les détecteurs dans
+le paquet lui-même, sans aucun modèle à télécharger : `haarcascade_frontalface_default.xml`,
+`haarcascade_profileface.xml` (visages de profil, fréquents sur une photo prise de loin),
+`haarcascade_russian_plate_number.xml` et `haarcascade_license_plate_rus_16stages.xml`. Garde
+cette version : OpenCV 5 ne livre plus ces fichiers. Ajoute-la à `requirements.txt`, et signale
+dans le compte rendu que l'image Docker grossit d'environ 90 Mo.
+
+**Le point qui compte le plus.** Le masquage se fait **à la réception, avant l'enregistrement**,
+dans `enregistrer_fichier()` (`application/__init__.py`). L'image d'origine ne doit **jamais**
+toucher le disque : ni en fichier temporaire, ni en copie « au cas où ». C'est la différence
+entre « nous floutons les visages » et « nous gardons les visages mais nous les cachons », et
+c'est exactement ce qu'un jury viendra vérifier. Dis-le dans le compte rendu.
+
+Floute par un **flou gaussien de forte intensité** ou un pavé plein, jamais un pixelisé léger
+qu'on peut défaire. Agrandis chaque zone détectée d'environ 20 % : une cascade cadre souvent
+juste et laisse le menton ou le bord de la plaque dehors.
+
+**Sois honnête sur ce que ça rate.** Ces détecteurs ne voient pas tout : un visage très de
+côté, une plaque burkinabè qui n'a pas le format sur lequel la cascade a été entraînée. Donc :
+
+- compte les zones trouvées et range le nombre avec le signalement ;
+- sur les postes de travail, affiche « n visage(s) et n plaque(s) masqués automatiquement » à
+  côté de la photo, et **un bouton pour masquer une zone à la main** si l'agent en voit une qui
+  reste. Un agent qui peut corriger vaut mieux qu'un détecteur qu'on prétend parfait ;
+- écris la limite dans le rapport plutôt que de la laisser découvrir au jury.
+
+**Réussi si** : une photo contenant un visage ressort floutée, et le fichier enregistré sur le
+disque ne contient plus le visage d'origine (vérifie-le en relisant le fichier, pas l'écran) ;
+une photo sans visage ressort intacte ; un fichier qui n'est pas une image est toujours rejeté
+comme avant ; `pytest` est vert avec un test qui compare les pixels de la zone avant et après ;
+le temps de traitement d'une photo de téléphone reste sous 2 secondes.
+
+## T18 — La matrice de contribution par membre et par couche
+
+**Pourquoi.** Livrable commun, nommé : « matrice de contribution par membre et par couche, avec
+les briques réutilisées et leur licence ». Elle n'existe pas. Et elle se relie au critère
+éliminatoire : le jury désigne lui-même qui explique une fonction.
+
+**Ce qu'il faut**, dans `docs/contribution.md` : un tableau dont les lignes sont les couches
+(signalement mobile, contrôles, chaîne des postes, cartographie, plan, simulation, interface de
+décision, déploiement, tests, documentation) et les colonnes les trois membres de l'équipe, qui
+dit qui a fait quoi et surtout **qui sait l'expliquer**.
+
+Puis un second tableau des briques réutilisées : nom, rôle, licence, lien. Reprends la table de
+technologies du `README.md`, et **ajoute ce qui vient de notre sprint** (`installer.sh`,
+`caddy/`) en le disant franchement — réutiliser son propre travail est permis et bien vu, le
+cacher ne l'est pas.
+
+Franck doit remplir les noms : ne les invente pas. Mets des cases à compléter.
+
+## T19 — Le jeu de signalements en GeoJSON, sous licence ouverte
+
+**Pourquoi.** Livrable nommé, et c'est notre « bien commun » : « la première carte ouverte des
+dépotoirs de Ouaga ».
+
+**Ce qu'il faut** : une adresse `GET /api/export/geojson` qui sort les dépotoirs **vérifiés**
+en GeoJSON, et un fichier `donnees/signalements-ouaga.geojson` versé dans le dépôt. Aucune
+donnée personnelle dedans : ni nom, ni téléphone, ni photo, ni source. Ajoute à côté un
+`donnees/signalements-ouaga.LICENCE.md` qui donne la licence (ODbL, comme OpenStreetMap, pour
+que le versement reste compatible) et la provenance.
+
+**Réussi si** : un test vérifie que l'export ne contient aucun champ de déclarant et que chaque
+entité a une position et une date.
+
+## T20 — Le rapport technique
+
+**Pourquoi.** Livrable commun : « rapport technique (contexte, architecture, choix, résultats,
+limites) », et livrable du challenge : « démarche, paramètres, scénarios simulés, résultats et
+plan de gestion ».
+
+**Ce qu'il faut** : `RAPPORT.md` à la racine, qui rassemble ce qui est déjà écrit dans `docs/`
+plutôt que de le réécrire. Les chiffres doivent être **mesurés**, pas estimés : nombre de
+points de regroupement, de tournées, taux de collecte, coût mensuel, temps de recalcul. Colle
+les commandes qui les produisent.
+
+La section « limites » est la plus importante pour un jury : les paramètres qui sont des
+hypothèses tant que la mairie n'a pas donné les siens, la décharge déduite d'OpenStreetMap, les
+arrondissements absents de l'extrait, les distances à vol d'oiseau entre un ménage et son point,
+et ce que le masquage de T17 ne détecte pas.
+
+## T21 — La vidéo de démonstration de 3 minutes
+
+**Pourquoi.** Livrable commun et livrable du challenge. La nôtre fait 2 min 18 s, montre
+l'ancien habillage, et ne contient ni les fuites d'eau, ni les nuisances, ni l'accueil parlé,
+ni la page d'accueil, ni les itinéraires par les rues.
+
+**Le scénario est imposé par l'énoncé** : « du signalement à la tournée, puis un changement de
+paramètres et le plan recalculé ». Suis cet ordre.
+
+Les outils existent : `outils/donnees_demonstration.py`, `outils/filmer.mjs`,
+`outils/monter_video.py`. **Fais-la durer entre 2 min 45 s et 3 min** : plus court donne
+l'impression d'avoir moins à montrer, plus long risque d'être coupé.
