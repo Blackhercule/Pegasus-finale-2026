@@ -49,3 +49,16 @@ tr.rejete td { color: var(--gris); background: #faf9f6; }
 /* T16 : position tirée d'un lieu connu, et non d'un GPS. */
 .position-lieu { display: block; margin: .3rem 0; padding: .3rem .5rem; border-radius: 6px;
                  background: var(--or-clair); color: #5c4f00; font-weight: 700; font-size: .82rem; }
+
+/* Pastille d'urgence de la file priorisée. Trois niveaux seulement : un agent pressé lit une
+   couleur, pas un nombre à deux décimales. Le détail des raisons est sur la ligne en dessous
+   et dans l'infobulle. */
+.priorite {
+  display: inline-block; min-width: 2.1rem; text-align: center; font-weight: 700;
+  font-size: .78rem; border-radius: 999px; padding: .1rem .4rem; margin-right: .35rem;
+  font-variant-numeric: tabular-nums;
+}
+.priorite.haute { background: var(--rouge); color: #fff; }
+.priorite.moyenne { background: var(--or-clair); color: var(--or-fonce); }
+.priorite.basse { background: #e7eaf3; color: var(--gris); }
+.ligne-raisons { font-size: .76rem; color: var(--gris); margin-top: .15rem; font-style: italic; }

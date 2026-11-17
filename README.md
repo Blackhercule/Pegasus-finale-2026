@@ -88,6 +88,38 @@ services, deux dossiers. Et la gravité retenue est la **plus forte** signalée,
 moyenne : entre « un peu bouché » et « ça déborde dans la rue », c'est la seconde qui décide
 de l'ordre de passage.
 
+## Quand les signalements deviennent ingérables
+
+Vingt signalements se traitent dans l'ordre d'arrivée. Cinq mille, non : un tas devant une
+école attendrait derrière un tas dans un terrain vague, simplement parce qu'il a été signalé
+plus tard. Embaucher des agents coûte cher ; mieux ordonner la file ne coûte rien.
+
+Chaque dossier reçoit donc une **note d'urgence**, et surtout **dit pourquoi** :
+
+```
+ 53  Dossier 1 · 1,0 m³
+     36 m d'un établissement scolaire · 254 m d'un plan d'eau · 2 témoins indépendants
+ 23  Dossier 2 · 20,0 m³
+     181 m d'un marché
+```
+
+Un tas d'un mètre cube passe devant un tas de vingt, parce qu'il est à trente-six mètres d'une
+école. C'est le genre d'arbitrage qu'un agent fait de tête quand il a dix dossiers, et qu'il ne
+peut plus faire quand il en a cinq mille.
+
+La note combine six facteurs, tous tirés de données déjà dans le dépôt : la proximité d'une
+école, d'un lieu de soins, d'un marché ou d'un point d'eau (les 1 187 lieux publics nommés), la
+proximité d'un plan d'eau, la gravité déclarée, le nombre de témoins indépendants, le temps
+déjà passé en file, et la densité de bâti alentour.
+
+**C'est un score écrit à la main, pas un modèle appris, et c'est délibéré.** Un agent doit
+pouvoir contester le classement, donc le comprendre ; une mairie doit pouvoir changer un poids
+sans toucher au code ; et « pourquoi ce dossier est-il passé devant ? » doit avoir une réponse
+autre que « le modèle l'a décidé ». Le calcul est instantané : 5 000 dossiers sont classés en
+moins d'une seconde, sans réseau et sans carte graphique.
+
+L'ordre d'arrivée reste accessible (`?ordre=arrivee`) : on ajoute un outil, on n'en retire pas.
+
 ## Parler plutôt qu'écrire, et comprendre le mooré
 
 - **Message vocal** : on décrit le lieu à la voix, en mooré, en dioula ou en français. Un agent
@@ -274,12 +306,12 @@ Notre code est publié sous **AGPL-3.0** (`LICENSE`).
 
 ```bash
 pip install -r requirements.txt
-python -m pytest tests/ -q        # 175 tests : contrôles, pièges, chaînes, plan, simulation, fuites, export
+python -m pytest tests/ -q        # 186 tests : contrôles, pièges, chaînes, plan, simulation, fuites, export
 ```
 
 | Dossier | Contenu |
 |---|---|
-| `application/` | l'application : `geo.py`, `reseau.py`, `signalements/`, `dossiers.py`, `fuites.py`, `nuisances.py`, `anonymiser.py`, `plan/`, `simulation/` |
+| `application/` | l'application : `geo.py`, `reseau.py`, `signalements/`, `dossiers.py`, `fuites.py`, `nuisances.py`, `anonymiser.py`, `priorite.py`, `plan/`, `simulation/` |
 | `interface/` | pages servies telles quelles ; `vendor/` contient les bibliothèques de la carte |
 | `donnees/` | préparation des données d'une commune et fichiers produits |
 | `tests/` | tests automatisés, dont le jeu de 42 signalements piégés |

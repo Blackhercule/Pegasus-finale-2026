@@ -24,6 +24,7 @@ from .export_osm import en_osm, note_d_export
 from .export_geojson import en_geojson
 from .fuites import AMPLEUR_NOMS, CHAINE_EAU, ErreurFuite, Fuites
 from .anonymiser import disponible as masquage_disponible, masquer
+from .priorite import Priorite
 from .nuisances import (CHAINE_NUISANCE, GRAVITE_NOMS, NATURES as NATURES_NUISANCE,
                         ErreurNuisance, Nuisances)
 from .geo import Geographie
@@ -56,6 +57,14 @@ def creer_application(reglages: Reglages = None) -> Flask:
     app.extensions["lieux"] = charger_lieux(reglages.fichier("lieux.geojson"))
     app.extensions["controleur"] = Controleur(app.extensions["geographie"], reglages.parametres,
                                               app.extensions["lieux"])
+    # La file priorisée : les lieux sensibles et la densité sont chargés une fois, au
+    # démarrage, pour que le classement d'une file de plusieurs milliers de dossiers reste
+    # instantané quand le jury en injecte un lot.
+    app.extensions["priorite"] = Priorite(
+        fichier_lieux=reglages.fichier("lieux.geojson"),
+        fichier_zones=reglages.fichier("zones.geojson"),
+        geo=app.extensions["geographie"],
+        poids=reglages.parametres.get("priorite"))
     app.register_blueprint(vues)
 
     @app.before_request
@@ -648,12 +657,22 @@ def chaine():
                     "comptes": dossiers().comptes_par_etape()})
 
 
+def priorite() -> Priorite:
+    from flask import current_app
+    return current_app.extensions["priorite"]
+
+
 @vues.route("/api/dossiers")
 def lister_dossiers():
     poste = session.get("poste")
     etape = request.args.get("etape")
     pour_moi = request.args.get("pour_moi") in ("1", "oui", "true")
-    return jsonify(dossiers().liste(etape=etape, poste=poste if pour_moi else None))
+    liste = dossiers().liste(etape=etape, poste=poste if pour_moi else None)
+    # Les plus urgents en tête, et chacun porte ses raisons : un agent qui traite une file de
+    # plusieurs milliers de dossiers ne peut pas suivre l'ordre d'arrivée.
+    if request.args.get("ordre") == "arrivee":
+        return jsonify(liste)
+    return jsonify(priorite().classer(liste, gravite=lambda d: d.get("taille")))
 
 
 @vues.route("/api/dossiers/<int:identifiant>")
@@ -708,7 +727,10 @@ def lister_fuites():
     poste = session.get("poste")
     etape = request.args.get("etape")
     pour_moi = request.args.get("pour_moi") in ("1", "oui", "true")
-    return jsonify(fuites().liste(etape=etape, poste=poste if pour_moi else None))
+    liste = fuites().liste(etape=etape, poste=poste if pour_moi else None)
+    if request.args.get("ordre") == "arrivee":
+        return jsonify(liste)
+    return jsonify(priorite().classer(liste, gravite=lambda f: f.get("ampleur")))
 
 
 @vues.route("/api/fuites/carte")
@@ -770,9 +792,16 @@ def chaine_nuisances():
 def lister_nuisances():
     poste = session.get("poste")
     pour_moi = request.args.get("pour_moi") in ("1", "oui", "true")
-    return jsonify(nuisances().liste(etape=request.args.get("etape"),
-                                     nature=request.args.get("nature"),
-                                     poste=poste if pour_moi else None))
+    liste = nuisances().liste(etape=request.args.get("etape"),
+                              nature=request.args.get("nature"),
+                              poste=poste if pour_moi else None)
+    if request.args.get("ordre") == "arrivee":
+        return jsonify(liste)
+    # « moyen » veut dire la même chose pour une nuisance et pour un tas, mais la table des
+    # niveaux les distingue : on lève l'ambiguïté ici.
+    return jsonify(priorite().classer(
+        liste, gravite=lambda n: ("moyen_nuisance" if n.get("gravite") == "moyen"
+                                  else n.get("gravite"))))
 
 
 @vues.route("/api/nuisances/carte")

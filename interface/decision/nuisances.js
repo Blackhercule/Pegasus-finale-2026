@@ -28,6 +28,20 @@ function avertissementLieu(signalements) {
     Chercher aux abords ; voir le repère dans le commentaire.</p>`).join("");
 }
 
+/* La file est classée par urgence et non par ordre d'arrivée : chaque ligne porte sa note et
+   surtout ses raisons. Un agent doit pouvoir contester le classement, donc le comprendre. */
+function pastilleDePriorite(dossier) {
+  const p = dossier.priorite;
+  if (!p) return "";
+  const niveau = p.note >= 60 ? "haute" : p.note >= 35 ? "moyenne" : "basse";
+  return `<span class="priorite ${niveau}" title="${echapper(p.raisons.join(" · ") || "aucun facteur particulier")}">${Math.round(p.note)}</span>`;
+}
+
+function raisonsDePriorite(dossier) {
+  const p = dossier.priorite;
+  return p && p.raisons.length ? `<div class="ligne-raisons">${echapper(p.raisons.join(" · "))}</div>` : "";
+}
+
 function dateCourte(iso) {
   if (!iso) return "—";
   const d = new Date(iso);
@@ -140,10 +154,11 @@ async function rafraichir() {
   element("lignes").innerHTML = liste.length ? liste.map((n) => `
     <tr data-id="${n.id}" class="${choisi === n.id ? "choisi" : ""}">
       <td>
-        <div class="ligne-titre">${echapper(n.nature_nom)} ·
+        <div class="ligne-titre">${pastilleDePriorite(n)} ${echapper(n.nature_nom)} ·
           ${echapper(n.quartier || "quartier non précisé")}</div>
         <div class="ligne-detail">${echapper(n.gravite_nom)} · ${echapper(n.etape_nom)}
           · dure depuis ${depuis(n.premier_vu)} · ${n.nb_signalements} signalement(s)</div>
+      ${raisonsDePriorite(n)}
       </td>
     </tr>`).join("")
     : `<tr><td class="vide">${filtre === "pour_moi"
