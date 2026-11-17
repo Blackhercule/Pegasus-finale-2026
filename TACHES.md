@@ -39,6 +39,7 @@ ne modifie pas ce fichier.
 | C6 | Une date absurde (piège 2001) ne date plus le dossier entier | coordinateur | **Fait** (17/11), relevé par Claude Code pendant T22 |
 | C7 | Construire l'image sans Internet (`Dockerfile.hors-ligne`) | coordinateur | **Fait** (17/11) |
 | C8 | Visages petits ratés par le masquage : YuNet en plus des cascades, et `remasquer` | coordinateur | **Fait** (17/11), relevé sur le PC |
+| T23 | Appeler la mairie depuis la page Signaler (menu 1-2-3), position en direct, photo en grand, carte du dossier | Claude Code | **À faire — sur la branche `appel-mairie`, jamais sur `main`** |
 | T12 | Page d'accueil publique | Claude Code | **Fait** (16/11), vérifié par le coordinateur |
 | T13 | Partie décision protégée par identifiant et mot de passe | Claude Code | **Fait** (16/11), vérifié et fusionné. Correctif C1 ajouté par-dessus |
 | T14 | Habillage de la partie décision : barre horizontale, menu ☰, drapeau | Claude Code | **Fait** (16/11), vérifié. Reste la bande grise au bord du fond de carte |
@@ -690,3 +691,197 @@ avant et après à 1366 px, une à 420 px, la liste des vérifications ci-dessus
 et ce qui n'a pas pu être fait et pourquoi. Range les captures dans `comptes-rendus/captures/`.
 
 Dis clairement, en tête, **quelles pages sont prêtes à fusionner** et lesquelles ne le sont pas.
+
+# T23 — Appeler la mairie depuis la page de signalement, et voir où est l'habitant
+
+Demandée par Franck le 17/11 au soir. **Lis toute la tâche avant d'écrire une ligne** : la
+démonstration est demain, et `main` doit rester en état de marche jusqu'au bout.
+
+## Ce que Franck veut, en une phrase par partie
+
+1. **Agrandir une photo.** Sur les pages des agents, un clic sur une photo l'ouvre en grand.
+2. **La position sur une carte.** Dans le détail d'un dossier, la position s'affiche sur une
+   petite carte avec une épingle, comme une position envoyée dans une messagerie.
+3. **Un menu 1, 2, 3 après le message d'accueil.** Sur la page Signaler, une fois le message
+   parlé écouté, trois grands boutons numérotés : **1** ouvre le formulaire actuel, **2** et
+   **3** appellent un agent de la mairie (même action pour les deux : choix de Franck).
+4. **L'appel passe par la plateforme**, pas par le réseau téléphonique : l'écran de l'agent de
+   la mairie sonne, il décroche sur son PC, ils se parlent, et **pendant l'appel l'agent voit la
+   position de l'habitant bouger en direct sur la carte**.
+
+Pourquoi : beaucoup d'habitants ne lisent pas le français. Le guidage parlé en mooré leur
+explique la page ; s'ils préfèrent parler à quelqu'un, la touche 2 ou 3 les met en relation avec
+la mairie, qui voit d'où ils appellent.
+
+## Le cadre
+
+### Une branche à part, jamais `main`
+
+Travaille sur la branche **`appel-mairie`**, créée depuis `main` à jour. **Ne pousse jamais sur
+`main`** : le coordinateur vérifie et fusionne lui-même.
+
+**Un commit par partie, dans l'ordre ci-dessous.** Les parties 1 et 2 sont petites et sans
+risque : on les fusionne dès qu'elles sont prêtes, même si l'appel n'aboutit pas. Les parties
+3 et 4 vont ensemble : **les touches 2 et 3 n'apparaissent pas tant que l'appel ne marche pas**.
+Un bouton qui ne fait rien devant le jury est pire que pas de bouton.
+
+### Ce qui est permis cette fois, et ce qui reste interdit
+
+- **Permis** : un module serveur nouveau (`application/appels.py`) et ses adresses d'API, une
+  page nouvelle pour l'agent, des fichiers JS et CSS nouveaux.
+- **Interdit** : modifier le comportement d'une adresse existante, changer le schéma de la base,
+  ajouter une bibliothèque (Python ou JavaScript), charger quoi que ce soit depuis Internet (E14).
+  **Aucun serveur STUN ou TURN** : ni celui de Google, ni un autre. L'appel se fait sur le réseau
+  local, sans Internet.
+- **Interdit** : du JavaScript dans le HTML (la CSP le bloque sans rien dire), et du texte venu
+  d'un habitant posé autrement qu'avec `textContent`.
+- **Les tests existants restent tous verts, sans en modifier un seul.**
+
+## Partie 1 — La photo en grand
+
+Sur toutes les pages d'agent qui montrent des photos (`dossiers.html`, `signalement.html`,
+`verifier.html`, et `fuites.html` / `nuisances.html` si elles en montrent) : un clic sur une
+photo ou une vignette l'ouvre **plein écran** sur fond sombre, ajustée à l'écran. On ferme par
+**Échap**, un clic à côté, ou un bouton ✕. Si le dossier a plusieurs photos, les flèches ← → (et
+deux boutons) passent de l'une à l'autre. Un seul fichier partagé, par exemple
+`interface/decision/visionneuse.js` et `.css`, branché sur toutes ces pages.
+
+Seule la photo du signalement est concernée. La CNIB et le portrait du déclarant restent comme
+aujourd'hui.
+
+## Partie 2 — La position sur une carte
+
+Dans le détail d'un dossier (`dossiers.html`, panneau de droite, et `signalement.html`) : sous la
+ligne « Position », une **petite carte** (environ 220 px de haut) centrée sur le dossier, avec une
+épingle. Même fond hors ligne que la grande carte : MapLibre et `fond.pmtiles`, déjà dans le
+projet (regarde comment `carte.js` les charge). Un lien « Voir sur la grande carte » ouvre
+`/decision/` centrée sur ce point.
+
+## Partie 3 — L'appel, côté serveur
+
+### Comment ça marche, pour que chaque membre de l'équipe puisse l'expliquer
+
+L'audio passe **directement d'un navigateur à l'autre**, par WebRTC, la technologie d'appel
+intégrée à Chrome. Notre serveur ne transporte pas la voix : il sert seulement de **standard
+téléphonique**. Il transmet la « proposition » du téléphone à l'agent, et la « réponse » de
+l'agent au téléphone (ce qu'on appelle la signalisation). Ensuite, les deux navigateurs se
+parlent directement sur le Wi-Fi.
+
+L'audio est **chiffré par le navigateur lui-même** (DTLS-SRTP, obligatoire dans WebRTC) : aucune
+cryptographie écrite par l'équipe.
+
+### Le plus simple qui marche
+
+- **Pas de WebSocket** : le téléphone et l'agent interrogent le serveur toutes les secondes. Un
+  seul processus gunicorn, huit fils : une connexion tenue ouverte bloquerait un fil.
+- **Pas d'échange de candidats au fil de l'eau** : chaque navigateur attend d'avoir rassemblé ses
+  adresses (`iceGatheringState === "complete"`, plafonné à 3 s), puis envoie sa description
+  complète en une fois. Une proposition, une réponse, c'est tout.
+- `new RTCPeerConnection({ iceServers: [] })` : sans serveur STUN, seules les adresses du réseau
+  local sont proposées. C'est ce qu'on veut.
+
+### Les adresses (à adapter si tu as mieux, en le justifiant dans le compte rendu)
+
+Côté **habitant**, ouvertes à tous (à ajouter à `OUVERT_A_TOUS`) :
+
+- `POST /api/appels` — `{offre, latitude, longitude, precision_m}` ; la position est facultative.
+  Répond `201 {id, jeton}`. Le jeton (`secrets.token_urlsafe`) est le seul moyen, pour le
+  téléphone, d'agir ensuite sur **son** appel. Il voyage dans un en-tête `X-Appel-Jeton`, jamais
+  dans l'adresse (les adresses finissent dans les journaux), et il est comparé avec
+  `hmac.compare_digest`.
+- `GET /api/appels/<id>` + jeton — l'état (`sonne`, `en_cours`, `termine`, `sans_reponse`) et, une
+  fois décroché, la réponse de l'agent.
+- `POST /api/appels/<id>/position` + jeton — la position du moment.
+- `POST /api/appels/<id>/raccrocher` + jeton.
+
+Côté **agent**, réservées au poste `mairie` (`agent_requis(postes=("mairie",))`, et `X-Jeton` sur
+les POST, comme partout) :
+
+- `GET /api/appels` — les appels qui sonnent ou sont en cours, avec la dernière position et son
+  âge en secondes ;
+- `GET /api/appels/<id>/offre` — la proposition du téléphone ;
+- `POST /api/appels/<id>/decrocher` — `{reponse}`. Si un autre agent a déjà décroché : `409`. Le
+  journal garde qui a décroché, comme pour les dossiers ;
+- `POST /api/appels/<id>/raccrocher`.
+
+### Les règles, que le jury cybersécurité ira chercher
+
+- **Rien n'est enregistré** : ni la voix (elle ne passe pas par le serveur), ni la position. Les
+  appels vivent **en mémoire** (un dictionnaire protégé par un `threading.Lock`), jamais sur le
+  disque, jamais dans la base, jamais dans les journaux. Une position est une donnée
+  personnelle : elle disparaît quand on raccroche.
+- **Délais** : un appel qui sonne plus de 90 s sans réponse passe à `sans_reponse` ; un appel en
+  cours est coupé au bout de 30 min ; un appel terminé est oublié 60 s plus tard (le temps que le
+  téléphone l'apprenne).
+- **Pas d'inondation** : au plus 3 appels qui sonnent ou sont en cours en même temps (sinon `503`,
+  « Tous les agents sont occupés »), et au plus 5 appels par adresse de téléphone en 10 minutes
+  (`429`). L'adresse du téléphone est celle que Caddy pose dans `X-Forwarded-For` : vérifie que
+  Caddy remplace bien celle qu'un client enverrait lui-même, et écris ce que tu as constaté.
+- **Tailles bornées** : une description WebRTC de plus de 20 000 caractères est refusée ; une
+  position est validée comme celle d'un signalement (`controles.py`).
+- **Tests `pytest`** pour chaque règle : jeton absent ou faux, brigade ou anonyme qui veut lister
+  ou décrocher, double décrochage, positions et tailles invalides, les deux limites, les délais
+  (en avançant l'horloge, pas en attendant), et la position effacée après raccrochage.
+
+## Partie 4 — L'appel, côté téléphone et côté agent
+
+### Le téléphone (`interface/signaler/`)
+
+- **Le menu.** Sur le dernier écran d'accueil, le bouton « Commencer le signalement » est
+  remplacé par **trois grands boutons numérotés**, faciles à toucher, avec une icône et deux ou
+  trois mots sous le chiffre : **1** « Je signale moi-même », **2** et **3** « Parler à la
+  mairie ». « Passer le guidage » reste et équivaut à 1. Le bouton « Revoir les messages
+  d'accueil » ramène à ce menu.
+- **Le message parlé du menu** est à enregistrer par l'équipe, en mooré : prévois un fichier
+  `audio/moore/menu.mp3`, joué sur ce dernier écran s'il existe (même mécanisme que les écrans
+  d'accueil : pas de fichier, pas de son, rien de cassé), et ajoute-le au `LISEZ-MOI.md` de ce
+  dossier avec le texte à dire : « Touchez 1 pour faire votre signalement vous-même. Touchez 2 ou
+  3 pour parler à un agent de la mairie. »
+- **L'appel.** Le téléphone demande le micro et la position (`watchPosition`), puis affiche « Appel
+  de la mairie… ça sonne », puis « En communication » avec un grand bouton rouge **Raccrocher**.
+  La position part toutes les 3 s pendant l'appel. Il joue la voix de l'agent dans un `<audio>`.
+- **Si ça ne marche pas, on retombe toujours sur le formulaire** : micro refusé, personne ne
+  décroche en 90 s, tous les agents occupés, réseau coupé. Un message court, et le bouton **1**.
+  Position refusée : l'appel passe quand même, l'agent voit « position non partagée ».
+
+### L'agent (poste `mairie`)
+
+- **Ça sonne partout.** `barre.js` est sur toutes les pages : pour le poste `mairie`, il interroge
+  `GET /api/appels` toutes les 2 s. Un appel qui sonne fait apparaître un bandeau bien visible
+  « 📞 Un habitant appelle » avec **Décrocher** et **Ignorer**, et une sonnerie fabriquée avec
+  l'API Web Audio (aucun fichier son de plus).
+- **Décrocher** ouvre une page nouvelle, `/decision/appel.html?id=…` : le micro de l'agent, la voix
+  de l'habitant, un bouton **Couper le micro** et un bouton **Raccrocher**, et surtout **une carte
+  qui suit l'habitant** : un point bleu entouré du cercle de précision, qui se déplace à chaque
+  nouvelle position, le trajet déjà parcouru en trait fin, et « position mise à jour il y a 4 s »
+  (en orange au-delà de 15 s). Même fond hors ligne que la grande carte.
+- À la fin de l'appel, la page dit « Appel terminé » et la position disparaît de l'écran.
+
+## Réussi si
+
+1. `python -m pytest -q` : tous les tests existants verts, plus les tiens.
+2. **Un essai dans le navigateur, automatisé avec Playwright**, deux contextes Chromium lancés
+   avec `--use-fake-ui-for-media-stream --use-fake-device-for-media-stream`. Le téléphone
+   (420 px, position permise et fixée par `context.setGeolocation`) touche **2**. L'agent
+   connecté (`agent`) voit le bandeau et décroche. Les deux `RTCPeerConnection` passent à
+   `connected` en moins de 10 s. On déplace la position du téléphone : le point bouge sur la carte
+   de l'agent en moins de 5 s. Le téléphone raccroche : l'agent lit « Appel terminé ». Aucune
+   requête vers Internet, aucune erreur de console. Range ce script dans `outils/`, pour qu'on le
+   relance sur le PC.
+3. Les cas d'échec du téléphone retombent tous sur le formulaire, vérifiés de la même façon.
+4. Les parties 1 et 2 vues à **1366 px** et **420 px**, et le parcours complet de T22
+   (`outils/verifier_parcours.mjs`) toujours vert.
+
+**[PC], après fusion** : l'essai entre un vrai téléphone et le PC, sur le Wi-Fi de la finale.
+Pour que Chrome donne le micro à l'agent, **le PC doit faire confiance au certificat**
+(`certutil -user -addstore Root ca-assainissement.crt`) : aujourd'hui il affiche « Non sécurisé ».
+Si le Wi-Fi isole les appareils les uns des autres, l'appel ne passera pas : c'est à essayer au
+plus tôt, avec le téléphone d'un membre de l'équipe.
+
+## Le compte rendu
+
+Dans `comptes-rendus/T23.md`, sur le modèle habituel. En tête : **quelles parties sont prêtes à
+fusionner**. Pour l'appel : un schéma en quelques lignes de qui envoie quoi à qui, pour que
+chaque membre puisse l'expliquer au jury, et ce que tu as constaté sur `X-Forwarded-For`. Si
+l'appel ne passe pas de façon fiable dans l'essai automatisé, **arrête-toi et écris-le** plutôt
+que de livrer des touches 2 et 3 qui échouent une fois sur deux.
