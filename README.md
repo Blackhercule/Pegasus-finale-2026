@@ -120,6 +120,31 @@ moins d'une seconde, sans réseau et sans carte graphique.
 
 L'ordre d'arrivée reste accessible (`?ordre=arrivee`) : on ajoute un outil, on n'en retire pas.
 
+### Une sortie pour dix constats
+
+Classer la file ne suffit pas : il faut encore aller voir. La brigade se déplaçait dossier par
+dossier, et deux dossiers voisins étaient souvent visités deux jours différents, simplement
+parce qu'ils étaient arrivés dans le désordre.
+
+Le bouton **« Préparer ma tournée »** de chaque poste groupe les visites qui l'attendent en un
+seul trajet par les rues, dans l'ordre le plus court. Sur quatorze dossiers dispersés dans la
+ville, mesuré :
+
+```
+13 déplacements évités aujourd'hui.
+9,5 h si l'on sortait une fois par dossier → 5,9 h en groupant (3,6 h gagnées).
+Il faut 1 agent sur le terrain aujourd'hui, sur 2 disponibles.
+```
+
+La dernière ligne est celle qui compte pour une mairie : l'outil ne dit pas seulement comment
+mieux employer ses agents, il dit combien il en faut **vraiment** ce jour-là.
+
+Rien n'est réinventé : c'est le même algorithme que les tournées des camions, le même réseau de
+rues, le même tracé. Seule la contrainte change — la journée de l'agent au lieu de la benne.
+L'équipe n'a donc qu'un algorithme à savoir expliquer. Le point de départ est le centre de la
+commune tant que la mairie n'a pas donné l'adresse du service (`base_inspection` dans
+`parametres.json`).
+
 ## Parler plutôt qu'écrire, et comprendre le mooré
 
 - **Message vocal** : on décrit le lieu à la voix, en mooré, en dioula ou en français. Un agent
@@ -306,12 +331,12 @@ Notre code est publié sous **AGPL-3.0** (`LICENSE`).
 
 ```bash
 pip install -r requirements.txt
-python -m pytest tests/ -q        # 186 tests : contrôles, pièges, chaînes, plan, simulation, fuites, export
+python -m pytest tests/ -q        # 195 tests : contrôles, pièges, chaînes, plan, simulation, fuites, export
 ```
 
 | Dossier | Contenu |
 |---|---|
-| `application/` | l'application : `geo.py`, `reseau.py`, `signalements/`, `dossiers.py`, `fuites.py`, `nuisances.py`, `anonymiser.py`, `priorite.py`, `plan/`, `simulation/` |
+| `application/` | l'application : `geo.py`, `reseau.py`, `signalements/`, `dossiers.py`, `fuites.py`, `nuisances.py`, `anonymiser.py`, `priorite.py`, `inspection.py`, `plan/`, `simulation/` |
 | `interface/` | pages servies telles quelles ; `vendor/` contient les bibliothèques de la carte |
 | `donnees/` | préparation des données d'une commune et fichiers produits |
 | `tests/` | tests automatisés, dont le jeu de 42 signalements piégés |

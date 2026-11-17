@@ -6,6 +6,7 @@
 <title>Fuites d'eau — Assainissement de Ouaga</title>
 <link rel="stylesheet" href="/decision/style.css">
 <link rel="stylesheet" href="/decision/barre.css">
+<script src="/decision/tournee.js" defer></script>
 <script src="/decision/barre.js" defer></script>
 <link rel="stylesheet" href="/decision/verifier.css">
 <link rel="stylesheet" href="/decision/dossiers.css">
@@ -69,6 +70,14 @@
         <p class="vide">Choisissez une fuite dans la liste.</p>
       </section>
     </div>
+
+    <section class="carte-bloc" id="bloc-tournee">
+      <h2>Ma tournée du jour</h2>
+      <p class="aide">Plutôt qu'une sortie par dossier, l'outil groupe les visites qui vous
+        attendent en un seul trajet, par les rues, dans l'ordre le plus court.</p>
+      <button type="button" id="preparer-tournee">Préparer ma tournée</button>
+      <div id="tournee"></div>
+    </section>
   </section>
 </main>
 

@@ -62,3 +62,17 @@ tr.rejete td { color: var(--gris); background: #faf9f6; }
 .priorite.moyenne { background: var(--or-clair); color: var(--or-fonce); }
 .priorite.basse { background: #e7eaf3; color: var(--gris); }
 .ligne-raisons { font-size: .76rem; color: var(--gris); margin-top: .15rem; font-style: italic; }
+
+/* « Ma tournée du jour » : le trajet groupé des visites de terrain. */
+#bloc-tournee button { width: 100%; }
+.economie { background: var(--or-clair); border-left: 3px solid var(--or-fonce);
+            border-radius: 8px; padding: .6rem .8rem; margin: .8rem 0; }
+.economie p { margin: .2rem 0; font-size: .9rem; }
+.sortie-terrain { border-top: 1px solid var(--trait); padding-top: .6rem; margin-top: .6rem; }
+.sortie-terrain h3 { font-size: .9rem; margin: 0 0 .4rem; }
+.etapes-tournee { margin: 0; padding-left: 1.4rem; font-size: .88rem; }
+.etapes-tournee li { padding: .15rem 0; }
+.etapes-tournee .genre { color: var(--gris); }
+/* Sous les deux colonnes, sur toute la largeur : le bouton n'a pas besoin de s'étirer. */
+#bloc-tournee { margin-top: 1rem; }
+#bloc-tournee button { width: auto; }
