@@ -28,3 +28,6 @@ ca-assainissement.crt
 
 # Photos de test déposées par l'equipe pour eprouver la detection : jamais publiees.
 tests/photos/
+
+# Paquets Python apportés à la main pour Dockerfile.hors-ligne (48 Mo) : hors dépôt.
+hors-ligne/

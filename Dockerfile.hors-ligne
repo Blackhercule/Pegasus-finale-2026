@@ -1,0 +1,28 @@
+# Construction SANS Internet, pour un PC qui ne joint ni Docker Hub ni PyPI.
+#
+#     DOCKER_BUILDKIT=0 docker build -f Dockerfile.hors-ligne -t assainissement-ouaga-application .
+#
+# Le Dockerfile normal part de python:3.12-slim et télécharge les bibliothèques : il lui faut
+# Internet. Celui-ci part de l'image de l'application DÉJÀ construite sur ce PC, qui contient
+# Python et toutes les bibliothèques d'avant T17. Il n'y ajoute que ce qui manque :
+#   - OpenCV (masquage des visages et des plaques), depuis un fichier posé dans hors-ligne/ ;
+#   - le code du jour.
+# Rien n'est téléchargé. Le fichier d'OpenCV n'est pas versé dans le dépôt (.gitignore) : il
+# s'obtient une fois, là où il y a Internet, par
+#     pip download opencv-python-headless==4.10.0.84 --only-binary=:all: --no-deps \
+#         --platform manylinux2014_x86_64 --python-version 3.12 -d hors-ligne
+FROM assainissement-ouaga-application:latest
+
+# pip a besoin d'écrire dans le dossier de Python : le temps de l'installation, on est root.
+USER root
+COPY hors-ligne/opencv_python_headless-4.10.0.84-*.whl /tmp/roues/
+# --no-index : ne jamais chercher sur Internet. --no-deps : NumPy, sa seule dépendance, est
+# déjà dans l'image.
+RUN pip install --no-cache-dir --no-index --no-deps /tmp/roues/*.whl && rm -rf /tmp/roues
+
+COPY application ./application
+COPY interface ./interface
+COPY donnees ./donnees
+
+# Comme dans le Dockerfile normal : l'application tourne sans privilèges.
+USER 991
