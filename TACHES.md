@@ -39,7 +39,7 @@ ne modifie pas ce fichier.
 | C6 | Une date absurde (piège 2001) ne date plus le dossier entier | coordinateur | **Fait** (17/11), relevé par Claude Code pendant T22 |
 | C7 | Construire l'image sans Internet (`Dockerfile.hors-ligne`) | coordinateur | **Fait** (17/11) |
 | C8 | Visages petits ratés par le masquage : YuNet en plus des cascades, et `remasquer` | coordinateur | **Fait** (17/11), relevé sur le PC |
-| T23 | Appeler la mairie depuis la page Signaler (menu 1-2-3), position en direct, photo en grand, carte du dossier | Claude Code | **À faire — sur la branche `appel-mairie`, jamais sur `main`** |
+| T23 | Appeler la mairie depuis la page Signaler (menu 1-2-3), position en direct, photo en grand, carte du dossier | Claude Code | **Fait (cloud), vérifié et fusionné le 17/11.** Reste [PC] : essai avec un vrai téléphone sur le Wi-Fi de la finale, `menu.mp3` à enregistrer |
 | T12 | Page d'accueil publique | Claude Code | **Fait** (16/11), vérifié par le coordinateur |
 | T13 | Partie décision protégée par identifiant et mot de passe | Claude Code | **Fait** (16/11), vérifié et fusionné. Correctif C1 ajouté par-dessus |
 | T14 | Habillage de la partie décision : barre horizontale, menu ☰, drapeau | Claude Code | **Fait** (16/11), vérifié. Reste la bande grise au bord du fond de carte |
