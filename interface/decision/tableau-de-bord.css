@@ -1,0 +1,6 @@
+/* Tableau de bord (T22) : ce qui est propre à cette page ; le reste est dans plateforme.css. */
+.colonnes { margin-bottom: var(--e5); }
+.graphiques { margin-bottom: var(--e5); }
+#mini-carte { min-height: 200px; }
+.plan .titre-panneau { margin-bottom: var(--e1); }
+.plan .tableau-chiffres { max-width: 560px; }

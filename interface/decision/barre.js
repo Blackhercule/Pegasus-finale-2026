@@ -7,6 +7,7 @@
 
 (function () {
   const SECTIONS = [
+    ["Tableau de bord", "/decision/tableau-de-bord.html"],
     ["Carte", "/decision/"],
     ["Dépotoirs", "/decision/dossiers.html"],
     ["Fuites d'eau", "/decision/fuites.html"],
