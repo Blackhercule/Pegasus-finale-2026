@@ -85,7 +85,8 @@ def principal():
                       "Enlevé : deux rotations"][numero]
             appeler(f"/api/dossiers/{identifiant}/avancer", {"detail": detail},
                     cookies=cookie, entetes={"X-Jeton": jeton})
-    resultat, _ = appeler("/api/chaine")
+    cookie, _ = connecter("mairie")           # depuis T13, la chaîne n'est lue que connecté
+    resultat, _ = appeler("/api/chaine", cookies=cookie)
     print("Dossiers par étape :", resultat.get("comptes"))
 
 

@@ -1,44 +1,54 @@
 """Monte la vidéo de démonstration à partir des scènes filmées dans le navigateur.
 
     node outils/filmer.mjs           (filme les scènes dans /tmp/video)
-    python outils/monter_video.py    (les assemble en un seul fichier)
+    python outils/monter_video.py [scènes] [vidéo.mp4]    (les assemble en un seul fichier)
 
 Chaque scène reçoit un bandeau avec sa phrase, et la vidéo s'ouvre et se ferme sur un carton.
 Tout est fait avec ffmpeg : aucun service en ligne, aucun montage à la main.
 """
 
+import json
 import os
 import shutil
 import subprocess
 import sys
 import tempfile
 
+# Dans l'ordre imposé par l'énoncé : « du signalement à la tournée, puis un changement de
+# paramètres et le plan recalculé ».
 SCENES = [
-    ("01-carte", "La carte de décision, servie par notre propre machine",
-     "Aucune connexion à Internet : fond de carte, données et calculs sont sur le poste"),
-    ("02-signaler", "Signaler un dépotoir depuis un téléphone",
-     "Guidage parlé en mooré, mesure du tas, message vocal — la page marche sans réseau"),
-    ("03-chaine", "Un signalement ouvre un dossier qui passe de poste en poste",
-     "Mairie, brigade Laabal, puis équipe de collecte : chaque passage est daté et signé"),
-    ("04-pieges", "Le jury injecte 42 signalements piégés",
-     "Chacun est écarté avec son motif, et le serveur ne tombe jamais"),
-    ("05-plan", "Le jury change les paramètres : 14 camions en panne, saison des pluies",
-     "Le plan se recalcule en 5 secondes et nomme les arrêts qu'il ne peut plus desservir"),
-    ("06-scenarios", "Comparer des scénarios",
-     "Ajouter des camions ne suffit pas : il faut aussi la fréquence et les abonnements"),
-    ("07-simulation", "Simulation de la filière, un jour par pas de temps",
-     "Ménages, pré-collecteurs, brigade Laabal et mairie"),
+    ("01-signaler", "1. Un habitant signale un dépotoir depuis son téléphone",
+     "Accueil parlé en mooré, mesure du tas, message vocal — sans compte, et même sans réseau"),
+    ("02-sans-gps", "Sans GPS : il choisit un lieu connu",
+     "Marchés, écoles, centres de santé ; la mairie saura que la position est approximative"),
+    ("03-pieges", "2. Le jury injecte 42 signalements piégés",
+     "Chacun est écarté avec son motif, aucun n'entre dans le plan, le serveur tient"),
+    ("04-chaine", "3. Le signalement ouvre un dossier qui passe de poste en poste",
+     "Mairie, brigade Laabal, mairie : chaque passage est daté et signé"),
+    ("05-tournee", "4. Jusqu'à la tournée : le camion passe par le dépotoir",
+     "Points de regroupement et tournées optimisées, tracées rue par rue"),
+    ("06-parametres", "5. Le jury change les paramètres : 8 camions en panne, saison des pluies",
+     "Le plan se recalcule en quelques secondes et affiche ses propres contrôles de cohérence"),
+    ("07-scenarios", "6. Comparer des scénarios",
+     "Camions, fréquence de passage, abonnements : chaque levier chiffré côte à côte"),
+    ("08-simulation", "7. Simulation multi-agents de la filière",
+     "Ménages, pré-collecteurs, brigade Laabal et mairie, un jour par pas de temps"),
 ]
 
-TITRE = ("Assainissement de Ouaga", "Outil libre d'aide à la décision",
+TITRE = ("Assainissement de Ouaga", "Du signalement d'un dépotoir au plan de gestion de la ville",
          "Équipe PEGASUS — Université Joseph Ki-Zerbo")
-FIN = ("Code libre, données ouvertes", "github.com/Blackhercule/Pegasus-finale-2026",
-       "64 tests automatisés · aucune dépendance à Internet")
+FIN = ("Code libre, données ouvertes", "AGPL-3.0 · OpenStreetMap (ODbL) · aucune dépendance à Internet",
+       "175 tests automatisés · déploiement en une commande")
+
+# Une scène qui attend un long calcul commence AVANT_RESULTAT secondes avant que le résultat
+# s'affiche (moment noté par filmer.mjs dans coupes.json) : on ne montre pas l'attente.
+AVANT_RESULTAT = 2.0
 
 POLICE = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 POLICE_GRASSE = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 LARGEUR, HAUTEUR = 1280, 720
-VERT, OR = "0x12302a", "0xb8862b"
+# Bleu marine et jaune des portails de l'administration, comme l'interface.
+VERT, OR = "0x1e2455", "0xfcd116"
 
 
 def echapper(texte: str) -> str:
@@ -47,7 +57,7 @@ def echapper(texte: str) -> str:
 
 
 def carton(chemin: str, lignes, secondes: float = 3.0) -> None:
-    """Un carton de texte, sur fond vert."""
+    """Un carton de texte, sur fond bleu marine."""
     dessins = []
     tailles = (54, 30, 24)
     positions = (HAUTEUR // 2 - 90, HAUTEUR // 2 - 10, HAUTEUR // 2 + 50)
@@ -63,22 +73,22 @@ def carton(chemin: str, lignes, secondes: float = 3.0) -> None:
             "-preset", "veryfast", "-crf", "23", chemin])
 
 
-def scene(source: str, chemin: str, titre: str, sous_titre: str) -> None:
-    """Met la scène au format, puis pose le bandeau de texte en bas."""
+def scene(source: str, chemin: str, titre: str, sous_titre: str, debut: float = 0) -> None:
+    """Met la scène au format, puis pose le bandeau de texte en bas. `debut` coupe l'attente."""
     bandeau = HAUTEUR - 112
     filtres = [
-        # La scène garde ses proportions ; le reste de l'image est rempli en vert.
+        # La scène garde ses proportions ; le reste de l'image est rempli en bleu marine.
         f"scale={LARGEUR}:{HAUTEUR}:force_original_aspect_ratio=decrease",
         f"pad={LARGEUR}:{HAUTEUR}:(ow-iw)/2:(oh-ih)/2:color={VERT}",
         f"drawbox=x=0:y={bandeau}:w=iw:h=112:color=black@0.72:t=fill",
         f"drawbox=x=0:y={bandeau}:w=iw:h=4:color={OR}@1:t=fill",
         f"drawtext=fontfile={POLICE_GRASSE}:text='{echapper(titre)}':fontcolor=white:"
         f"fontsize=27:x=40:y={bandeau + 26}",
-        f"drawtext=fontfile={POLICE}:text='{echapper(sous_titre)}':fontcolor=0xc9d6cf:"
+        f"drawtext=fontfile={POLICE}:text='{echapper(sous_titre)}':fontcolor=0xdde1f2:"
         f"fontsize=20:x=40:y={bandeau + 66}",
         "fps=25", "format=yuv420p",
     ]
-    lancer(["ffmpeg", "-y", "-i", source, "-vf", ",".join(filtres),
+    lancer(["ffmpeg", "-y", "-ss", f"{debut:.2f}", "-i", source, "-vf", ",".join(filtres),
             "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-an", chemin])
 
 
@@ -90,29 +100,35 @@ def lancer(commande) -> None:
 
 def principal():
     source = sys.argv[1] if len(sys.argv) > 1 else "/tmp/video"
-    sortie = sys.argv[2] if len(sys.argv) > 2 else "/tmp/demonstration.mp4"
+    sortie = sys.argv[2] if len(sys.argv) > 2 else "/tmp/Demonstration-Assainissement-de-Ouaga.mp4"
     if not shutil.which("ffmpeg"):
         sys.exit("ffmpeg est nécessaire.")
     travail = tempfile.mkdtemp(prefix="montage-")
     morceaux = []
 
     debut = os.path.join(travail, "00-titre.mp4")
-    carton(debut, TITRE, 3.5)
+    carton(debut, TITRE, 5.0)
     morceaux.append(debut)
 
     for nom, titre, sous_titre in SCENES:
         dossier = os.path.join(source, nom)
-        fichiers = [f for f in sorted(os.listdir(dossier))] if os.path.isdir(dossier) else []
+        fichiers = ([f for f in sorted(os.listdir(dossier)) if f.endswith(".webm")]
+                    if os.path.isdir(dossier) else [])
         if not fichiers:
             print(f"scène absente, ignorée : {nom}")
             continue
         chemin = os.path.join(travail, nom + ".mp4")
-        scene(os.path.join(dossier, fichiers[0]), chemin, titre, sous_titre)
+        debut = 0.0
+        coupes = os.path.join(dossier, "coupes.json")
+        if os.path.exists(coupes):
+            with open(coupes, encoding="utf-8") as f:
+                debut = max(0.0, float(json.load(f)["resultat"]) - AVANT_RESULTAT)
+        scene(os.path.join(dossier, fichiers[0]), chemin, titre, sous_titre, debut)
         morceaux.append(chemin)
         print("monté :", nom)
 
     fin = os.path.join(travail, "99-fin.mp4")
-    carton(fin, FIN, 4.0)
+    carton(fin, FIN, 6.0)
     morceaux.append(fin)
 
     liste = os.path.join(travail, "morceaux.txt")
