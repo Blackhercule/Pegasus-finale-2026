@@ -15,11 +15,18 @@ finir dans une base municipale parce qu'il passait là.
 Tout fonctionne **hors ligne** : les détecteurs sont livrés dans le paquet `opencv-python-
 headless` (version 4.10 ; OpenCV 5 ne les livre plus), rien n'est téléchargé à l'exécution.
 
-Ce que ces détecteurs ratent, et nous le disons plutôt que de le laisser découvrir : un visage
-vu très de côté, un visage minuscule au fond de l'image, une plaque burkinabè dont le format
-diffère de celui sur lequel la cascade a été entraînée. D'où le comptage renvoyé avec chaque
-photo, et le masquage à la main offert aux agents sur leur poste de travail.
+Pour les visages, deux méthodes s'ajoutent : les cascades d'OpenCV, et **YuNet**, un petit
+réseau de neurones (230 Ko, licence MIT, rangé dans `application/modeles/`). Les cascades
+ratent les visages petits, au fond d'une photo prise de loin, qui sont justement ceux qu'on
+trouve devant un dépotoir ; YuNet les voit. Un visage vu par l'une OU l'autre est masqué.
+
+Ce qui reste raté, et nous le disons plutôt que de le laisser découvrir : un visage vu
+complètement de dos ou de côté, une plaque burkinabè dont le format diffère de celui sur lequel
+la cascade a été entraînée. D'où le comptage renvoyé avec chaque photo, et le masquage à la main
+offert aux agents sur leur poste de travail.
 """
+
+import pathlib
 
 import numpy as np
 
@@ -101,6 +108,38 @@ def _zones(image_grise, cascades, genre) -> list:
     return trouvees
 
 
+MODELE_YUNET = (pathlib.Path(__file__).resolve().parent / "modeles"
+                / "face_detection_yunet_2023mar.onnx")
+# Note de confiance de 0 à 1 au-dessus de laquelle YuNet annonce un visage. Plus bas que la
+# valeur des exemples d'OpenCV (0,9) : ici, rater un visage coûte plus cher que flouter une
+# zone de trop.
+SEUIL_YUNET = 0.6
+
+
+def _visages_yunet(image_couleur) -> list:
+    """Les visages que voit YuNet, en (x, y, largeur, hauteur). Liste vide si le modèle manque :
+    les cascades travaillent alors seules, comme avant."""
+    if not MODELE_YUNET.exists() or not hasattr(cv2, "FaceDetectorYN"):
+        return []
+    hauteur, largeur = image_couleur.shape[:2]
+    try:
+        # Un détecteur par photo : il se crée en quelques millisecondes, et les fils de gunicorn
+        # ne se partagent ainsi rien.
+        detecteur = cv2.FaceDetectorYN.create(str(MODELE_YUNET), "", (largeur, hauteur),
+                                              SEUIL_YUNET, 0.3, 5000)
+        _, visages = detecteur.detect(image_couleur)
+    except cv2.error:
+        return []
+    zones = []
+    for visage in (visages if visages is not None else []):
+        x, y, l, h = (int(round(float(v))) for v in visage[:4])
+        x, y = max(0, x), max(0, y)
+        l, h = min(l, largeur - x), min(h, hauteur - y)
+        if l > 0 and h > 0:
+            zones.append((x, y, l, h))
+    return zones
+
+
 def _fusionner(zones: list) -> list:
     """Deux cascades voient souvent le même visage : on ne masque pas deux fois au même endroit.
 
@@ -141,8 +180,10 @@ def masquer(contenu: bytes) -> tuple:
     grise = cv2.equalizeHist(cv2.cvtColor(petite, cv2.COLOR_BGR2GRAY))
 
     detecteurs = _charger()
-    trouvees = {genre: _fusionner(_zones(grise, cascades, genre))
-                for genre, cascades in detecteurs.items()}
+    trouvees = {genre: _zones(grise, cascades, genre) for genre, cascades in detecteurs.items()}
+    # YuNet s'ajoute aux cascades ; un même visage vu deux fois n'est compté qu'une.
+    trouvees["visage"] = trouvees.get("visage", []) + _visages_yunet(petite)
+    trouvees = {genre: _fusionner(zones) for genre, zones in trouvees.items()}
 
     for genre, zones in trouvees.items():
         for (x, y, l, h) in zones:

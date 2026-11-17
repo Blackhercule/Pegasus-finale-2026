@@ -166,3 +166,70 @@ def test_la_detection_voit_un_vrai_visage():
         _, comptes = anonymiser.masquer(photo.read_bytes())
         assert comptes["visages"] + comptes["plaques"] > 0, (
             f"rien de détecté sur {photo.name}")
+
+
+# ------------------------------------------------- YuNet, et les photos reçues avant (17/11)
+# Essai sur le PC : une photo prise de loin, visages petits, ressortait en clair (0 visage
+# trouvé). Les cascades ratent ces visages-là ; YuNet, un petit réseau de neurones, les voit.
+
+def test_le_modele_yunet_est_livre_et_se_charge():
+    assert anonymiser.MODELE_YUNET.exists(), "application/modeles/ : le modèle YuNet manque"
+    assert anonymiser._visages_yunet(np.zeros((240, 320, 3), np.uint8)) == []
+
+
+def test_sans_le_modele_les_cascades_travaillent_seules(monkeypatch, tmp_path):
+    monkeypatch.setattr(anonymiser, "MODELE_YUNET", tmp_path / "absent.onnx")
+    contenu = image_bruitee()
+    assert anonymiser.masquer(contenu)[0] == contenu
+
+
+def test_un_visage_vu_par_yunet_seul_est_floute(monkeypatch):
+    monkeypatch.setattr(anonymiser, "_zones", lambda grise, cascades, mini: [])
+    monkeypatch.setattr(anonymiser, "_visages_yunet", lambda image: [(160, 120, 160, 120)])
+    original = image_bruitee()
+    masquee, comptes = anonymiser.masquer(original)
+    assert comptes == {"visages": 1, "plaques": 0}
+    assert variance(masquee, 180, 140, 300, 220) < variance(original, 180, 140, 300, 220) / 3
+
+
+def test_remasquer_floute_les_photos_recues_avant_puis_ne_refait_rien(client, agent,
+                                                                      monkeypatch):
+    from application.remasquer import remasquer
+    # Reçue « avant » : rien n'est détecté, la photo est enregistrée telle quelle.
+    monkeypatch.setattr(anonymiser, "_zones", lambda grise, cascades, mini: [])
+    monkeypatch.setattr(anonymiser, "_visages_yunet", lambda image: [])
+    original = image_bruitee()
+    assert envoyer_photo(client, original).status_code == 201
+    s = agent.get("/api/depotoirs").get_json()["features"][0]["properties"]
+    chemin = agent.get("/api/dossiers/%d" % s["id"]).get_json()["signalements"][0]["photo"]
+    assert agent.get("/api/fichiers/" + chemin).get_data() == original
+
+    # Le détecteur s'améliore : on repasse sur ce qui est déjà sur le disque.
+    monkeypatch.setattr(anonymiser, "_visages_yunet", lambda image: [(160, 120, 160, 120)])
+    with client.application.app_context():
+        from application import reglages
+        base, photos = reglages().base, reglages().dossier_photos
+    assert remasquer(base, photos)["visages"] == 1
+    servi = agent.get("/api/fichiers/" + chemin).get_data()
+    assert variance(servi, 180, 140, 300, 220) < variance(original, 180, 140, 300, 220) / 3
+    signalement = agent.get("/api/dossiers/%d" % s["id"]).get_json()["signalements"][0]
+    assert signalement["visages_masques"] == 1
+
+    # Relancé : le visage déjà flouté n'est plus vu, rien n'est réécrit.
+    monkeypatch.setattr(anonymiser, "_visages_yunet", lambda image: [])
+    assert remasquer(base, photos)["masquees"] == 0
+    assert agent.get("/api/fichiers/" + chemin).get_data() == servi
+
+
+@pytest.mark.skipif(not (PHOTOS.exists() and list(PHOTOS.glob("*.jpg"))),
+                    reason="aucune photo dans tests/photos/")
+def test_un_vrai_visage_petit_au_fond_de_la_photo_est_vu():
+    """Le cas du PC : la photo réduite au tiers, posée dans le coin d'une image grise, comme une
+    personne au fond d'une photo de dépotoir. Les cascades seules n'y voient rien."""
+    for photo in sorted(PHOTOS.glob("*.jpg")):
+        image = cv2.imread(str(photo))
+        petite = cv2.resize(image, None, fx=0.35, fy=0.35)
+        fond = np.full_like(image, 120)
+        fond[:petite.shape[0], :petite.shape[1]] = petite
+        _, comptes = anonymiser.masquer(cv2.imencode(".jpg", fond)[1].tobytes())
+        assert comptes["visages"] > 0, f"visage petit raté sur {photo.name}"

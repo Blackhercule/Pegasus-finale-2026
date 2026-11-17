@@ -167,11 +167,17 @@ jamais le disque** — pas de fichier temporaire, pas de copie « au cas où ».
 entre masquer et cacher, et c'est vérifiable : relisez le fichier enregistré, le visage n'y est
 plus.
 
-Tout se fait sur la machine, hors ligne : les détecteurs sont livrés dans OpenCV, rien n'est
-envoyé nulle part.
+Tout se fait sur la machine, hors ligne, rien n'est envoyé nulle part. Pour les visages, deux
+détecteurs travaillent ensemble : les cascades livrées dans OpenCV, et **YuNet**, un petit réseau
+de neurones de 230 Ko rangé dans le dépôt (`application/modeles/`). Les cascades ratent les
+visages petits, au fond d'une photo prise de loin, justement ceux qu'on trouve devant un
+dépotoir ; YuNet les voit.
+
+Une photo reçue avant une amélioration du détecteur se reprend d'une commande :
+`docker compose exec application python -m application.remasquer`.
 
 **Ce que la détection rate**, parce qu'il vaut mieux le dire que le laisser découvrir : un
-visage vu très de côté, un visage minuscule au fond de l'image, une plaque dont le format
+visage vu de dos ou complètement de côté, une plaque dont le format
 s'éloigne de ceux sur lesquels les détecteurs ont été entraînés. Chaque photo affiche donc à
 l'agent combien de zones ont été masquées, et il peut en masquer d'autres à la main.
 
@@ -324,6 +330,7 @@ briques éprouvées, on les adapte à Ouagadougou, et on ajoute ce qui manque en
 | [Lato](https://www.latofonts.com/) | police de l'interface | OFL-1.1 |
 | [Noto Sans](https://fonts.google.com/noto) (via `smp-noto-glyphs`) | polices de la carte | OFL-1.1, paquet MIT |
 | [OpenCV](https://opencv.org/) | masquage des visages et des plaques | Apache-2.0 |
+| [YuNet](https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet) | détection des visages petits ou mal éclairés | MIT |
 | [Caddy](https://caddyserver.com/) | HTTPS local | Apache-2.0 |
 | [Docker](https://www.docker.com/) | déploiement en une commande | Apache-2.0 |
 

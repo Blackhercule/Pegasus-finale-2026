@@ -37,6 +37,8 @@ ne modifie pas ce fichier.
 | C4 | Une base déjà installée ne recevait pas les colonnes `lot` et masquage | coordinateur | **Fait** (17/11) |
 | C5 | La construction Docker reprend un téléchargement coupé | coordinateur | **Fait** (17/11) |
 | C6 | Une date absurde (piège 2001) ne date plus le dossier entier | coordinateur | **Fait** (17/11), relevé par Claude Code pendant T22 |
+| C7 | Construire l'image sans Internet (`Dockerfile.hors-ligne`) | coordinateur | **Fait** (17/11) |
+| C8 | Visages petits ratés par le masquage : YuNet en plus des cascades, et `remasquer` | coordinateur | **Fait** (17/11), relevé sur le PC |
 | T12 | Page d'accueil publique | Claude Code | **Fait** (16/11), vérifié par le coordinateur |
 | T13 | Partie décision protégée par identifiant et mot de passe | Claude Code | **Fait** (16/11), vérifié et fusionné. Correctif C1 ajouté par-dessus |
 | T14 | Habillage de la partie décision : barre horizontale, menu ☰, drapeau | Claude Code | **Fait** (16/11), vérifié. Reste la bande grise au bord du fond de carte |
