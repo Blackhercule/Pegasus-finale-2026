@@ -204,6 +204,8 @@ async function afficherDossier(identifiant) {
       <dt>Signalements</dt><dd>${d.nb_signalements}, de ${d.nb_sources} source(s)</dd>
       <dt>Position</dt><dd>${Number(d.latitude).toFixed(5)}, ${Number(d.longitude).toFixed(5)}</dd>
     </dl>
+    <div class="mini-carte" id="mini-carte" aria-label="Position du dossier sur la carte"></div>
+    <p class="lien-grande-carte"><a id="lien-grande-carte" href="/decision/">Voir sur la grande carte</a></p>
     ${avertissementLieu(d.signalements)}
     ${photos ? `<div class="vignettes">${photos}</div>` : ""}
     ${voix ? `<h3 class="aide">Message vocal du déclarant</h3>${voix}` : ""}
@@ -226,6 +228,10 @@ async function afficherDossier(identifiant) {
       </div>` : `<p class="aide">Ce dossier attend le poste « ${
         echapper(chaine.postes[etape.poste] || "—")} ».</p>`}
   `;
+
+  // T23 : la position sur une petite carte, avec une épingle.
+  if (typeof MiniCarte !== "undefined") MiniCarte.monter(element("mini-carte"), d.longitude, d.latitude,
+                                         element("lien-grande-carte"));
 
   element("avancer")?.addEventListener("click", () => agir("avancer",
     { detail: element("detail-action").value }));

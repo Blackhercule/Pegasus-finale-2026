@@ -1,0 +1,5 @@
+/* La petite carte du détail d'un dossier (T23, partie 2). */
+.mini-carte { height: 220px; margin-top: 12px; border-radius: 10px; overflow: hidden;
+              border: 1px solid #dfe2ec; background: #e2dfda; }
+.lien-grande-carte { margin: 8px 0 0; font-size: 14px; }
+.lien-grande-carte a { font-weight: 700; }

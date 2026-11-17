@@ -197,6 +197,9 @@
     $("informations").replaceChildren(...lignesInformations(d).flatMap(([nom, valeur]) =>
       [el("dt", {}, nom), el("dd", {}, valeur ?? "—")]));
 
+    // T23 : la position sur une petite carte, avec une épingle.
+    if (typeof MiniCarte !== "undefined") MiniCarte.monter($("mini-carte"), d.longitude, d.latitude, $("lien-grande-carte"));
+
     const depuisUnLieu = d.signalements.filter((s) => s.source_position === "lieu");
     $("avertissement-lieu").replaceChildren(...depuisUnLieu.map((s) => el("p", { class: "position-lieu" },
       "⚠ Position approximative : déduite du lieu « " + (s.lieu_nom || "?") + " » (± "

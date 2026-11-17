@@ -117,12 +117,25 @@ carte.on("load", async () => {
       } });
 
     carte.fitBounds(bornes(commune), { padding: 30, duration: 0 });
+    centrerSurLaDemande();
     await rafraichir();
     etat(dechets.features.length + " sites de déchets déjà cartographiés dans OpenStreetMap.");
   } catch (erreur) {
     etat("Erreur de chargement : " + erreur.message);
   }
 });
+
+/* T23 : /decision/?lon=…&lat=… ouvre la carte centrée sur ce point, avec une épingle (lien
+   « Voir sur la grande carte » du détail d'un dossier). Des valeurs absentes ou absurdes sont
+   simplement ignorées : la carte s'ouvre alors comme d'habitude, sur toute la commune. */
+function centrerSurLaDemande() {
+  const demande = new URLSearchParams(location.search);
+  const lon = Number(demande.get("lon")), lat = Number(demande.get("lat"));
+  if (!demande.has("lon") || !demande.has("lat") || !Number.isFinite(lon) || !Number.isFinite(lat)
+      || Math.abs(lon) > 180 || Math.abs(lat) > 90) return;
+  carte.jumpTo({ center: [lon, lat], zoom: 16 });
+  new maplibregl.Marker({ color: "#c8102e" }).setLngLat([lon, lat]).addTo(carte);
+}
 
 function bornes(collection) {
   const b = new maplibregl.LngLatBounds();
