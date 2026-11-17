@@ -129,6 +129,13 @@
         lien.href = "/decision/agents.html";
         if (location.pathname === lien.pathname) lien.setAttribute("aria-current", "page");
         nav.append(lien);
+        // T23 : la mairie répond aux appels des habitants. Sur toutes ses pages, un bandeau et
+        // une sonnerie signalent un appel qui sonne (voir sonnerie.js).
+        if (location.pathname !== "/decision/appel.html") {
+          const sonnerie = document.createElement("script");
+          sonnerie.src = "/decision/sonnerie.js";
+          document.head.append(sonnerie);
+        }
       }
       poste.title = s.poste_nom || "";
     })

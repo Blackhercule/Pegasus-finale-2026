@@ -212,3 +212,51 @@ textarea { resize: vertical; }
   .guidage { padding: .3rem .55rem; font-size: .8rem; }
   .choix { gap: .45rem; }
 }
+
+/* ------------------------------------------------------------ T23 : le menu 1-2-3 et l'appel
+   Trois grandes touches sur le dernier écran d'accueil : un gros chiffre, une icône, deux ou
+   trois mots. Elles se lisent sans savoir lire : le chiffre et l'icône suffisent. */
+.menu-accueil { display: grid; gap: .7rem; }
+.menu-touche {
+  width: 100%; font: inherit; cursor: pointer; display: grid; text-align: left;
+  grid-template-columns: 3.4rem 2.2rem 1fr; align-items: center; gap: .6rem;
+  padding: .85rem 1rem; min-height: 76px; border-radius: 16px; border: 0;
+  background: var(--or); color: var(--sur-accent); box-shadow: 0 6px 18px rgba(0, 0, 0, .25);
+}
+.menu-touche.menu-appel { background: #fff; }
+.menu-chiffre {
+  width: 3.4rem; height: 3.4rem; line-height: 3.4rem; border-radius: 50%; text-align: center;
+  background: var(--vert); color: var(--or); font-size: 1.9rem; font-weight: 700;
+}
+.menu-icone { font-size: 1.8rem; text-align: center; }
+.menu-mots { font-size: 1.12rem; font-weight: 700; line-height: 1.25; }
+.menu-touche:active { transform: translateY(1px); }
+
+/* L'écran d'appel couvre toute la page, comme l'accueil. */
+.appel-ecran {
+  position: fixed; inset: 0; z-index: 60; background: var(--vert);
+  background-image: radial-gradient(circle at 50% 0%, #2b3372 0%, var(--vert) 60%);
+  display: flex; align-items: center; justify-content: center; padding: 1.2rem;
+}
+.appel-boite { width: 100%; max-width: 420px; text-align: center; color: #fff; }
+.appel-icone {
+  margin: 0 auto 1rem; width: 6rem; height: 6rem; line-height: 6rem; font-size: 3rem;
+  border-radius: 50%; background: rgba(255, 255, 255, .12);
+}
+/* Tant que ça sonne, l'icône bat doucement. */
+.appel-ecran[data-etat="sonne"] .appel-icone,
+.appel-ecran[data-etat="preparation"] .appel-icone { animation: appel-bat 1.2s ease-in-out infinite; }
+.appel-ecran[data-etat="en_communication"] .appel-icone { background: #0e6b3a; }
+.appel-ecran[data-etat="echec"] .appel-icone,
+.appel-ecran[data-etat="fini"] .appel-icone { opacity: .5; }
+@keyframes appel-bat { 50% { transform: scale(1.08); background: rgba(255, 255, 255, .22); } }
+@media (prefers-reduced-motion: reduce) { .appel-icone { animation: none !important; } }
+.appel-boite h2 { color: #fff; font-size: 1.5rem; margin: 0 0 .5rem; display: block; }
+.appel-texte { margin: 0 0 1.4rem; font-size: 1.05rem; line-height: 1.55; min-height: 1.6em; }
+.appel-raccrocher {
+  width: 100%; font: inherit; font-size: 1.25rem; font-weight: 700; padding: 1.15rem;
+  border-radius: 999px; border: 0; background: var(--rouge); color: #fff; cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .3);
+}
+.appel-raccrocher::before { content: "📵  "; }
+.appel-ecran button:focus-visible { outline: 3px solid var(--or); outline-offset: 3px; }

@@ -7,13 +7,15 @@ téléchargé à l'exécution — les fichiers sont servis par notre propre mach
 
 ## Ce qu'il faut enregistrer
 
-Quatorze fichiers, au format **MP3**, nommés exactement comme ci-dessous. Le texte français donne le
+Quinze fichiers, au format **MP3**, nommés exactement comme ci-dessous. Le texte français donne le
 sens ; dites-le naturellement en mooré, lentement, dans un endroit calme.
 
 ### Les écrans d'accueil
 
 Ce sont les messages qui s'enchaînent à l'ouverture de la page, avant le formulaire. Chacun a
-son écran ; « Continuer » passe au suivant, et le dernier ouvre le formulaire.
+son écran ; « Continuer » passe au suivant. Sur le dernier écran, trois grandes touches
+remplacent « Continuer » : **1** « Je signale moi-même » ouvre le formulaire, **2** et **3**
+« Parler à la mairie » appellent un agent (T23).
 
 **Le nombre d'écrans suit les fichiers réellement présents.** La page demande au chargement
 lesquels existent et n'affiche que ceux-là. Déposer `accueil-2.mp3` ici fait donc apparaître
@@ -29,6 +31,16 @@ haut de `signaler.js` à modifier.
 | `accueil-2.mp3` | « Vous pouvez signaler un tas d'ordures, ou une fuite d'eau sur une conduite. » |
 | `accueil-3.mp3` | « Touchez les grandes images, ou parlez : vous n'avez rien à écrire. » |
 | `accueil-4.mp3` | « Vous pouvez signaler sans donner votre nom ni votre numéro. Ne vous inquiétez pas, nous nous occupons du reste. » |
+
+### Le menu 1-2-3
+
+Joué sur le dernier écran d'accueil, juste après le message de cet écran (ou seul, si aucun
+message d'accueil n'est encore enregistré). Même règle : pas de fichier, pas de son, rien de
+cassé.
+
+| Fichier | Ce qu'il faut dire, en mooré |
+|---|---|
+| `menu.mp3` | « Touchez 1 pour faire votre signalement vous-même. Touchez 2 ou 3 pour parler à un agent de la mairie. » |
 
 ### Le guidage étape par étape
 
@@ -61,6 +73,6 @@ aucun bruit. Il n'y a donc aucun risque à n'en enregistrer que quelques-uns.
 
 ## À dire au jury
 
-Les quatorze messages couvrent tout le parcours, pour les deux natures de signalement. Une
+Les quinze messages couvrent tout le parcours, pour les deux natures de signalement. Une
 personne qui ne lit pas peut signaler un dépotoir ou une fuite d'eau de bout en bout : elle
 écoute, elle touche de grands boutons illustrés, elle parle.

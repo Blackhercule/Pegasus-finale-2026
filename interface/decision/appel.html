@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appel d'un habitant — Assainissement de Ouaga</title>
+<link rel="stylesheet" href="/decision/style.css">
+<link rel="stylesheet" href="/decision/barre.css">
+<link rel="stylesheet" href="/vendor/maplibre-gl/maplibre-gl.css">
+<script src="/decision/barre.js" defer></script>
+<link rel="stylesheet" href="/decision/verifier.css">
+<link rel="stylesheet" href="/decision/appel.css">
+</head>
+<!-- T23 : la page où l'agent de la mairie parle avec un habitant et voit où il se trouve.
+     La voix va directement du téléphone à ce navigateur (WebRTC) ; le serveur ne fait que
+     mettre en relation et relayer la position. -->
+<body class="page-verifier page-appel">
+<main class="appel">
+  <section class="carte-bloc appel-fiche">
+    <h2 id="titre">Appel d'un habitant</h2>
+    <p id="etat" class="appel-phrase" aria-live="polite">Décrochage…</p>
+    <p id="duree" class="appel-duree"></p>
+    <p id="avertissement" class="appel-avertissement" hidden></p>
+    <audio id="voix" autoplay></audio>
+    <div class="appel-actions" id="actions">
+      <button type="button" id="micro" class="appel-bouton" disabled>🎙 Couper le micro</button>
+      <button type="button" id="raccrocher" class="appel-bouton appel-rouge" disabled>Raccrocher</button>
+    </div>
+    <p id="retour" class="appel-retour" hidden><a href="/decision/dossiers.html">Retour aux dossiers</a></p>
+    <p class="aide">La voix passe directement du téléphone à cet ordinateur, chiffrée par les
+      navigateurs : rien n'est enregistré. La position de l'habitant s'efface dès que l'appel se
+      termine.</p>
+  </section>
+
+  <section class="carte-bloc appel-ou">
+    <h2>Où est l'habitant</h2>
+    <p id="position" class="appel-position">En attente de la position…</p>
+    <p id="coordonnees" class="appel-coordonnees"></p>
+    <div id="carte-appel" class="appel-carte" aria-label="Carte de la position de l'habitant"></div>
+  </section>
+</main>
+<script src="/vendor/maplibre-gl/maplibre-gl-csp.js"></script>
+<script src="/vendor/pmtiles/pmtiles.js"></script>
+<script src="/vendor/protomaps-basemaps/basemaps.js"></script>
+<script src="/decision/fond-carte.js"></script>
+<script src="/decision/appel.js"></script>
+</body>
+</html>

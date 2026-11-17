@@ -405,7 +405,7 @@ function arreterLAccueil() {
 /* Joue le message de l'écran courant. `automatique` distingue la lecture lancée toute seule
    à l'arrivée sur l'écran de celle demandée par le bouton : un navigateur refuse la première
    tant que la personne n'a rien touché, et ce refus ne doit pas ressembler à une panne. */
-function jouerLAccueil(automatique) {
+function jouerLAccueil(automatique, puisLeMenu = false) {
   arreterLAccueil();
   const ecran = ACCUEIL[rangAccueil];
   const etat = element("accueil-etat");
@@ -416,6 +416,8 @@ function jouerLAccueil(automatique) {
     etat.textContent = "Message non enregistré pour l'instant.";
   });
   sonAccueil = son;
+  // Sur le dernier écran, le message du menu suit celui de l'écran.
+  if (puisLeMenu) son.addEventListener("ended", () => { if (sonAccueil === son) jouerLeMenu(); });
   son.play()
     .then(() => { etat.textContent = "Lecture en cours…"; })
     .catch(() => {
@@ -427,17 +429,37 @@ function jouerLAccueil(automatique) {
     });
 }
 
+/* T23 : le menu 1-2-3. Sur le DERNIER écran d'accueil, les trois grandes touches remplacent
+   « Continuer » : 1 ouvre le formulaire, 2 et 3 appellent la mairie (appel.js). Si aucun
+   message d'accueil n'est enregistré, ce menu s'affiche seul : sans lui, personne ne pourrait
+   appeler. Son message parlé, menu.mp3, se joue après celui de l'écran s'il existe. */
+const ECRAN_DU_MENU = { fichier: null, titre: "Que voulez-vous faire ?",
+  texte: "Touchez 1 pour faire votre signalement vous-même. Touchez 2 ou 3 pour parler à un agent de la mairie." };
+
 function afficherLAccueil(automatique) {
   const ecran = ACCUEIL[rangAccueil];
+  const dernier = rangAccueil === ACCUEIL.length - 1;
   element("accueil-progression").textContent =
     ACCUEIL.length > 1 ? `${rangAccueil + 1} sur ${ACCUEIL.length}` : "";
   element("accueil-numero").textContent = String(rangAccueil + 1);
+  element("accueil-numero").hidden = !ecran.fichier;
   element("accueil-titre").textContent = ecran.titre;
   element("accueil-texte").textContent = ecran.texte;
-  element("accueil-continuer").textContent =
-    rangAccueil === ACCUEIL.length - 1 ? "Commencer le signalement" : "Continuer";
+  element("accueil-continuer").hidden = dernier;
+  element("menu-accueil").hidden = !dernier;
+  element("accueil-ecouter").hidden = !ecran.fichier;
   element("accueil-ecouter-mot").textContent = "Écouter";
-  jouerLAccueil(automatique);
+  if (ecran.fichier) jouerLAccueil(automatique, dernier);
+  else if (dernier) jouerLeMenu();
+}
+
+/* Le message du menu, s'il est enregistré : pas de fichier, pas de son, rien de cassé. */
+function jouerLeMenu() {
+  arreterLAccueil();
+  const son = new Audio("/signaler/audio/moore/menu.mp3");
+  son.addEventListener("error", () => { if (sonAccueil === son) sonAccueil = null; });
+  sonAccueil = son;
+  son.play().catch(() => { if (sonAccueil === son) sonAccueil = null; });
 }
 
 function fermerLAccueil() {
@@ -447,17 +469,20 @@ function fermerLAccueil() {
 
 element("accueil-ecouter").addEventListener("click", () => jouerLAccueil(false));
 element("accueil-passer").addEventListener("click", fermerLAccueil);
-element("revoir-accueil").addEventListener("click", () => ouvrirLAccueil());
+// « Revoir les messages d'accueil » ramène au menu 1-2-3 (T23).
+element("revoir-accueil").addEventListener("click", () => ouvrirLAccueil(true));
+element("menu-1").addEventListener("click", fermerLAccueil);
 element("accueil-continuer").addEventListener("click", () => {
   rangAccueil += 1;
   if (rangAccueil >= ACCUEIL.length) { fermerLAccueil(); return; }
   afficherLAccueil(true);
 });
 
-async function ouvrirLAccueil() {
+async function ouvrirLAccueil(auMenu = false) {
   ACCUEIL = await accueilsDisponibles();
-  if (!ACCUEIL.length) { fermerLAccueil(); return; }   // rien d'enregistré : droit au formulaire
-  rangAccueil = 0;
+  // Rien d'enregistré : le menu seul, pour que les touches 2 et 3 restent possibles.
+  if (!ACCUEIL.length) ACCUEIL = [ECRAN_DU_MENU];
+  rangAccueil = auMenu ? ACCUEIL.length - 1 : 0;
   element("accueil").hidden = false;
   afficherLAccueil(true);
 }
