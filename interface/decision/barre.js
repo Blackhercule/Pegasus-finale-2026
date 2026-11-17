@@ -61,7 +61,7 @@
 
   const compte = creer("div", "barre__compte");
   const poste = creer("span", "barre__poste");
-  const changer = creer("button", "barre__changer", "Changer de poste");
+  const changer = creer("button", "barre__changer", "Me déconnecter");
   changer.type = "button";
   changer.addEventListener("click", async () => {
     await fetch("/api/deconnexion", { method: "POST" }).catch(() => {});

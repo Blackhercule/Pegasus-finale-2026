@@ -63,3 +63,8 @@ body.panneau-ouvert .voile-panneau { display: block; }
   .page-verifier main > * { min-width: 0; }
   .page-verifier table { display: block; overflow-x: auto; }
 }
+
+/* Un seul bouton « Me déconnecter » : celui de la barre. L'en-tête propre à chaque page avait
+   le sien avant que la barre n'existe ; on le garde dans la page, parce que son script s'y
+   accroche, mais on ne le montre plus. */
+.bandeau #deconnexion, .bandeau #session { display: none !important; }
