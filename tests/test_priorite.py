@@ -108,3 +108,48 @@ def test_le_classement_tient_la_charge(application):
     assert duree < 5.0, "classement de 5 000 dossiers en %.1f s" % duree
     notes = [d["priorite"]["note"] for d in classes]
     assert notes == sorted(notes, reverse=True)
+
+
+# ------------------------------------------------------------------ C6 : une date absurde
+# Trouvé pendant T22 : sur le tableau de bord, un dossier affichait « en attente depuis
+# 9198 jour(s) ». Un piège du jury daté de 2001, rangé « à vérifier », avait daté tout le
+# dossier en 2001 et l'avait hissé en tête des urgences.
+VIEILLE_DATE = "2001-09-11T08:46:00Z"
+
+
+def attentes(dossier):
+    return [r for r in dossier["priorite"]["raisons"] if "en attente" in r]
+
+
+def test_un_piege_date_de_2001_ne_vieillit_pas_le_dossier_voisin(agent):
+    signaler(agent, LOIN, source="tel-a", id_client="vrai")
+    r = signaler(agent, LOIN, source="jury", id_client="piege",
+                 date_observation=VIEILLE_DATE).get_json()
+    assert r["statut"] == "a_verifier" and "date_trop_ancienne" in r["motifs"]
+    dossier = agent.get("/api/dossiers").get_json()[0]
+    assert not dossier["premier_vu"].startswith("2001"), dossier["premier_vu"]
+    assert attentes(dossier) == [], dossier["priorite"]
+
+
+def test_meme_confirme_par_un_agent_la_date_absurde_ne_compte_pas(agent):
+    """L'agent confirme que le tas existe, pas que l'horloge du téléphone était juste."""
+    r = signaler(agent, LOIN, source="jury", id_client="seul",
+                 date_observation=VIEILLE_DATE).get_json()
+    assert agent.post("/api/signalements/%d/verifier" % r["id"]).status_code == 200
+    dossier = agent.get("/api/dossiers").get_json()[0]
+    assert not dossier["premier_vu"].startswith("2001"), dossier["premier_vu"]
+    assert attentes(dossier) == [], dossier["priorite"]
+
+
+def test_la_regle_vaut_aussi_pour_les_fuites_et_les_nuisances(agent):
+    agent.post("/api/signalements", json={
+        "nature": "fuite_eau", "latitude": LOIN[0], "longitude": LOIN[1], "ampleur": "jet",
+        "source": "jury", "id_client": "fuite", "date_observation": VIEILLE_DATE})
+    agent.post("/api/signalements", json={
+        "nature": "caniveau_bouche", "latitude": PRES_ECOLE[0], "longitude": PRES_ECOLE[1],
+        "gravite": "moyen", "source": "jury", "id_client": "nuisance",
+        "date_observation": VIEILLE_DATE})
+    for adresse in ("/api/fuites", "/api/nuisances"):
+        dossier = agent.get(adresse).get_json()[0]
+        assert not (dossier["premier_vu"] or "").startswith("2001"), (adresse, dossier)
+        assert attentes(dossier) == [], (adresse, dossier["priorite"])

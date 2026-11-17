@@ -21,7 +21,7 @@ import json
 import sqlite3
 
 from .geo import distance_m, origines
-from .signalements.controles import REJET
+from .signalements.controles import REJET, date_retenue
 
 # Ampleurs, du plus petit au plus gros. L'ordre sert à trier le bordereau de l'ONEA :
 # une inondation passe avant un suintement.
@@ -179,14 +179,15 @@ class Fuites:
         fuite. L'ampleur retenue est la PLUS GRAVE signalée — entre « ça suinte » et « la rue
         est noyée », c'est la seconde qui décide de l'urgence de l'intervention."""
         lignes = self.co.execute(
-            "SELECT latitude, longitude, source, lot, date_observation, ampleur, quartier"
+            "SELECT latitude, longitude, source, lot, date_observation, ampleur, quartier,"
+            " motifs, date_reception"
             " FROM signalements WHERE fuite_id = ? AND statut <> 'rejete'", (id_fuite,)).fetchall()
         if not lignes:
             self.co.execute("DELETE FROM fuites WHERE id = ?", (id_fuite,))
             return
         milieu = lambda valeurs: sorted(valeurs)[len(valeurs) // 2]
         sources = origines(lignes)
-        dates = [l["date_observation"] for l in lignes if l["date_observation"]]
+        dates = [d for d in map(date_retenue, lignes) if d]
         ampleurs = [l["ampleur"] for l in lignes if l["ampleur"] in URGENCE]
         ampleur = max(ampleurs, key=lambda a: URGENCE[a]) if ampleurs else None
         quartiers = [l["quartier"] for l in lignes if l["quartier"]]

@@ -25,7 +25,7 @@ import json
 import sqlite3
 
 from .geo import distance_m, origines
-from .signalements.controles import REJET
+from .signalements.controles import REJET, date_retenue
 
 # Pour chaque nature : ce qu'on en dit, et surtout QUI intervient après la mairie.
 # Cette répartition est une hypothèse de l'équipe, à confirmer avec la mairie de Ouagadougou ;
@@ -226,7 +226,8 @@ class Nuisances:
         Position au milieu (médiane) : un signalement décalé ne déplace pas le dossier. Gravité
         la PLUS forte signalée : c'est elle qui décide de l'ordre de passage du service."""
         lignes = self.co.execute(
-            "SELECT latitude, longitude, source, lot, date_observation, gravite, quartier"
+            "SELECT latitude, longitude, source, lot, date_observation, gravite, quartier,"
+            " motifs, date_reception"
             " FROM signalements WHERE nuisance_id = ? AND statut <> 'rejete'",
             (id_nuisance,)).fetchall()
         if not lignes:
@@ -234,7 +235,7 @@ class Nuisances:
             return
         milieu = lambda valeurs: sorted(valeurs)[len(valeurs) // 2]
         sources = origines(lignes)
-        dates = [l["date_observation"] for l in lignes if l["date_observation"]]
+        dates = [d for d in map(date_retenue, lignes) if d]
         gravites = [l["gravite"] for l in lignes if l["gravite"] in URGENCE]
         gravite = max(gravites, key=lambda g: URGENCE[g]) if gravites else None
         quartiers = [l["quartier"] for l in lignes if l["quartier"]]

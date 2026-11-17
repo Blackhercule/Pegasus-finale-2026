@@ -10,7 +10,7 @@ import json
 import sqlite3
 
 from ..geo import distance_m, origines
-from .controles import REJET
+from .controles import REJET, date_retenue
 
 
 class Depotoirs:
@@ -121,7 +121,7 @@ class Depotoirs:
         volume exagéré ne déplace pas le dépotoir ni ne gonfle le total."""
         lignes = self.co.execute(
             "SELECT latitude, longitude, volume_m3, source, lot, date_observation, depot,"
-            " longueur_m, largeur_m FROM signalements"
+            " longueur_m, largeur_m, motifs, date_reception FROM signalements"
             " WHERE depotoir_id = ? AND statut <> 'rejete'", (id_depotoir,)).fetchall()
         if not lignes:
             self.co.execute("DELETE FROM depotoirs WHERE id = ?", (id_depotoir,))
@@ -129,7 +129,7 @@ class Depotoirs:
         milieu = lambda valeurs: sorted(valeurs)[len(valeurs) // 2]
         volumes = [l["volume_m3"] for l in lignes if l["volume_m3"] is not None]
         sources = origines(lignes)
-        dates = [l["date_observation"] for l in lignes if l["date_observation"]]
+        dates = [d for d in map(date_retenue, lignes) if d]
         # Superficie estimée : longueur × largeur, quand elles ont été données.
         surfaces = [l["longueur_m"] * l["largeur_m"] for l in lignes
                     if l["longueur_m"] and l["largeur_m"]]

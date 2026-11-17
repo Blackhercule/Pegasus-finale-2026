@@ -7,6 +7,7 @@ signalement écarté reste visible, avec la raison.
 """
 
 import datetime
+import json
 import math
 
 # Un motif bloque le signalement (rejete) ou demande un contrôle humain (a_verifier).
@@ -102,6 +103,21 @@ def lire_date(valeur):
     except ValueError:
         return None
     return d if d.tzinfo else d.replace(tzinfo=datetime.timezone.utc)
+
+
+def date_retenue(ligne) -> str:
+    """La date à laquelle on situe un signalement dans son dossier.
+
+    D'habitude, celle que donne le téléphone. Mais quand le contrôle l'a jugée trop ancienne
+    (horloge d'un téléphone remise à zéro, ou piège du jury daté de 2001), on prend la date à
+    laquelle la plateforme l'a reçu, qui, elle, vient de notre horloge. Sinon, un seul
+    signalement daté de 2001 ferait dire au dossier « en attente depuis 9198 jours » et le
+    mettrait en tête des urgences, même après qu'un agent a confirmé que le tas existe."""
+    try:
+        douteuse = "date_trop_ancienne" in json.loads(ligne["motifs"] or "[]")
+    except (TypeError, ValueError):
+        douteuse = False
+    return ligne["date_reception"] if douteuse else ligne["date_observation"]
 
 
 def est_une_image(contenu: bytes) -> bool:
