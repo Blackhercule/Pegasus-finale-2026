@@ -32,6 +32,8 @@ ne modifie pas ce fichier.
 | T19 | Jeu de signalements en GeoJSON sous licence ouverte | — | **À faire — livrable officiel manquant** |
 | T20 | Rapport technique unique | Claude Code | **Fait** (17/11) |
 | T21 | Vidéo de démonstration de 3 minutes | Claude Code | **Fait** (17/11), 2 min 52 s |
+| — | File priorisée, tournées d'inspection, connexion par rôle, comptes individuels | coordinateur | **Fait** (17/11) |
+| T22 | Refonte de l'interface en plateforme web professionnelle | Claude Code | **À faire — sur la branche `refonte-interface`, jamais sur `main`** |
 | T12 | Page d'accueil publique | Claude Code | **Fait** (16/11), vérifié par le coordinateur |
 | T13 | Partie décision protégée par identifiant et mot de passe | Claude Code | **Fait** (16/11), vérifié et fusionné. Correctif C1 ajouté par-dessus |
 | T14 | Habillage de la partie décision : barre horizontale, menu ☰, drapeau | Claude Code | **Fait** (16/11), vérifié. Reste la bande grise au bord du fond de carte |
@@ -489,3 +491,197 @@ paramètres et le plan recalculé ». Suis cet ordre.
 Les outils existent : `outils/donnees_demonstration.py`, `outils/filmer.mjs`,
 `outils/monter_video.py`. **Fais-la durer entre 2 min 45 s et 3 min** : plus court donne
 l'impression d'avoir moins à montrer, plus long risque d'être coupé.
+
+---
+
+# T22 — Refonte de l'interface en plateforme web professionnelle
+
+Demandée par Franck le 17/11, d'après un prompt écrit pour un autre projet (« OUA-GREEN ») et
+adapté ici à **notre** travail : seules les parties qui correspondent à ce que nous avons sont
+gardées, et le design est refait.
+
+**Lis toute la tâche avant d'écrire une ligne.** Elle est longue parce que la démonstration
+devant le jury a lieu demain, et que tout ce qui marche aujourd'hui doit encore marcher ce
+soir.
+
+## Le cadre, non négociable
+
+### Une branche à part, jamais `main`
+
+Travaille sur la branche **`refonte-interface`**, créée depuis `main` à jour. **Ne pousse
+jamais sur `main`**, même si Franck te le demande pour cette tâche : `main` doit rester prêt pour
+la démonstration à tout moment. Le coordinateur vérifie chaque page et la fusionne lui-même.
+
+**Un commit par page**, dans l'ordre donné plus bas. Si tu n'as le temps d'en finir que trois,
+on fusionne ces trois-là et on présente le reste dans sa version actuelle. Une page à moitié
+refaite ne doit jamais être dans un commit.
+
+### Ce qui est interdit
+
+- **Toucher au serveur** : rien dans `application/`, rien dans `donnees/`, rien dans les tests
+  existants. La refonte est uniquement dans `interface/`.
+- **Créer une adresse d'API.** Toutes celles dont tu as besoin existent : voir le tableau
+  ci-dessous. Si une page te semble impossible sans nouvelle adresse, arrête-toi et écris-le
+  dans le compte rendu, ne contourne pas.
+- **Ajouter une technologie** : pas de framework, pas de bibliothèque de graphiques, pas de
+  préprocesseur CSS. Du HTML, du CSS et du JavaScript sans dépendance, comme aujourd'hui. Les
+  graphiques se dessinent en SVG à la main, comme dans `scenarios.js` et `simulation.js`.
+- **Charger quoi que ce soit depuis Internet** (E14) : aucune police, aucune icône, aucune
+  image, aucun script venu d'ailleurs. Les icônes sont en SVG dans la page ou en caractères.
+- **Supprimer une fonctionnalité qui marche.** La liste de ce qui doit encore marcher est plus
+  bas : vérifie-la entièrement avant chaque commit.
+
+### Deux pièges techniques
+
+**La politique de sécurité du contenu interdit tout JavaScript dans le HTML.** `script-src`
+vaut `'self'` : un bloc `<script>` écrit dans la page, un `onclick="…"`, un `href="javascript:…"`
+sont refusés par le navigateur, sans message visible. Tout le JavaScript va dans des fichiers
+`.js`. Le CSS en ligne est permis.
+
+**Tout ce qui vient d'un habitant s'affiche avec `textContent`, jamais en HTML.** Le commentaire
+d'un signalement, le nom d'un quartier, un nom de lieu sont tapés par n'importe qui — et le jury
+injectera des signalements piégés. Garde les fonctions `echapper()` / `proteger()` existantes, ou
+construis avec `createElement`.
+
+## Ce qui est gardé du prompt d'origine, et ce qui est écarté
+
+| Point du prompt | Décision | Pourquoi |
+|---|---|---|
+| 1. Accueil | **gardé** | page publique existante (`/`) |
+| 2. Explorer | **gardé** | les données existent, derrière la connexion |
+| 3. Carte interactive | **gardé, en dernier** | c'est la page de l'épreuve en direct : la plus risquée |
+| 4. Signaler | **gardé, toutes fonctions conservées** | sans l'envoi de vidéo, voir plus bas |
+| 5. Détails d'un signalement | **gardé, sans commentaires ni réactions** | l'historique existe déjà : c'est le journal |
+| 6. Espace citoyen, profils | **écarté** | les habitants n'ont pas de compte, et c'est voulu : le signalement est anonyme |
+| 7. Classement des citoyens | **écarté** | il faudrait identifier les habitants, et récompenser le nombre de signalements encourage les faux |
+| 8. Notifications | **écarté** | demande un serveur et une identité des habitants |
+| 9. Opérations citoyennes | **écarté** | l'inscription demande un stockage, donc le serveur |
+| 10. Administration | **gardé** | un tableau de bord, à partir des adresses existantes |
+| Commentaires, réactions | **écarté** | demande un stockage, donc le serveur |
+| Envoi de vidéos | **écarté** | le serveur ne l'accepte pas, et masquer les visages sur une vidéo est une autre affaire |
+
+Ce que tu écartes, n'en mets **aucune trace** dans l'interface : pas de bouton grisé « bientôt »,
+pas d'onglet vide. Un jury qui clique sur une promesse vide le note.
+
+## L'identité visuelle
+
+**Notre identité, pas celle d'un réseau social.** Inspire-toi de la clarté de ces plateformes —
+grilles de cartes, colonnes bien séparées, galeries de photos — sans en copier l'allure. Le
+public est une mairie et des habitants de Ouagadougou, pas des abonnés.
+
+À garder, parce que l'équipe l'a choisi :
+- la police **Lato**, déjà dans `interface/vendor/polices/lato/` ;
+- le **bleu marine `#1e2455`**, le blanc, le **jaune vif `#ffff00`** en accent sur fond sombre
+  seulement (illisible sur blanc : prends `#8a7a00`) ;
+- la **barre au drapeau** de T14 (`barre.js`, `barre.css`) sur toutes les pages de décision.
+
+À soigner : les espacements, une seule échelle de tailles de texte, des états de survol et de
+focus visibles (on navigue aussi au clavier), et des pages qui ne débordent jamais. **Conçu
+d'abord pour un ordinateur de 1366 px**, puis adapté à une tablette et à un téléphone de 420 px.
+
+## Les pages, dans l'ordre
+
+L'ordre va **des pages nouvelles aux pages existantes** : une page nouvelle ne peut rien
+casser, une page refaite le peut. Si le temps manque, c'est la carte qu'on ne fait pas.
+
+### 1. Tableau de bord d'administration — nouvelle page `/decision/tableau-de-bord.html`
+
+Ce que la mairie voit d'un coup d'œil : combien de dossiers à chaque étape des trois chaînes
+(dépotoirs, fuites, nuisances), combien par nature, les dossiers les plus urgents (la file
+priorisée), les chiffres du plan de gestion, et une petite carte. Des graphiques en barres en
+SVG, pas plus de quatre : un tableau de bord surchargé ne se lit pas.
+
+Une fois la page faite, fais-y arriver la **mairie** à la connexion : c'est une ligne dans
+`PAGE_DU_POSTE` de `interface/decision/connexion.js`. Les autres postes gardent leur page.
+
+### 2. Explorer — nouvelle page `/decision/explorer.html`
+
+Les signalements en **grille de cartes**, chacune avec sa photo, sa nature, son quartier, son
+étape et sa note d'urgence. Des filtres par nature, par étape et par quartier, qui s'appliquent
+sans recharger la page. Un clic sur une carte ouvre la page de détail.
+
+Les photos sont déjà masquées (T17). Une carte sans photo garde la même hauteur que les autres.
+
+### 3. Détail d'un signalement — nouvelle page `/decision/signalement.html?type=…&id=…`
+
+Une page par dossier : la **galerie** de ses photos, ses informations, le **message vocal** s'il
+y en a un, la note d'urgence **avec ses raisons**, et l'**historique** — c'est le journal du
+dossier, qui dit qui a fait quoi et quand. Les boutons d'action de l'étape (confirmer, constater,
+classer…) y sont aussi, pour le poste qui en a le droit : réemploie les appels déjà écrits dans
+`dossiers.js`, `fuites.js` et `nuisances.js`.
+
+L'identité facultative du déclarant n'apparaît que si le serveur la renvoie (agent connecté).
+Ne la demande pas autrement.
+
+### 4. Accueil — refaire `/` (`interface/accueil/`)
+
+Page **publique** : elle ne peut montrer que ce qui est public, c'est-à-dire les trois chiffres
+de `/api/publics`. **Pas de fil des signalements** : leurs positions sont réservées aux agents
+depuis T13, et une page publique qui les afficherait annulerait cette protection.
+
+Ce qu'elle doit dire : ce qu'est l'outil, les six choses qu'on peut signaler, comment ça marche
+en trois étapes, et deux portes — **« Signaler »**, la plus grosse, et « Espace des services ».
+
+### 5. Signaler — refaire l'allure de `/signaler/`, sans rien retirer
+
+**Le design change, le comportement non.** Tout ceci doit marcher exactement comme avant :
+- les **écrans d'accueil parlés en mooré**, qui suivent les fichiers présents ;
+- le bouton **🔊 Mooré** et le guidage parlé de chaque étape ;
+- les **six natures**, et les étapes qui changent et se renumérotent selon la nature ;
+- la **position GPS**, et le **choix d'un lieu connu** quand elle échoue (T16) ;
+- la **photo**, le **message vocal**, l'**identité facultative** avec CNIB et portrait ;
+- la **file d'attente hors ligne**, qui envoie toute seule au retour du réseau.
+
+Si tu renommes ou ajoutes un fichier dans `interface/signaler/`, mets à jour la liste `FICHIERS`
+de `service-worker.js` **et** change le nom du cache (`signaler-v3` → `signaler-v4`) : sinon les
+téléphones déjà passés sur la page garderont l'ancienne version, et la page cassera hors ligne.
+
+### 6. Carte interactive — refaire `/decision/` (en dernier, seulement s'il reste du temps)
+
+Une liste latérale des signalements, la carte sur le reste de l'écran, un clic dans la liste
+centre la carte. **C'est la page de l'épreuve en direct** : le jury y change les paramètres et
+regarde le plan se recalculer. Le panneau ☰, toutes les couches, tous les réglages du plan, le
+bouton « Recalculer » et les contrôles de cohérence doivent marcher exactement comme avant.
+
+## Les adresses à ta disposition
+
+Toutes existent, aucune n'est à créer. Celles marquées « agent » demandent une connexion.
+
+| Adresse | Accès | Ce qu'elle rend |
+|---|---|---|
+| `GET /api/publics` | public | trois chiffres, rien d'autre |
+| `GET /api/lieux` | public | les lieux connus (marchés, écoles…) |
+| `GET /api/fichiers/public/…` | public | une photo de signalement (déjà masquée) |
+| `GET /api/session` | public | qui est connecté, son poste, son jeton |
+| `GET /api/dossiers`, `/api/fuites`, `/api/nuisances` | agent | les listes, classées par urgence, avec `priorite.note` et `priorite.raisons` |
+| `GET /api/dossiers/<id>`, `/api/fuites/<id>`, `/api/nuisances/<id>` | agent | un dossier : ses signalements, photos, voix, journal |
+| `GET /api/chaine`, `/api/fuites/chaine`, `/api/nuisances/chaine` | agent | les étapes et le nombre de dossiers à chacune |
+| `GET /api/comptes` | agent | les signalements par statut |
+| `GET /api/depotoirs`, `/api/fuites/carte`, `/api/nuisances/carte` | agent | GeoJSON pour la carte |
+| `GET /api/plan` | agent | le plan de gestion (prend 5 à 7 s : ne l'appelle pas au chargement du tableau de bord) |
+| `GET /api/inspection` | agent | la tournée du jour |
+
+Les actions (`POST …/avancer`, `…/classer`) demandent l'en-tête `X-Jeton` : réemploie la
+fonction `appel()` des pages existantes, qui le pose.
+
+## Ce qui doit encore marcher avant chaque commit
+
+1. `python -m pytest -q` : **212 tests, tous verts**, sans en avoir modifié un seul.
+2. Dans un navigateur, sans erreur de console et **sans aucune requête vers Internet** :
+   - signaler un tas d'ordures depuis le téléphone (420 px), avec photo ;
+   - signaler une fuite d'eau, puis signaler sans GPS en choisissant un lieu ;
+   - se connecter avec `onea` et arriver sur les fuites ; avec `agent` et arriver sur sa page ;
+   - suivre un dossier mairie → brigade → mairie → collecte, jusqu'à « collecté » ;
+   - injecter le lot de pièges du jury depuis « Vérifier », et voir les motifs de rejet ;
+   - sur la carte, mettre 14 camions en panne et la saison des pluies, recalculer, lire les
+     contrôles de cohérence ;
+   - « Me déconnecter », et retrouver la page de connexion.
+3. Chaque page refaite, vue à **1366 px** et à **420 px** : rien ne déborde.
+
+## Le compte rendu
+
+Dans `comptes-rendus/T22.md`, sur le modèle habituel, avec pour **chaque page** : une capture
+avant et après à 1366 px, une à 420 px, la liste des vérifications ci-dessus avec leur résultat,
+et ce qui n'a pas pu être fait et pourquoi. Range les captures dans `comptes-rendus/captures/`.
+
+Dis clairement, en tête, **quelles pages sont prêtes à fusionner** et lesquelles ne le sont pas.
