@@ -27,11 +27,11 @@ ne modifie pas ce fichier.
 | C1 | Trois erreurs 500 et limite des essais de mot de passe | coordinateur | **Fait** (16/11) |
 | C2 | Un lot ne doit pas pouvoir confirmer son propre dépotoir | coordinateur | **Fait** (16/11) |
 | C3 | L'installateur ne se déclarait plus prêt depuis T13 | coordinateur | **Fait** (17/11) |
-| T17 | Masquer visages et plaques sur les photos | — | **À faire — livrable officiel manquant** |
-| T18 | Matrice de contribution par membre et par couche | — | **À faire — livrable officiel manquant** |
+| T17 | Masquer visages et plaques sur les photos | coordinateur | **Fait** (17/11), éprouvé sur de vraies photos |
+| T18 | Matrice de contribution par membre et par couche | coordinateur | **Fait** (17/11) — `docs/contribution.md`, **à relire par l'équipe** |
 | T19 | Jeu de signalements en GeoJSON sous licence ouverte | — | **À faire — livrable officiel manquant** |
-| T20 | Rapport technique unique | — | **À faire** |
-| T21 | Vidéo de démonstration de 3 minutes | — | **À faire** (la nôtre est périmée) |
+| T20 | Rapport technique unique | Claude Code | **Fait** (17/11) |
+| T21 | Vidéo de démonstration de 3 minutes | Claude Code | **Fait** (17/11), 2 min 52 s |
 | T12 | Page d'accueil publique | Claude Code | **Fait** (16/11), vérifié par le coordinateur |
 | T13 | Partie décision protégée par identifiant et mot de passe | Claude Code | **Fait** (16/11), vérifié et fusionné. Correctif C1 ajouté par-dessus |
 | T14 | Habillage de la partie décision : barre horizontale, menu ☰, drapeau | Claude Code | **Fait** (16/11), vérifié. Reste la bande grise au bord du fond de carte |

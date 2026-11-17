@@ -118,6 +118,13 @@ visage vu très de côté, un visage minuscule au fond de l'image, une plaque do
 s'éloigne de ceux sur lesquels les détecteurs ont été entraînés. Chaque photo affiche donc à
 l'agent combien de zones ont été masquées, et il peut en masquer d'autres à la main.
 
+**Et ce qu'elle voit de trop.** Les détecteurs de plaques se déclenchent volontiers sur
+n'importe quel rectangle contrasté : une planche, une banderole, un panneau. Sur une photo de
+dépotoir il y en a partout, et masquer au hasard effacerait le tas d'ordures lui-même,
+c'est-à-dire ce que le signalement apporte. Chaque zone trouvée est donc écartée si sa forme ou
+sa taille ne colle pas à ce qu'on cherche. Sur nos photos d'essai, ce filtre a supprimé trois
+fausses plaques sur trois, sans faire perdre un seul visage.
+
 Deux exceptions, et elles sont voulues : la photo de CNIB et le portrait du déclarant ne sont
 pas floutés. Ce sont les pièces qu'il a **choisi** de donner pour être témoin ; les flouter les
 viderait de leur sens. Elles ne sont jamais servies au public et s'effacent à la clôture du
@@ -261,4 +268,4 @@ python -m pytest tests/ -q        # 175 tests : contrôles, pièges, chaînes, p
 | `interface/` | pages servies telles quelles ; `vendor/` contient les bibliothèques de la carte |
 | `donnees/` | préparation des données d'une commune et fichiers produits |
 | `tests/` | tests automatisés, dont le jeu de 42 signalements piégés |
-| `docs/` | proposition de l'équipe, conception, note sur les données |
+| `docs/` | proposition, conception, matrice de contribution, note sur les données |
