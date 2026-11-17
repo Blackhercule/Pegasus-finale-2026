@@ -26,6 +26,7 @@ from .fuites import AMPLEUR_NOMS, CHAINE_EAU, ErreurFuite, Fuites
 from .anonymiser import disponible as masquage_disponible, masquer
 from .inspection import base_du_service, tournees_d_inspection
 from .agents import Agents, ErreurAgent, POSTES_POSSIBLES
+from .appels import Appels, ErreurAppel, adresse_du_client, lire_description, lire_position
 from .priorite import Priorite
 from .nuisances import (CHAINE_NUISANCE, GRAVITE_NOMS, NATURES as NATURES_NUISANCE,
                         ErreurNuisance, Nuisances)
@@ -67,6 +68,8 @@ def creer_application(reglages: Reglages = None) -> Flask:
         fichier_zones=reglages.fichier("zones.geojson"),
         geo=app.extensions["geographie"],
         poids=reglages.parametres.get("priorite"))
+    # T23 : les appels vers la mairie vivent en mémoire, jamais sur le disque.
+    app.extensions["appels"] = Appels()
     app.register_blueprint(vues)
 
     @app.before_request
@@ -270,6 +273,13 @@ OUVERT_A_TOUS = {
     "api.connecter",           # POST /api/connexion
     "api.session_en_cours",    # GET /api/session : « suis-je connecté ? »
     "api.deconnecter",         # POST /api/deconnexion
+    # T23 : un habitant appelle la mairie depuis la page Signaler. Ces quatre adresses sont
+    # ouvertes, mais chacune (sauf la création) exige le jeton secret de L'appel, remis au
+    # téléphone à sa création : sans lui, un appel est « inconnu ».
+    "api.appel_creer",         # POST /api/appels
+    "api.appel_etat",          # GET  /api/appels/<id>          + X-Appel-Jeton
+    "api.appel_position",      # POST /api/appels/<id>/position + X-Appel-Jeton
+    "api.appel_raccrocher",    # POST /api/appels/<id>/raccrocher + X-Appel-Jeton
 }
 # La page de connexion elle-même doit pouvoir s'afficher sans être connecté.
 PAGE_DE_CONNEXION = {"connexion.html", "connexion.js", "connexion.css"}
@@ -1113,3 +1123,97 @@ def verifier(identifiant):
 def rejeter(identifiant):
     return (jsonify({"ok": True}) if depotoirs().decider(identifiant, False)
             else (jsonify({"erreur": "Signalement inconnu."}), 404))
+
+
+# ------------------------------------------------------------------ T23 : appeler la mairie
+# Le serveur ne transporte pas la voix : il passe l'offre du téléphone à l'agent, la réponse de
+# l'agent au téléphone, et la position du téléphone à la carte de l'agent. Voir appels.py.
+def appels() -> Appels:
+    from flask import current_app
+    return current_app.extensions["appels"]
+
+
+def _reponse_d_appel(fonction, *args, code=200):
+    """Exécute une action sur un appel ; une ErreurAppel devient une réponse JSON propre."""
+    try:
+        return jsonify(fonction(*args)), code
+    except ErreurAppel as erreur:
+        return jsonify({"erreur": erreur.message}), erreur.code
+
+
+def _jeton_d_appel() -> str:
+    # Le jeton voyage dans un en-tête, jamais dans l'adresse : les adresses finissent dans les
+    # journaux du serveur.
+    return request.headers.get("X-Appel-Jeton", "")
+
+
+def _envoi() -> dict:
+    envoi = request.get_json(silent=True)
+    return envoi if isinstance(envoi, dict) else {}
+
+
+@vues.route("/api/appels", methods=["POST"])
+def appel_creer():
+    """Un habitant appelle : {offre, latitude, longitude, precision_m} → 201 {id, jeton}."""
+    from flask import current_app
+    from .signalements.controles import nombre
+    envoi = _envoi()
+    try:
+        offre = lire_description(envoi.get("offre"))
+        position = lire_position(envoi, nombre, current_app.extensions["geographie"])
+    except ErreurAppel as erreur:
+        return jsonify({"erreur": erreur.message}), erreur.code
+    return _reponse_d_appel(appels().appeler, offre, position, adresse_du_client(request), code=201)
+
+
+@vues.route("/api/appels/<int:identifiant>")
+def appel_etat(identifiant):
+    return _reponse_d_appel(appels().etat_pour_le_telephone, identifiant, _jeton_d_appel())
+
+
+@vues.route("/api/appels/<int:identifiant>/position", methods=["POST"])
+def appel_position(identifiant):
+    from flask import current_app
+    from .signalements.controles import nombre
+    try:
+        position = lire_position(_envoi(), nombre, current_app.extensions["geographie"])
+    except ErreurAppel as erreur:
+        return jsonify({"erreur": erreur.message}), erreur.code
+    return _reponse_d_appel(appels().nouvelle_position, identifiant, _jeton_d_appel(), position)
+
+
+@vues.route("/api/appels/<int:identifiant>/raccrocher", methods=["POST"])
+def appel_raccrocher(identifiant):
+    return _reponse_d_appel(appels().raccrocher_telephone, identifiant, _jeton_d_appel())
+
+
+@vues.route("/api/appels")
+@agent_requis(postes=("mairie",))
+def appels_lister():
+    """Pour la mairie : les appels qui sonnent ou sont en cours, avec la dernière position."""
+    return jsonify(appels().lister())
+
+
+@vues.route("/api/appels/<int:identifiant>/offre")
+@agent_requis(postes=("mairie",))
+def appel_offre(identifiant):
+    return _reponse_d_appel(appels().offre, identifiant)
+
+
+@vues.route("/api/appels/<int:identifiant>/decrocher", methods=["POST"])
+@agent_requis(postes=("mairie",))
+def appel_decrocher(identifiant):
+    try:
+        reponse = lire_description(_envoi().get("reponse"))
+    except ErreurAppel as erreur:
+        return jsonify({"erreur": erreur.message}), erreur.code
+    return _reponse_d_appel(appels().decrocher, identifiant, reponse, session["agent"])
+
+
+@vues.route("/api/appels/<int:identifiant>/terminer", methods=["POST"])
+@agent_requis(postes=("mairie",))
+def appel_terminer(identifiant):
+    """L'agent raccroche. Adresse distincte de celle du téléphone : l'une est ouverte et
+    protégée par le jeton de l'appel, l'autre est fermée et réservée au poste mairie."""
+    return _reponse_d_appel(appels().raccrocher_agent, identifiant)
+

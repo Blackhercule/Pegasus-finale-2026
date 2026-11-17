@@ -1,0 +1,25 @@
+/* Visionneuse de photos (T23, partie 1). */
+img[src^="/api/fichiers/public/"] { cursor: zoom-in; }
+.visionneuse { position: fixed; inset: 0; z-index: 1000; background: rgba(10, 12, 28, .97);
+               display: grid; place-items: center; padding: 56px 16px 40px; }
+.visionneuse[hidden] { display: none; }
+.visionneuse__image { width: calc(100vw - 32px); height: calc(100vh - 96px); object-fit: contain; border-radius: 6px;
+                      cursor: default; box-shadow: 0 8px 40px rgba(0, 0, 0, .5); }
+.visionneuse__legende { position: absolute; left: 0; right: 0; bottom: 12px; margin: 0;
+                        text-align: center; color: #dde1f2; font: 14px Lato, system-ui, sans-serif; }
+.visionneuse__bouton { position: absolute; border: 0; cursor: pointer; color: #fff; line-height: 1;
+                       background: rgba(255, 255, 255, .16); border-radius: 999px; }
+.visionneuse__bouton:hover { background: rgba(255, 255, 255, .3); }
+.visionneuse__bouton:focus-visible { outline: 3px solid #ffff00; outline-offset: 2px; }
+.visionneuse__fermer { top: 12px; right: 12px; width: 44px; height: 44px; font-size: 22px; }
+.visionneuse__prec, .visionneuse__suiv { top: 50%; transform: translateY(-50%); width: 52px; height: 52px;
+                                         font-size: 36px; padding-bottom: 5px; }
+.visionneuse__prec { left: 12px; }
+.visionneuse__suiv { right: 12px; }
+.visionneuse__bouton[hidden] { display: none; }
+body.visionneuse-ouverte { overflow: hidden; }
+@media (max-width: 640px) {
+  .visionneuse { padding: 56px 8px 40px; }
+  .visionneuse__image { width: calc(100vw - 16px); }
+  .visionneuse__prec, .visionneuse__suiv { width: 44px; height: 44px; font-size: 30px; top: auto; bottom: 8px; transform: none; }
+}

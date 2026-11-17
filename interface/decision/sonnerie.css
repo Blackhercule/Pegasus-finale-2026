@@ -1,0 +1,21 @@
+/* T23 : le bandeau « Un habitant appelle », au-dessus de tout, sur toutes les pages de la mairie. */
+.sonnerie {
+  position: fixed; left: 50%; top: 4.2rem; transform: translateX(-50%); z-index: 1000;
+  display: flex; align-items: center; gap: .6rem 1rem; flex-wrap: wrap; justify-content: center;
+  width: min(760px, calc(100vw - 24px)); padding: .9rem 1.1rem; border-radius: 14px;
+  background: #c8102e; color: #fff; box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+  font-family: inherit; animation: sonnerie-bat 1.2s ease-in-out infinite;
+}
+.sonnerie[hidden] { display: none; }
+.sonnerie__titre { font-size: 1.15rem; }
+.sonnerie__detail { font-size: .88rem; opacity: .92; flex: 1 1 200px; }
+.sonnerie__decrocher, .sonnerie__ignorer {
+  font: inherit; font-weight: 700; border-radius: 999px; padding: .55rem 1.2rem; cursor: pointer;
+  text-decoration: none; border: 2px solid #fff;
+}
+.sonnerie__decrocher { background: #0e8a4a; border-color: #0e8a4a; color: #fff; }
+.sonnerie__decrocher::before { content: "📞 "; }
+.sonnerie__ignorer { background: transparent; color: #fff; }
+.sonnerie a:focus-visible, .sonnerie button:focus-visible { outline: 3px solid #fcd116; outline-offset: 2px; }
+@keyframes sonnerie-bat { 50% { box-shadow: 0 10px 30px rgba(0, 0, 0, .35), 0 0 0 6px rgba(200, 16, 46, .35); } }
+@media (prefers-reduced-motion: reduce) { .sonnerie { animation: none; } }

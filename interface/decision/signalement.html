@@ -6,9 +6,18 @@
 <title>Dossier — Assainissement de Ouaga</title>
 <link rel="stylesheet" href="/decision/plateforme.css">
 <link rel="stylesheet" href="/decision/barre.css">
+<link rel="stylesheet" href="/vendor/maplibre-gl/maplibre-gl.css">
+<link rel="stylesheet" href="/decision/mini-carte.css">
+<link rel="stylesheet" href="/decision/visionneuse.css">
+<script src="/decision/visionneuse.js" defer></script>
 <link rel="stylesheet" href="/decision/signalement.css">
 <script src="/decision/barre.js" defer></script>
 <script src="/decision/plateforme.js" defer></script>
+<script src="/vendor/maplibre-gl/maplibre-gl-csp.js" defer></script>
+<script src="/vendor/pmtiles/pmtiles.js" defer></script>
+<script src="/vendor/protomaps-basemaps/basemaps.js" defer></script>
+<script src="/decision/fond-carte.js" defer></script>
+<script src="/decision/mini-carte.js" defer></script>
 <script src="/decision/signalement.js" defer></script>
 </head>
 <body>
@@ -35,6 +44,8 @@
       <section class="panneau">
         <h2>Informations</h2>
         <dl class="informations" id="informations"></dl>
+        <div class="mini-carte" id="mini-carte" aria-label="Position du dossier sur la carte"></div>
+        <p class="lien-grande-carte"><a id="lien-grande-carte" href="/decision/">Voir sur la grande carte</a></p>
         <div id="avertissement-lieu"></div>
         <p class="aide" id="pourquoi" hidden></p>
       </section>

@@ -22,7 +22,35 @@
     </button>
     <p id="accueil-etat" class="accueil-etat" aria-live="polite"></p>
     <button type="button" id="accueil-continuer" class="accueil-continuer">Continuer</button>
+    <!-- T23 : sur le dernier écran, trois grandes touches remplacent « Continuer ». Les touches 2
+         et 3 restent cachées tant que ce téléphone ne sait pas passer un appel (voir appel.js). -->
+    <div id="menu-accueil" class="menu-accueil" hidden>
+      <button type="button" id="menu-1" class="menu-touche">
+        <span class="menu-chiffre">1</span><span class="menu-icone" aria-hidden="true">📝</span>
+        <span class="menu-mots">Je signale moi-même</span></button>
+      <button type="button" id="menu-2" class="menu-touche menu-appel" hidden>
+        <span class="menu-chiffre">2</span><span class="menu-icone" aria-hidden="true">📞</span>
+        <span class="menu-mots">Parler à la mairie</span></button>
+      <button type="button" id="menu-3" class="menu-touche menu-appel" hidden>
+        <span class="menu-chiffre">3</span><span class="menu-icone" aria-hidden="true">📞</span>
+        <span class="menu-mots">Parler à la mairie</span></button>
+    </div>
     <button type="button" id="accueil-passer" class="accueil-passer">Passer le guidage</button>
+  </div>
+</div>
+
+<!-- T23 : l'appel vers un agent de la mairie. La voix passe directement d'un navigateur à
+     l'autre (WebRTC) ; le serveur ne fait que mettre en relation. -->
+<div id="appel" class="appel-ecran" hidden role="dialog" aria-modal="true" aria-labelledby="appel-titre">
+  <div class="appel-boite">
+    <p class="appel-icone" aria-hidden="true">📞</p>
+    <h2 id="appel-titre">Appel de la mairie…</h2>
+    <p id="appel-texte" class="appel-texte" aria-live="polite"></p>
+    <audio id="appel-voix" autoplay></audio>
+    <button type="button" id="appel-raccrocher" class="appel-raccrocher">Raccrocher</button>
+    <button type="button" id="appel-formulaire" class="menu-touche appel-formulaire" hidden>
+      <span class="menu-chiffre">1</span><span class="menu-icone" aria-hidden="true">📝</span>
+      <span class="menu-mots">Je signale moi-même</span></button>
   </div>
 </div>
 
@@ -215,5 +243,6 @@
 </main>
 
 <script src="/signaler/signaler.js"></script>
+<script src="/signaler/appel.js"></script>
 </body>
 </html>
