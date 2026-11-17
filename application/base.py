@@ -178,7 +178,11 @@ AJOUTS = {
                      ("ampleur", "TEXT"), ("quartier", "TEXT"),
                      ("nuisance_id", "INTEGER"), ("gravite", "TEXT"),
                      # T16 : d'où vient la position — « gps », ou « lieu » choisi dans une liste.
-                     ("source_position", "TEXT NOT NULL DEFAULT 'gps'"), ("lieu_nom", "TEXT")],
+                     ("source_position", "TEXT NOT NULL DEFAULT 'gps'"), ("lieu_nom", "TEXT"),
+                     # C2 : l'envoi groupé d'où vient le signalement (un lot = un seul témoin).
+                     ("lot", "TEXT"),
+                     # T17 : combien de visages et de plaques ont été masqués sur la photo.
+                     ("visages_masques", "INTEGER"), ("plaques_masquees", "INTEGER")],
     "depotoirs": [("etape", "TEXT NOT NULL DEFAULT 'signale'"), ("surface_m2", "REAL"),
                   ("depot", "TEXT")],
 }
