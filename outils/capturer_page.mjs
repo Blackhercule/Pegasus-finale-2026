@@ -43,6 +43,15 @@ for (const largeur of [1366, 420]) {
     await page.waitForFunction((s) => !document.querySelector(s).disabled, cliquer, { timeout: 120000 });
     await page.waitForTimeout(500);
   }
+  // On parcourt la page jusqu'en bas : ce qui se charge à l'apparition (photos) est chargé.
+  await page.evaluate(async () => {
+    for (let y = 0; y < document.body.scrollHeight; y += 500) {
+      window.scrollTo(0, y);
+      await new Promise((r) => setTimeout(r, 120));
+    }
+    window.scrollTo(0, 0);
+  });
+  await page.waitForTimeout(800);
   const debord = await page.evaluate(() => document.documentElement.scrollWidth);
   await page.screenshot({ path: `${dossier}/${prefixe}-${largeur}.png`, fullPage: true });
   const ok = debord <= largeur && !erreurs.length && !dehors.length;

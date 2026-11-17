@@ -1,0 +1,41 @@
+/* Explorer (T22) : les dossiers en grille de cartes, filtrés sans recharger la page. */
+.compte { margin: 0; color: var(--gris); font-size: var(--t2); }
+
+.filtres { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--e3) var(--e4);
+           background: var(--blanc); border: 1px solid var(--trait); border-radius: var(--rayon);
+           padding: var(--e4) var(--e5); margin-bottom: var(--e5); box-shadow: var(--ombre); }
+.filtres label { display: grid; gap: var(--e1); font-size: var(--t1); font-weight: 700; color: var(--gris); }
+.filtres select { font: inherit; font-size: var(--t2); color: var(--encre); min-width: 200px;
+                  padding: var(--e2) var(--e3); border: 1px solid var(--trait); border-radius: 8px;
+                  background: var(--blanc); }
+
+.grille-cartes { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--e5);
+                 grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.tuile { display: flex; flex-direction: column; height: 100%; text-decoration: none; color: inherit;
+         background: var(--blanc); border: 1px solid var(--trait); border-radius: var(--rayon);
+         overflow: hidden; box-shadow: var(--ombre); transition: transform .12s, box-shadow .12s; }
+.tuile:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(27, 32, 51, .14);
+               border-color: var(--marine); }
+
+/* La photo garde la même place, qu'il y en ait une ou non : toutes les cartes ont la même
+   hauteur. */
+.tuile .photo { position: relative; aspect-ratio: 4 / 3; background: #e6e9f2; display: grid;
+                place-items: center; color: var(--gris); font-size: var(--t1); }
+.tuile .photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tuile .photo .sans { display: grid; justify-items: center; gap: var(--e1); }
+.tuile .photo .sans span:first-child { font-size: 30px; opacity: .55; }
+.tuile .urgence { position: absolute; top: var(--e3); right: var(--e3); box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+
+.tuile .corps { display: grid; gap: var(--e2); padding: var(--e4); flex: 1; align-content: start; }
+.tuile h2 { font-size: var(--t3); }
+.tuile .ligne { display: flex; flex-wrap: wrap; gap: var(--e2); }
+.tuile .lieu { color: var(--gris); font-size: var(--t1); }
+.tuile .raisons { color: var(--gris); font-size: var(--t1); margin: 0; }
+
+@media (max-width: 640px) {
+  .filtres { padding: var(--e4); }
+  .filtres label, .filtres select { width: 100%; min-width: 0; }
+  .filtres button { width: 100%; }
+  .grille-cartes { grid-template-columns: minmax(0, 1fr); gap: var(--e4); }
+  .tuile .photo { aspect-ratio: 16 / 9; }
+}

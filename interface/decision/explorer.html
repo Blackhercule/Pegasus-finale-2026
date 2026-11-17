@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorer les signalements — Assainissement de Ouaga</title>
+<link rel="stylesheet" href="/decision/plateforme.css">
+<link rel="stylesheet" href="/decision/barre.css">
+<link rel="stylesheet" href="/decision/explorer.css">
+<script src="/decision/barre.js" defer></script>
+<script src="/decision/plateforme.js" defer></script>
+<script src="/decision/explorer.js" defer></script>
+</head>
+<body>
+<main class="page">
+  <header class="entete-page">
+    <div>
+      <h1>Explorer les signalements</h1>
+      <p>Tous les dossiers des trois chaînes, du plus urgent au moins urgent.</p>
+    </div>
+    <p class="compte" id="compte" aria-live="polite"></p>
+  </header>
+
+  <form class="filtres" id="filtres" aria-label="Filtrer les dossiers">
+    <label>Nature
+      <select id="f-nature"><option value="">Toutes</option></select></label>
+    <label>Étape
+      <select id="f-etape">
+        <option value="ouverts">Dossiers ouverts</option>
+        <option value="">Toutes les étapes</option>
+      </select></label>
+    <label>Quartier
+      <select id="f-quartier"><option value="">Tous</option></select></label>
+    <button type="reset" class="bouton secondaire">Effacer les filtres</button>
+  </form>
+
+  <ul class="grille-cartes" id="grille"><li class="vide">Chargement…</li></ul>
+</main>
+</body>
+</html>
