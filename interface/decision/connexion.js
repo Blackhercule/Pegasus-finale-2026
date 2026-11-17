@@ -7,7 +7,7 @@
    sur une page qui ne le concerne pas : l'ONEA n'a rien à faire dans les dossiers de
    dépotoirs, et un agent de collecte n'a rien à décider sur les fuites. */
 const PAGE_DU_POSTE = {
-  mairie: "/decision/dossiers.html",
+  mairie: "/decision/tableau-de-bord.html",
   brigade: "/decision/dossiers.html",
   collecte: "/decision/dossiers.html",
   onea: "/decision/fuites.html",

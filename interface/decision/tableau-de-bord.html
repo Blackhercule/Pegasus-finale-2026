@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tableau de bord — Assainissement de Ouaga</title>
+<link rel="stylesheet" href="/decision/plateforme.css">
+<link rel="stylesheet" href="/decision/barre.css">
+<link rel="stylesheet" href="/decision/tableau-de-bord.css">
+<script src="/decision/barre.js" defer></script>
+<script src="/decision/plateforme.js" defer></script>
+<script src="/decision/tableau-de-bord.js" defer></script>
+</head>
+<body>
+<main class="page">
+  <header class="entete-page">
+    <div>
+      <h1>Tableau de bord</h1>
+      <p id="sous-titre">Ce qui attend les services aujourd'hui.</p>
+    </div>
+    <a class="bouton secondaire" href="/decision/explorer.html">Explorer les signalements</a>
+  </header>
+
+  <section class="chiffres-cles" aria-label="Chiffres clés">
+    <div class="chiffre-cle"><span class="valeur" id="c-ouverts">—</span><span class="libelle">dossiers ouverts</span></div>
+    <div class="chiffre-cle alerte"><span class="valeur" id="c-urgents">—</span><span class="libelle">dossiers urgents (note ≥ 60)</span></div>
+    <div class="chiffre-cle"><span class="valeur" id="c-depotoirs">—</span><span class="libelle">dépotoirs ouverts</span></div>
+    <div class="chiffre-cle eau"><span class="valeur" id="c-fuites">—</span><span class="libelle">fuites d'eau ouvertes</span></div>
+    <div class="chiffre-cle nuisance"><span class="valeur" id="c-nuisances">—</span><span class="libelle">nuisances ouvertes</span></div>
+  </section>
+
+  <div class="colonnes">
+    <section class="panneau">
+      <div class="titre-panneau">
+        <h2>Les plus urgents</h2>
+        <a href="/decision/explorer.html">Tout voir</a>
+      </div>
+      <p class="aide">Les trois chaînes réunies, classées par note d'urgence. La note et ses raisons
+        sont celles des postes de travail.</p>
+      <ol class="file" id="file"><li class="vide">Chargement…</li></ol>
+    </section>
+
+    <section class="panneau">
+      <h2>Où sont-ils ?</h2>
+      <p class="aide">Les dossiers ouverts dans la commune. Un clic ouvre le dossier.</p>
+      <div id="mini-carte"></div>
+      <p class="legende"><span class="ordures">Dépotoir</span><span class="eau">Fuite d'eau</span>
+        <span class="nuisance">Nuisance</span></p>
+    </section>
+  </div>
+
+  <div class="grille-2 graphiques">
+    <section class="panneau"><h2>Dépotoirs, par étape</h2><p class="aide">Mairie, brigade Laabal, collecte.</p><div id="g-depotoirs"></div></section>
+    <section class="panneau"><h2>Fuites d'eau, par étape</h2><p class="aide">De la mairie à l'ONEA.</p><div id="g-fuites"></div></section>
+    <section class="panneau"><h2>Nuisances, par étape</h2><p class="aide">Caniveaux, abattoirs, toilettes, eaux usées.</p><div id="g-nuisances"></div></section>
+    <section class="panneau"><h2>Dossiers ouverts, par nature</h2><p class="aide">Ce que signalent les habitants.</p><div id="g-natures"></div></section>
+  </div>
+
+  <section class="panneau plan">
+    <div class="titre-panneau">
+      <h2>Plan de gestion du jour</h2>
+      <button type="button" class="bouton" id="calculer">Calculer le plan</button>
+    </div>
+    <p class="aide">Le calcul prend quelques secondes : il n'est lancé qu'à la demande. Pour changer
+      les paramètres, ouvrir <a href="/decision/">la carte</a>.</p>
+    <p class="etat" id="etat-plan"></p>
+    <table class="tableau-chiffres" id="chiffres-plan" hidden>
+      <tbody></tbody>
+    </table>
+  </section>
+</main>
+</body>
+</html>

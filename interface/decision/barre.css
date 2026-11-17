@@ -16,8 +16,8 @@
 .barre__marque { color: #fff; font-weight: 700; text-decoration: none; white-space: nowrap; }
 .barre__sections { display: flex; gap: .15rem; flex: 1; min-width: 0; overflow-x: auto; }
 .barre__sections a {
-  color: #fff; text-decoration: none; padding: .35rem .65rem; border-radius: 6px;
-  white-space: nowrap; font-size: .92rem;
+  color: #fff; text-decoration: none; padding: .35rem .5rem; border-radius: 6px;
+  white-space: nowrap; font-size: .9rem;
 }
 .barre__sections a:hover { background: rgba(255, 255, 255, .15); }
 .barre__sections a[aria-current="page"] {          /* la section ouverte */
@@ -50,7 +50,7 @@ body.panneau-ouvert .voile-panneau { display: block; }
 
 /* --- Écran étroit (portable de 1100 px, tablette, téléphone) : les sections passent sur une
    seconde ligne, où elles tiennent ou défilent ; aucune n'est coupée sans qu'on le voie. --- */
-@media (max-width: 1180px) {
+@media (max-width: 1340px) {
   .barre__sections { order: 3; flex-basis: 100%; }
 }
 @media (max-width: 640px) {

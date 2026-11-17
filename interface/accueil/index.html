@@ -8,30 +8,84 @@
     <script src="/accueil/accueil.js" defer></script>
   </head>
   <body>
+    <header class="haut">
+      <div class="cadre haut__ligne">
+        <span class="marque">Assainissement de Ouaga</span>
+        <a class="haut__services" href="/decision/">Espace des services</a>
+      </div>
+    </header>
+
     <main>
-      <p class="equipe">Outil libre · Groupe Pegasus · Université Joseph Ki-Zerbo</p>
-      <h1>Assainissement de Ouaga</h1>
-      <p class="chapeau">
-        Vous voyez un tas d'ordures, un caniveau bouché ou une fuite d'eau ? Signalez-le :
-        la mairie le reçoit, le vérifie et l'ajoute à son plan de ramassage.
-      </p>
-
-      <a class="signaler" href="/signaler/">
-        <span class="signaler__icone" aria-hidden="true">📍</span>
-        <span class="signaler__texte">Signaler</span>
-        <span class="signaler__aide">Gratuit, sans compte, même sans réseau</span>
-      </a>
-
-      <section class="chiffres" aria-label="Les chiffres de l'outil">
-        <p><strong id="signalements">–</strong><span>signalements reçus</span></p>
-        <p><strong id="depotoirs">–</strong><span>dépotoirs recensés</span></p>
-        <p><strong id="dossiers_traites">–</strong><span>dossiers traités</span></p>
+      <section class="une">
+        <div class="cadre une__grille">
+          <div>
+            <p class="equipe">Outil libre · Groupe Pegasus · Université Joseph Ki-Zerbo</p>
+            <h1>Un tas d'ordures, un caniveau bouché, une fuite ? Signalez-le.</h1>
+            <p class="chapeau">
+              La mairie reçoit votre signalement, le vérifie et l'inscrit à son plan de ramassage.
+              Les services concernés le traitent, du constat jusqu'à l'enlèvement.
+            </p>
+            <a class="signaler" href="/signaler/">
+              <span class="signaler__icone" aria-hidden="true">📍</span>
+              <span>
+                <span class="signaler__texte">Signaler</span>
+                <span class="signaler__aide">Gratuit, sans compte, même sans réseau</span>
+              </span>
+            </a>
+            <p class="parler">🔊 La page peut vous guider à voix haute en mooré.</p>
+          </div>
+          <section class="chiffres" aria-label="Les chiffres de l'outil">
+            <p><strong id="signalements">–</strong><span>signalements reçus</span></p>
+            <p><strong id="depotoirs">–</strong><span>dépotoirs recensés</span></p>
+            <p><strong id="dossiers_traites">–</strong><span>dossiers traités</span></p>
+          </section>
+        </div>
       </section>
 
-      <p class="services">
-        Mairie, brigade Laabal, équipe de collecte, ONEA :
-        <a href="/decision/">Espace des services</a>
-      </p>
+      <section class="cadre bloc" aria-labelledby="titre-natures">
+        <h2 id="titre-natures">Ce que vous pouvez signaler</h2>
+        <ul class="natures">
+          <li><span class="icone" aria-hidden="true">🗑</span><strong>Un tas d'ordures</strong><span>dépotoir sauvage</span></li>
+          <li><span class="icone" aria-hidden="true">💧</span><strong>Une fuite d'eau</strong><span>conduite percée</span></li>
+          <li><span class="icone" aria-hidden="true">🚧</span><strong>Un caniveau bouché</strong><span>l'eau ne passe plus</span></li>
+          <li><span class="icone" aria-hidden="true">🚽</span><strong>Toilettes vidées dehors</strong><span>matières répandues</span></li>
+          <li><span class="icone" aria-hidden="true">🐄</span><strong>Un abattoir clandestin</strong><span>bêtes tuées hors d'un abattoir officiel</span></li>
+          <li><span class="icone" aria-hidden="true">🐟</span><strong>Des eaux de poisson ou de poulet</strong><span>eaux de lavage déversées</span></li>
+        </ul>
+      </section>
+
+      <section class="cadre bloc" aria-labelledby="titre-etapes">
+        <h2 id="titre-etapes">Comment ça marche</h2>
+        <ol class="etapes">
+          <li><span class="numero" aria-hidden="true">1</span>
+            <strong>Vous signalez</strong>
+            <span>Une photo, la position du téléphone ou un lieu connu, et si vous préférez,
+              un message à la voix. Sans réseau, le signalement part tout seul plus tard.</span></li>
+          <li><span class="numero" aria-hidden="true">2</span>
+            <strong>La mairie vérifie</strong>
+            <span>Un signalement confirmé par deux téléphones, ou par un agent, devient un dossier.
+              Les visages et les plaques sont masqués sur les photos.</span></li>
+          <li><span class="numero" aria-hidden="true">3</span>
+            <strong>Les services agissent</strong>
+            <span>Brigade Laabal, équipe de collecte, ONEA : chacun à son tour, et chaque passage
+              est daté et signé jusqu'à l'enlèvement.</span></li>
+        </ol>
+      </section>
+
+      <section class="cadre porte-services" aria-labelledby="titre-services">
+        <div>
+          <h2 id="titre-services">Vous travaillez pour la mairie, la brigade Laabal, la collecte ou l'ONEA ?</h2>
+          <p>Carte de décision, dossiers, plan de gestion et scénarios : avec votre identifiant.</p>
+        </div>
+        <a class="bouton-services" href="/decision/">Espace des services</a>
+      </section>
     </main>
+
+    <footer class="pied">
+      <div class="cadre">
+        Outil libre (AGPL-3.0) · données cartographiques © les contributeurs d'OpenStreetMap ·
+        aucune connexion à Internet nécessaire.
+      </div>
+    </footer>
   </body>
 </html>

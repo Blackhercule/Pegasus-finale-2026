@@ -1,0 +1,143 @@
+/* Plateforme (T22) : la base commune des pages nouvelles — tableau de bord, explorer, détail.
+   Les pages existantes ne la chargent pas : elle ne peut rien casser chez elles.
+
+   Une seule échelle d'espacements (4, 8, 12, 16, 24, 32, 48 px) et une seule échelle de
+   tailles de texte (13, 15, 17, 20, 26, 32 px). Police Lato, servie par notre machine.
+   Couleurs de l'équipe : bleu marine, blanc, jaune vif sur fond sombre seulement (#8a7a00
+   sur fond clair, où le jaune vif serait illisible). */
+@import url("/vendor/polices/lato/lato.css");
+
+:root {
+  --marine: #1e2455;
+  --marine-fonce: #161a3f;
+  --marine-clair: #eceefa;
+  --jaune: #ffff00;
+  --jaune-texte: #8a7a00;
+  --jaune-fond: #fdf7cc;
+  --encre: #1b2033;
+  --gris: #5f6680;
+  --trait: #dfe2ec;
+  --papier: #f5f6fa;
+  --blanc: #ffffff;
+  --rouge: #c8102e;
+  --rouge-fond: #fbe4e6;
+  --vert: #0e6b3a;
+  --vert-fond: #dcf1e4;
+  --bleu-eau: #0077b6;
+  --violet: #6b3fa0;
+
+  --e1: 4px; --e2: 8px; --e3: 12px; --e4: 16px; --e5: 24px; --e6: 32px; --e7: 48px;
+  --t1: 13px; --t2: 15px; --t3: 17px; --t4: 20px; --t5: 26px; --t6: 32px;
+  --rayon: 12px;
+  --ombre: 0 1px 2px rgba(27, 32, 51, .06), 0 4px 14px rgba(27, 32, 51, .06);
+}
+
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: Lato, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  font-size: var(--t2); line-height: 1.5; color: var(--encre); background: var(--papier);
+}
+h1, h2, h3 { line-height: 1.2; margin: 0; color: var(--marine); }
+a { color: var(--marine); }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+.tuile:focus-visible { outline: 3px solid var(--jaune-texte); outline-offset: 2px; }
+
+/* --- Mise en page --- */
+.page { max-width: 1280px; margin: 0 auto; padding: var(--e5) var(--e5) var(--e7); }
+.entete-page { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+               gap: var(--e3) var(--e5); margin-bottom: var(--e5); }
+.entete-page h1 { font-size: var(--t6); }
+.entete-page p { margin: var(--e1) 0 0; color: var(--gris); font-size: var(--t3); }
+.colonnes { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--e5); }
+.grille-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e5); }
+.pile { display: grid; gap: var(--e5); align-content: start; }
+
+/* --- Panneaux --- */
+.panneau { background: var(--blanc); border: 1px solid var(--trait); border-radius: var(--rayon);
+           padding: var(--e5); box-shadow: var(--ombre); min-width: 0; }
+.panneau h2 { font-size: var(--t4); margin-bottom: var(--e1); }
+.panneau .aide { margin: 0 0 var(--e4); color: var(--gris); font-size: var(--t1); }
+.titre-panneau { display: flex; align-items: baseline; justify-content: space-between; gap: var(--e3);
+                 flex-wrap: wrap; }
+
+/* --- Chiffres clés --- */
+.chiffres-cles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                 gap: var(--e4); margin-bottom: var(--e5); }
+.chiffre-cle { background: var(--blanc); border: 1px solid var(--trait); border-radius: var(--rayon);
+               padding: var(--e4) var(--e5); box-shadow: var(--ombre); border-top: 4px solid var(--marine); }
+.chiffre-cle .valeur { display: block; font-size: var(--t6); font-weight: 700; color: var(--marine);
+                       font-variant-numeric: tabular-nums; line-height: 1.1; }
+.chiffre-cle .libelle { display: block; color: var(--gris); font-size: var(--t1); margin-top: var(--e1); }
+.chiffre-cle.alerte { border-top-color: var(--rouge); }
+.chiffre-cle.alerte .valeur { color: var(--rouge); }
+.chiffre-cle.eau { border-top-color: var(--bleu-eau); }
+.chiffre-cle.nuisance { border-top-color: var(--violet); }
+
+/* --- Étiquettes et notes d'urgence --- */
+.etiquette { display: inline-flex; align-items: center; gap: var(--e1); padding: 2px var(--e2);
+             border-radius: 999px; font-size: var(--t1); font-weight: 700; white-space: nowrap;
+             background: var(--marine-clair); color: var(--marine); }
+.etiquette.ordures { background: #f3e9df; color: #6e4a1e; }
+.etiquette.eau { background: #dff0fa; color: #005a8a; }
+.etiquette.nuisance { background: #efe6f8; color: var(--violet); }
+.etiquette.clos { background: var(--vert-fond); color: var(--vert); }
+.urgence { display: inline-grid; place-items: center; min-width: 2.4em; height: 2.4em; padding: 0 var(--e1);
+           border-radius: 999px; font-weight: 700; font-size: var(--t1); font-variant-numeric: tabular-nums; }
+.urgence.haute { background: var(--rouge); color: var(--blanc); }
+.urgence.moyenne { background: var(--jaune-fond); color: var(--jaune-texte); border: 1px solid #e4d57a; }
+.urgence.basse { background: var(--marine-clair); color: var(--marine); }
+
+/* --- Boutons --- */
+.bouton { font: inherit; font-weight: 700; cursor: pointer; border-radius: 8px; padding: var(--e2) var(--e4);
+          border: 1px solid var(--marine); background: var(--marine); color: var(--blanc); }
+.bouton:hover { background: var(--marine-fonce); }
+.bouton.secondaire { background: var(--blanc); color: var(--marine); }
+.bouton.secondaire:hover { background: var(--marine-clair); }
+.bouton.danger { background: var(--blanc); color: var(--rouge); border-color: var(--rouge); }
+.bouton:disabled { opacity: .6; cursor: progress; }
+
+/* --- Listes de dossiers (file priorisée) --- */
+.file { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--e2); }
+.file a { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--e3); align-items: center;
+          padding: var(--e3); border: 1px solid var(--trait); border-radius: 10px; text-decoration: none;
+          color: inherit; background: var(--blanc); }
+.file a:hover { border-color: var(--marine); background: var(--marine-clair); }
+.file .titre { font-weight: 700; color: var(--marine); }
+.file .raisons { display: block; color: var(--gris); font-size: var(--t1); }
+
+/* --- Graphiques en barres (SVG) --- */
+.barres { width: 100%; height: auto; display: block; }
+.barres text { font-family: inherit; font-size: 13px; fill: var(--encre); }
+.barres .valeur { font-weight: 700; fill: var(--marine); }
+.barres .fond { fill: var(--papier); }
+
+/* --- Petite carte SVG --- */
+.mini-carte { width: 100%; height: auto; display: block; background: #eef1f6; border-radius: 10px; }
+.legende { display: flex; flex-wrap: wrap; gap: var(--e2) var(--e4); margin-top: var(--e3);
+           font-size: var(--t1); color: var(--gris); }
+.legende span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+                        margin-right: var(--e1); background: currentColor; vertical-align: -1px; }
+.legende .ordures { color: #a0522d; } .legende .eau { color: var(--bleu-eau); }
+.legende .nuisance { color: var(--violet); }
+
+/* --- Tableau de chiffres --- */
+.tableau-chiffres { width: 100%; border-collapse: collapse; font-size: var(--t2); }
+.tableau-chiffres th, .tableau-chiffres td { text-align: left; padding: var(--e2) 0;
+                                              border-bottom: 1px solid var(--trait); }
+.tableau-chiffres td { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.vide, .etat { color: var(--gris); font-size: var(--t1); }
+
+/* --- Tablette et téléphone --- */
+@media (max-width: 1024px) {
+  .colonnes, .grille-2 { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .page { padding: var(--e4) var(--e3) var(--e6); }
+  .entete-page h1 { font-size: var(--t5); }
+  .panneau { padding: var(--e4); }
+  .chiffres-cles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e3); }
+  .chiffre-cle { padding: var(--e3); }
+  .chiffre-cle .valeur { font-size: var(--t5); }
+}
