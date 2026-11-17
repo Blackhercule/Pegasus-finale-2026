@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dossier — Assainissement de Ouaga</title>
+<link rel="stylesheet" href="/decision/plateforme.css">
+<link rel="stylesheet" href="/decision/barre.css">
+<link rel="stylesheet" href="/decision/signalement.css">
+<script src="/decision/barre.js" defer></script>
+<script src="/decision/plateforme.js" defer></script>
+<script src="/decision/signalement.js" defer></script>
+</head>
+<body>
+<main class="page">
+  <nav class="fil" aria-label="Fil d'Ariane"><a href="/decision/explorer.html">Explorer</a> ›
+    <span id="fil-dossier">Dossier</span></nav>
+  <header class="entete-page">
+    <div>
+      <div class="ligne-etiquettes" id="etiquettes"></div>
+      <h1 id="titre">Chargement…</h1>
+      <p id="sous-titre"></p>
+    </div>
+    <div id="urgence-grande"></div>
+  </header>
+  <p class="erreur" id="erreur" role="alert" hidden></p>
+
+  <div class="colonnes" id="contenu" hidden>
+    <div class="pile">
+      <section class="panneau" id="bloc-galerie">
+        <h2>Photos</h2>
+        <p class="aide">Les visages et les plaques sont masqués avant tout enregistrement.</p>
+        <div id="galerie"></div>
+      </section>
+      <section class="panneau">
+        <h2>Informations</h2>
+        <dl class="informations" id="informations"></dl>
+        <div id="avertissement-lieu"></div>
+        <p class="aide" id="pourquoi" hidden></p>
+      </section>
+      <section class="panneau" id="bloc-voix" hidden>
+        <h2>Message vocal</h2>
+        <p class="aide">Le déclarant a parlé au lieu d'écrire. Aucune transcription automatique :
+          on l'écoute soi-même.</p>
+        <div id="voix"></div>
+      </section>
+      <section class="panneau" id="bloc-commentaires" hidden>
+        <h2>Ce qu'ont écrit les habitants</h2>
+        <ul class="commentaires" id="commentaires"></ul>
+      </section>
+      <section class="panneau prive" id="bloc-temoins" hidden>
+        <h2>Déclarant qui accepte d'être témoin</h2>
+        <p class="aide">Renseignements facultatifs, donnés volontairement, visibles des seuls agents
+          connectés. À effacer dès la clôture du dossier.</p>
+        <div id="temoins"></div>
+      </section>
+    </div>
+
+    <div class="pile">
+      <section class="panneau">
+        <h2>Pourquoi cette urgence</h2>
+        <p class="aide">La note va de 0 à 100. Ses raisons sont données pour qu'un agent puisse la
+          contester.</p>
+        <ul class="raisons-liste" id="raisons"></ul>
+      </section>
+      <section class="panneau" id="bloc-actions">
+        <h2>Ce qu'il reste à faire</h2>
+        <p id="explication"></p>
+        <div id="actions"></div>
+      </section>
+      <section class="panneau">
+        <h2>Historique</h2>
+        <p class="aide">Qui a fait quoi, et quand. Chaque passage est daté et signé.</p>
+        <ol class="historique" id="historique"></ol>
+      </section>
+    </div>
+  </div>
+</main>
+</body>
+</html>
