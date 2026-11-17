@@ -1,0 +1,9 @@
+{
+ "type": "FeatureCollection",
+ "name": "Dépotoirs sauvages vérifiés de Ouagadougou",
+ "licence": "ODbL-1.0",
+ "attribution": "© équipe PEGASUS (Université Joseph Ki-Zerbo) et contributeurs, ODbL 1.0",
+ "genere_le": "2026-11-17",
+ "description": "Dépotoirs signalés par des habitants et vérifiés (par un agent de la mairie, ou par au moins deux appareils différents). Aucune donnée personnelle. Voir signalements-ouaga.LICENCE.md.",
+ "features": []
+}

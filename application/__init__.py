@@ -21,6 +21,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from .base import connexion, creer
 from .dossiers import CHAINE, POSTES, Dossiers, ErreurDossier
 from .export_osm import en_osm, note_d_export
+from .export_geojson import en_geojson
 from .fuites import AMPLEUR_NOMS, CHAINE_EAU, ErreurFuite, Fuites
 from .anonymiser import disponible as masquage_disponible, masquer
 from .nuisances import (CHAINE_NUISANCE, GRAVITE_NOMS, NATURES as NATURES_NUISANCE,
@@ -886,6 +887,16 @@ def export_osm():
         d["type"] = ligne["type"] if ligne else "autre"
     fichier = en_osm(verifies, note_d_export(len(verifies)))
     return app_reponse_osm(fichier, len(verifies))
+
+
+@vues.route("/api/export/geojson")
+def export_geojson():
+    """Les dépotoirs VÉRIFIÉS en GeoJSON, sous licence ODbL, sans donnée personnelle (T19)."""
+    collection = en_geojson(depotoirs().retenus(mode_strict=True), depotoirs().co)
+    reponse = jsonify(collection)
+    reponse.headers["Content-Disposition"] = 'attachment; filename="signalements-ouaga.geojson"'
+    reponse.headers["X-Depotoirs"] = str(len(collection["features"]))
+    return reponse
 
 
 def app_reponse_osm(contenu: str, nombre: int):
