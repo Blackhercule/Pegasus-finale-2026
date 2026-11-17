@@ -28,7 +28,7 @@ dernière — **qui est prêt à l'expliquer au jury**, puisque c'est le jury qu
 | Masquage des visages et des plaques | ✔ | ✔ | — | Latif |
 | Chaîne des postes (mairie, brigade Laabal, collecte) | ✔ | ✔ | — | Franck |
 | Fuites d'eau et poste ONEA | ✔ | ✔ | — | Franck |
-| Nuisances (caniveaux, abattage, toilettes, eaux usées) | ✔ | ✔ | — | Franck |
+| Nuisances (caniveaux, abattoirs, toilettes, eaux usées) | ✔ | ✔ | — | Franck |
 | Préparation des données OpenStreetMap | ✔ | ✔ | — | Latif |
 | Cartographie hors ligne (MapLibre, PMTiles) | ✔ | ✔ | — | Latif |
 | Plan de gestion : points de regroupement et tournées | ✔ | ✔ | — | Latif |

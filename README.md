@@ -17,7 +17,7 @@ challenge 01.
 | **Vérifier** | Chaque signalement passe treize contrôles automatiques. Un signalement douteux est écarté **avec son motif**, jamais silencieusement. Un agent tranche les cas limites. |
 | **Traiter** | Le signalement ouvre un dossier qui passe de poste en poste : mairie, brigade Laabal, mairie, équipe de collecte. Chaque passage est daté et signé. |
 | **Alerter l'ONEA** | Une fuite d'eau suit sa propre chaîne : la mairie la confirme et la transmet, l'ONEA déclare la réparation. Un **bordereau CSV** se télécharge pour l'envoi. |
-| **Orienter** | Caniveau bouché, abattage clandestin, toilettes vidées en pleine rue, eaux usées de poissonnerie : la mairie reçoit et **oriente vers le service compétent**, que la nature du signalement désigne. |
+| **Orienter** | Caniveau bouché, abattoir clandestin, toilettes vidées en pleine rue, eaux usées de poissonnerie : la mairie reçoit et **oriente vers le service compétent**, que la nature du signalement désigne. |
 | **Cartographier** | Les dépotoirs sur un fond OpenStreetMap servi par notre propre machine, avec les 226 sites de déchets déjà cartographiés. |
 | **Planifier** | Emplacement des points de regroupement, tournées des camions, jour par jour, avec les coûts. |
 | **Simuler** | Ménages, pré-collecteurs, brigade Laabal et mairie, un jour par pas de temps. |
@@ -76,14 +76,14 @@ signalement qui décide où il va :
 | Fuite d'eau sur une conduite | **ONEA** |
 | Caniveau bouché | **équipe de collecte** (curage) |
 | Déversement de toilettes en plein air | **ONEA** (assainissement) |
-| Abattage clandestin d'animaux | **brigade Laabal** (constat, verbalisation) |
+| Abattoir clandestin d'animaux | **brigade Laabal** (constat, verbalisation) |
 | Eaux usées de poisson et de poulet | **brigade Laabal** |
 
 Cette répartition est une hypothèse de l'équipe, **à confirmer avec la mairie** : la changer
 demande de modifier une ligne par nature dans `application/nuisances.py`, rien d'autre.
 
 Deux règles valent pour toutes les natures. Le regroupement ne se fait qu'**à nature égale** :
-un caniveau bouché et un abattage clandestin au même carrefour sont deux problèmes, deux
+un caniveau bouché et un abattoir clandestin au même carrefour sont deux problèmes, deux
 services, deux dossiers. Et la gravité retenue est la **plus forte** signalée, jamais la
 moyenne : entre « un peu bouché » et « ça déborde dans la rue », c'est la seconde qui décide
 de l'ordre de passage.

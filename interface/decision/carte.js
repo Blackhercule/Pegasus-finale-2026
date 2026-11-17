@@ -106,7 +106,7 @@ carte.on("load", async () => {
         "circle-stroke-width": 2, "circle-stroke-color": "#fff",
       } });
 
-    /* Caniveaux, abattages clandestins, déversements : un losange violet, encore une autre
+    /* Caniveaux, abattoirs clandestins, déversements : un losange violet, encore une autre
        forme, pour qu'on distingue les trois familles d'un coup d'œil sur la carte. */
     carte.addSource("nuisances", { type: "geojson", data: await json("/api/nuisances/carte") });
     carte.addLayer({ id: "nuisances", type: "circle", source: "nuisances",

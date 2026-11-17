@@ -1,4 +1,4 @@
-/* Poste de travail des nuisances : caniveaux bouchés, abattage clandestin, déversement de
+/* Poste de travail des nuisances : caniveaux bouchés, abattoirs clandestins, déversement de
    toilettes, eaux usées de poisson et de poulet.
 
    La mairie reçoit tout et oriente ; ensuite c'est le service que la nature désigne qui agit.

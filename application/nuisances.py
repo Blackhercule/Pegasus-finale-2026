@@ -40,7 +40,7 @@ NATURES = {
                     "première pluie, et l'eau stagnante élève les moustiques.",
     },
     "abattoir_clandestin": {
-        "nom": "Abattage clandestin d'animaux",
+        "nom": "Abattoir clandestin d'animaux",
         "poste": "brigade",
         "action": "Déclarer le constat fait",
         "explication": "La brigade Laabal se rend sur place, constate, sensibilise et "

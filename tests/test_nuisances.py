@@ -1,4 +1,4 @@
-"""Caniveaux bouchés, abattage clandestin, toilettes en plein air, eaux usées animales.
+"""Caniveaux bouchés, abattoirs clandestins, toilettes en plein air, eaux usées animales.
 
 Ce qui est vérifié ici avant tout : chaque nature arrive au bon service, et aucune n'entre
 dans les tournées des camions ni dans les fuites d'eau.
@@ -44,7 +44,7 @@ def test_chaque_nature_va_au_bon_service(client, agent):
 
 
 def test_deux_natures_au_meme_endroit_font_deux_dossiers(client, agent):
-    """Un caniveau bouché et un abattage clandestin au même carrefour sont deux problèmes,
+    """Un caniveau bouché et un abattoir clandestin au même carrefour sont deux problèmes,
     deux services, donc deux dossiers — même si les points se touchent."""
     signaler(client, "caniveau_bouche", id_client="a")
     signaler(client, "abattoir_clandestin", id_client="b", source="tel-b")
