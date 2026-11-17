@@ -1,14 +1,20 @@
 """Monte la vidéo de démonstration à partir des scènes filmées dans le navigateur.
 
     node outils/filmer.mjs           (filme les scènes dans /tmp/video)
-    python outils/monter_video.py [scènes] [vidéo.mp4]    (les assemble en un seul fichier)
+    python outils/monter_video.py [scènes] [vidéo.mp4] [--voix modele.onnx] [--sans-musique]
+
+Avec --voix, une voix de synthèse (Piper, hors ligne) lit le bandeau de chaque scène, sans le
+changer. La musique de fond est fabriquée par outils/musique_de_fond.py ; elle baisse d'elle-même
+quand la voix parle.
 
 Chaque scène reçoit un bandeau avec sa phrase, et la vidéo s'ouvre et se ferme sur un carton.
 Tout est fait avec ffmpeg : aucun service en ligne, aucun montage à la main.
 """
 
+import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -43,6 +49,10 @@ FIN = ("Code libre, données ouvertes", "AGPL-3.0 · OpenStreetMap (ODbL) · auc
 # Une scène qui attend un long calcul commence AVANT_RESULTAT secondes avant que le résultat
 # s'affiche (moment noté par filmer.mjs dans coupes.json) : on ne montre pas l'attente.
 AVANT_RESULTAT = 2.0
+
+# Début coupé (secondes) des scènes de carte : la connexion y a déjà été montrée (scènes 3 et
+# 4), et la page clignote le temps que la barre se pose.
+COUPER_LE_DEBUT = {"05-tournee": 3.0, "06-parametres": 3.5}
 
 POLICE = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 POLICE_GRASSE = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
@@ -92,6 +102,70 @@ def scene(source: str, chemin: str, titre: str, sous_titre: str, debut: float = 
             "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-an", chemin])
 
 
+def pour_la_voix(*lignes) -> str:
+    """Le texte du bandeau, tel que la voix doit le lire : mêmes mots, ponctuation parlée.
+
+    Le numéro de scène (« 1. ») n'est pas lu, les tirets et les points médians deviennent des
+    pauses, et quelques sigles sont épelés pour que la voix ne les prononce pas comme un mot."""
+    texte = ". ".join(re.sub(r"^\d+\. ", "", ligne) for ligne in lignes) + "."
+    for ecrit, dit in ((" — ", ", "), (" · ", ", "), (" : ", ", "), ("GPS", "gé pé esse"),
+                       ("AGPL-3.0", "A G P L 3"), ("(ODbL)", ""), ("PEGASUS", "Pégasus"),
+                       ("Ki-Zerbo", "Ki Zerbo")):
+        texte = texte.replace(ecrit, dit)
+    return texte
+
+
+def dire(texte: str, modele: str, chemin: str) -> float:
+    """Fait lire le texte par Piper et renvoie la durée de l'enregistrement, en secondes."""
+    piper = shutil.which("piper") or os.path.join(os.path.dirname(sys.executable), "piper")
+    resultat = subprocess.run([piper, "-m", modele, "-f", chemin], input=texte, text=True,
+                              capture_output=True)
+    if resultat.returncode != 0:
+        sys.exit("Piper a échoué : " + resultat.stderr[-800:])
+    return duree(chemin)
+
+
+def duree(chemin: str) -> float:
+    return float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
+                                 "-of", "csv=p=0", chemin], capture_output=True, text=True).stdout)
+
+
+# La voix commence un peu après le début de la scène, et la musique ne descend que de quoi
+# laisser la voix au premier plan.
+DECALAGE_VOIX = 0.6
+VOLUME_MUSIQUE = 0.32
+
+
+def bande_son(travail, paroles, total, musique, sortie):
+    """Assemble la voix (chaque phrase à sa place) et la musique, baissée sous la voix."""
+    entrees, filtres, etiquettes = [], [], []
+    for numero, (chemin, debut) in enumerate(paroles):
+        entrees += ["-i", chemin]
+        ms = int((debut + DECALAGE_VOIX) * 1000)
+        filtres.append(f"[{numero}:a]aresample=44100,aformat=channel_layouts=stereo,"
+                       f"adelay={ms}|{ms}[v{numero}]")
+        etiquettes.append(f"[v{numero}]")
+    voix = (f"{''.join(etiquettes)}amix=inputs={len(etiquettes)}:normalize=0,"
+            f"apad=whole_dur={total:.2f},atrim=0:{total:.2f}" if etiquettes
+            else f"anullsrc=r=44100:cl=stereo,atrim=0:{total:.2f}")
+    if musique:
+        chemin_musique = os.path.join(travail, "musique.wav")
+        lancer([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                             "musique_de_fond.py"), chemin_musique, f"{total:.2f}"])
+        entrees += ["-i", chemin_musique]
+        m = len(paroles)
+        filtres.append(voix + ",asplit=2[voix][cle]")
+        filtres.append(f"[{m}:a]volume={VOLUME_MUSIQUE}[musique]")
+        # La voix sert de « clé » : quand elle parle, la musique est comprimée (baissée).
+        filtres.append("[musique][cle]sidechaincompress=threshold=0.02:ratio=6:attack=30:"
+                       "release=500[sous]")
+        filtres.append("[sous][voix]amix=inputs=2:normalize=0,alimiter=limit=0.95,loudnorm=I=-16:TP=-1.5:LRA=11,aresample=44100[sortie]")
+    else:
+        filtres.append(voix + "[sortie]")
+    lancer(["ffmpeg", "-y", *entrees, "-filter_complex", ";".join(filtres), "-map", "[sortie]",
+            "-c:a", "pcm_s16le", sortie])
+
+
 def lancer(commande) -> None:
     resultat = subprocess.run(commande, capture_output=True, text=True)
     if resultat.returncode != 0:
@@ -99,49 +173,83 @@ def lancer(commande) -> None:
 
 
 def principal():
-    source = sys.argv[1] if len(sys.argv) > 1 else "/tmp/video"
-    sortie = sys.argv[2] if len(sys.argv) > 2 else "/tmp/Demonstration-Assainissement-de-Ouaga.mp4"
+    arguments = argparse.ArgumentParser(description="Monte la vidéo de démonstration.")
+    arguments.add_argument("source", nargs="?", default="/tmp/video")
+    arguments.add_argument("sortie", nargs="?", default="/tmp/Demonstration-Assainissement-de-Ouaga.mp4")
+    arguments.add_argument("--voix", help="modèle de voix Piper (.onnx) qui lit les bandeaux")
+    arguments.add_argument("--sans-musique", action="store_true")
+    options = arguments.parse_args()
     if not shutil.which("ffmpeg"):
         sys.exit("ffmpeg est nécessaire.")
     travail = tempfile.mkdtemp(prefix="montage-")
-    morceaux = []
+    morceaux, paroles, position = [], [], 0.0
 
-    debut = os.path.join(travail, "00-titre.mp4")
-    carton(debut, TITRE, 5.0)
-    morceaux.append(debut)
+    def ajouter(chemin, texte_lu):
+        """Range un morceau monté et, si la voix est demandée, sa phrase à son instant."""
+        nonlocal position
+        if texte_lu is not None:
+            paroles.append((texte_lu, position))
+        morceaux.append(chemin)
+        position += duree(chemin)
+
+    def voix_du_carton(nom, lignes, secondes):
+        """Un carton dure au moins le temps que la voix le lise."""
+        if not options.voix:
+            return secondes, None
+        chemin = os.path.join(travail, nom + ".wav")
+        return max(secondes, dire(pour_la_voix(*lignes), options.voix, chemin) + 0.9), chemin
+
+    secondes, lu = voix_du_carton("00-titre", TITRE, 4.0)
+    debut_video = os.path.join(travail, "00-titre.mp4")
+    carton(debut_video, TITRE, secondes)
+    ajouter(debut_video, lu)
 
     for nom, titre, sous_titre in SCENES:
-        dossier = os.path.join(source, nom)
+        dossier = os.path.join(options.source, nom)
         fichiers = ([f for f in sorted(os.listdir(dossier)) if f.endswith(".webm")]
                     if os.path.isdir(dossier) else [])
         if not fichiers:
             print(f"scène absente, ignorée : {nom}")
             continue
         chemin = os.path.join(travail, nom + ".mp4")
-        debut = 0.0
+        coupe = COUPER_LE_DEBUT.get(nom, 0.0)
         coupes = os.path.join(dossier, "coupes.json")
         if os.path.exists(coupes):
             with open(coupes, encoding="utf-8") as f:
-                debut = max(0.0, float(json.load(f)["resultat"]) - AVANT_RESULTAT)
-        scene(os.path.join(dossier, fichiers[0]), chemin, titre, sous_titre, debut)
-        morceaux.append(chemin)
+                coupe = max(0.0, float(json.load(f)["resultat"]) - AVANT_RESULTAT)
+        scene(os.path.join(dossier, fichiers[0]), chemin, titre, sous_titre, coupe)
+        lu = None
+        if options.voix:
+            lu = os.path.join(travail, nom + ".wav")
+            parole = dire(pour_la_voix(titre, sous_titre), options.voix, lu)
+            if parole + DECALAGE_VOIX + 0.5 > duree(chemin):
+                print(f"attention : la voix de {nom} ({parole:.1f} s) dépasse la scène")
+        ajouter(chemin, lu)
         print("monté :", nom)
 
-    fin = os.path.join(travail, "99-fin.mp4")
-    carton(fin, FIN, 6.0)
-    morceaux.append(fin)
+    secondes, lu = voix_du_carton("99-fin", FIN, 5.0)
+    fin_video = os.path.join(travail, "99-fin.mp4")
+    carton(fin_video, FIN, secondes)
+    ajouter(fin_video, lu)
 
     liste = os.path.join(travail, "morceaux.txt")
     with open(liste, "w", encoding="utf-8") as f:
         for chemin in morceaux:
             f.write(f"file '{chemin}'\n")
+    image = os.path.join(travail, "image.mp4")
     lancer(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", liste,
-            "-c:v", "libx264", "-preset", "veryfast", "-crf", "23",
-            "-pix_fmt", "yuv420p", "-movflags", "+faststart", sortie])
-    duree = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
-                            "-of", "csv=p=0", sortie], capture_output=True, text=True).stdout.strip()
-    print(f"\nVidéo écrite : {sortie} ({float(duree):.0f} s, "
-          f"{os.path.getsize(sortie) / 1e6:.1f} Mo)")
+            "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-pix_fmt", "yuv420p", image])
+    total = duree(image)
+    if options.voix or not options.sans_musique:
+        son = os.path.join(travail, "son.wav")
+        bande_son(travail, paroles, total, not options.sans_musique, son)
+        lancer(["ffmpeg", "-y", "-i", image, "-i", son, "-map", "0:v", "-map", "1:a",
+                "-c:v", "copy", "-c:a", "aac", "-b:a", "160k", "-shortest",
+                "-movflags", "+faststart", options.sortie])
+    else:
+        shutil.copy(image, options.sortie)
+    print(f"\nVidéo écrite : {options.sortie} ({duree(options.sortie):.0f} s, "
+          f"{os.path.getsize(options.sortie) / 1e6:.1f} Mo)")
     shutil.rmtree(travail, ignore_errors=True)
 
 
