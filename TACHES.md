@@ -33,7 +33,10 @@ ne modifie pas ce fichier.
 | T20 | Rapport technique unique | Claude Code | **Fait** (17/11) |
 | T21 | Vidéo de démonstration de 3 minutes | Claude Code | **Fait** (17/11), 2 min 52 s |
 | — | File priorisée, tournées d'inspection, connexion par rôle, comptes individuels | coordinateur | **Fait** (17/11) |
-| T22 | Refonte de l'interface en plateforme web professionnelle | Claude Code | **À faire — sur la branche `refonte-interface`, jamais sur `main`** |
+| T22 | Refonte de l'interface en plateforme web professionnelle | Claude Code | **Fait** (17/11), six pages vérifiées par le coordinateur et fusionnées |
+| C4 | Une base déjà installée ne recevait pas les colonnes `lot` et masquage | coordinateur | **Fait** (17/11) |
+| C5 | La construction Docker reprend un téléchargement coupé | coordinateur | **Fait** (17/11) |
+| C6 | Une date absurde (piège 2001) ne date plus le dossier entier | coordinateur | **Fait** (17/11), relevé par Claude Code pendant T22 |
 | T12 | Page d'accueil publique | Claude Code | **Fait** (16/11), vérifié par le coordinateur |
 | T13 | Partie décision protégée par identifiant et mot de passe | Claude Code | **Fait** (16/11), vérifié et fusionné. Correctif C1 ajouté par-dessus |
 | T14 | Habillage de la partie décision : barre horizontale, menu ☰, drapeau | Claude Code | **Fait** (16/11), vérifié. Reste la bande grise au bord du fond de carte |
