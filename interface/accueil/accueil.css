@@ -1,33 +1,103 @@
-/* Page d'accueil publique. Mêmes police et couleurs que le reste de l'outil ; rien d'Internet. */
+/* Page d'accueil publique (T12, refaite par T22). Rien n'y vient d'Internet ; police Lato
+   servie par notre machine. Jaune vif seulement sur fond bleu marine, où il est lisible. */
 @import url("/vendor/polices/lato/lato.css");
+
+:root { --marine: #1e2455; --marine-fonce: #161a3f; --jaune: #ffff00; --jaune-texte: #8a7a00;
+        --encre: #1b2033; --gris: #5f6680; --trait: #dfe2ec; --papier: #f5f6fa; --blanc: #fff;
+        --e2: 8px; --e3: 12px; --e4: 16px; --e5: 24px; --e6: 32px; --e7: 48px; }
 * { box-sizing: border-box; }
-body {
-  margin: 0; min-height: 100vh; background: #f5f6fa; color: #1b2033; line-height: 1.45;
-  font-family: Lato, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
-}
-main { max-width: 34rem; margin: 0 auto; padding: 2.5rem 1.2rem 3rem; }
-.equipe { margin: 0; font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: #666e85; }
-h1 { margin: .3rem 0 .6rem; font-size: 2rem; color: #1e2455; }
-.chapeau { margin: 0 0 1.8rem; font-size: 1.1rem; }
+html, body { margin: 0; }
+body { font-family: Lato, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+       font-size: 17px; line-height: 1.5; color: var(--encre); background: var(--papier); }
+h1, h2 { line-height: 1.15; margin: 0; }
+a:focus-visible { outline: 3px solid var(--jaune-texte); outline-offset: 3px; }
+.cadre { max-width: 1180px; margin: 0 auto; padding: 0 var(--e5); }
 
-/* Le bouton « Signaler » : l'élément le plus gros de la page, lisible de loin. */
-.signaler {
-  display: grid; justify-items: center; gap: .2rem; padding: 1.6rem 1rem;
-  background: #1e2455; color: #fff; text-decoration: none; border-radius: 18px;
-  box-shadow: 0 6px 18px rgb(30 36 85 / 30%);
-}
-.signaler:focus-visible { outline: 4px solid #8a7a00; outline-offset: 3px; }
-.signaler__icone { font-size: 2.6rem; line-height: 1; }
-.signaler__texte { font-size: 2.6rem; font-weight: 700; }
-.signaler__aide { font-size: 1rem; opacity: .9; }
+/* --- Haut de page : la marque, et la porte des services, discrète --- */
+.haut { background: var(--marine-fonce); color: var(--blanc); }
+.haut__ligne { display: flex; align-items: center; justify-content: space-between; gap: var(--e4);
+               min-height: 56px; }
+.marque { font-weight: 700; }
+.haut__services { color: var(--blanc); font-size: 15px; }
+.haut a:focus-visible, .une a:focus-visible { outline-color: var(--jaune); }
 
-.chiffres { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; margin: 2rem 0; }
-.chiffres p {
-  margin: 0; padding: .8rem .5rem; background: #fff; border: 1px solid #dfe2ec;
-  border-radius: 12px; text-align: center; display: grid;
-}
-.chiffres strong { font-size: 1.7rem; color: #1e2455; }
-.chiffres span { font-size: .85rem; color: #666e85; }
+/* --- La une : le bouton « Signaler », plus gros élément de la page --- */
+.une { background: var(--marine); color: var(--blanc); padding: var(--e7) 0;
+       border-bottom: 6px solid; border-image: linear-gradient(90deg, #ef2b2d, #009e49) 1; }
+.une__grille { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--e7);
+               align-items: center; }
+.equipe { margin: 0 0 var(--e3); font-size: 14px; letter-spacing: .05em; text-transform: uppercase;
+          color: #c9cfe8; }
+.une h1 { font-size: 40px; }
+.chapeau { margin: var(--e4) 0 var(--e6); font-size: 19px; color: #dde1f2; max-width: 40em; }
+.signaler { display: inline-flex; align-items: center; gap: var(--e4); padding: var(--e5) var(--e7) var(--e5) var(--e6);
+            background: var(--jaune); color: var(--marine); text-decoration: none; border-radius: 18px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .3); transition: transform .12s; }
+.signaler:hover { transform: translateY(-2px); }
+.signaler__icone { font-size: 44px; line-height: 1; }
+.signaler__texte { display: block; font-size: 44px; font-weight: 700; line-height: 1.05; }
+.signaler__aide { display: block; font-size: 16px; font-weight: 700; }
+.parler { margin: var(--e4) 0 0; color: #dde1f2; font-size: 15px; }
 
-.services { font-size: .95rem; color: #666e85; text-align: center; }
-.services a { color: #1e2455; font-weight: 700; }
+.chiffres { display: grid; gap: var(--e3); }
+.chiffres p { margin: 0; display: flex; align-items: baseline; gap: var(--e3); padding: var(--e4) var(--e5);
+              border: 1px solid rgba(255, 255, 255, .18); border-radius: 14px; background: rgba(255, 255, 255, .06); }
+.chiffres strong { font-size: 40px; color: var(--jaune); font-variant-numeric: tabular-nums; min-width: 2.2ch; }
+.chiffres span { color: #dde1f2; }
+
+/* --- Sections --- */
+.bloc { padding-top: var(--e7); }
+.bloc h2, .porte-services h2 { font-size: 28px; color: var(--marine); margin-bottom: var(--e5); }
+.natures { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--e4);
+           grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.natures li { display: grid; gap: 2px; padding: var(--e5); background: var(--blanc); border: 1px solid var(--trait);
+              border-radius: 14px; }
+.natures .icone { font-size: 32px; line-height: 1.2; }
+.natures strong { color: var(--marine); font-size: 18px; }
+.natures span:last-child { color: var(--gris); font-size: 15px; }
+
+.etapes { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--e5);
+          grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.etapes li { display: grid; gap: var(--e2); align-content: start; }
+.etapes .numero { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+                  background: var(--marine); color: var(--jaune); font-weight: 700; font-size: 20px; }
+.etapes strong { font-size: 19px; color: var(--marine); }
+.etapes span:last-child { color: var(--gris); }
+
+.porte-services { display: flex; align-items: center; justify-content: space-between; gap: var(--e5);
+                  flex-wrap: wrap; margin-top: var(--e7); margin-bottom: var(--e7); padding-top: var(--e6);
+                  padding-bottom: var(--e6); border-top: 1px solid var(--trait); }
+.porte-services h2 { font-size: 20px; margin-bottom: var(--e2); }
+.porte-services p { margin: 0; color: var(--gris); }
+.bouton-services { color: var(--marine); font-weight: 700; padding: var(--e3) var(--e5); border: 2px solid var(--marine);
+                   border-radius: 10px; text-decoration: none; white-space: nowrap; }
+.bouton-services:hover { background: #eceefa; }
+
+.pied { background: var(--marine-fonce); color: #c9cfe8; font-size: 14px; padding: var(--e5) 0; }
+
+/* --- Tablette --- */
+@media (max-width: 900px) {
+  .une__grille { grid-template-columns: minmax(0, 1fr); gap: var(--e6); }
+  .natures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .etapes { grid-template-columns: minmax(0, 1fr); }
+  .chiffres { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .chiffres p { display: grid; gap: 0; padding: var(--e4); }
+}
+/* --- Téléphone --- */
+@media (max-width: 560px) {
+  .cadre { padding-left: var(--e4); padding-right: var(--e4); }
+  .une { padding: var(--e6) 0; }
+  .une h1 { font-size: 28px; }
+  .chapeau { font-size: 17px; margin-bottom: var(--e5); }
+  .signaler { display: flex; width: 100%; padding: var(--e5); justify-content: center; }
+  .signaler__texte, .signaler__icone { font-size: 38px; }
+  .chiffres { gap: var(--e2); }
+  .chiffres p { padding: var(--e3); }
+  .chiffres strong { font-size: 28px; }
+  .chiffres span { font-size: 13px; }
+  .natures { grid-template-columns: minmax(0, 1fr); }
+  .natures li { grid-template-columns: auto minmax(0, 1fr); column-gap: var(--e4); align-items: center; }
+  .natures .icone { grid-row: span 2; }
+  .bloc h2 { font-size: 24px; }
+  .bouton-services { width: 100%; text-align: center; }
+}
