@@ -5,7 +5,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /application
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Sur une connexion mobile qui coupe, pip réessaie et reprend un téléchargement interrompu
+# au lieu de tout recommencer (un pip trop ancien ignore simplement ces réglages).
+RUN PIP_RETRIES=10 PIP_DEFAULT_TIMEOUT=60 PIP_RESUME_RETRIES=20 \
+    pip install --no-cache-dir -r requirements.txt
 
 COPY application ./application
 COPY interface ./interface
