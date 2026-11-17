@@ -22,6 +22,7 @@ from .base import connexion, creer
 from .dossiers import CHAINE, POSTES, Dossiers, ErreurDossier
 from .export_osm import en_osm, note_d_export
 from .fuites import AMPLEUR_NOMS, CHAINE_EAU, ErreurFuite, Fuites
+from .anonymiser import disponible as masquage_disponible, masquer
 from .nuisances import (CHAINE_NUISANCE, GRAVITE_NOMS, NATURES as NATURES_NUISANCE,
                         ErreurNuisance, Nuisances)
 from .geo import Geographie
@@ -363,11 +364,19 @@ def parametres():
 # Fichiers joints possibles. Les trois derniers sont FACULTATIFS et réservés au cas où le
 # déclarant accepte d'être témoin ; ils ne sont jamais servis au public.
 # champ du formulaire : (colonne, genre de fichier, privé ?)
+# Pour chaque pièce jointe : la colonne, son genre, si elle est privée, et si les visages et
+# les plaques doivent y être masqués.
+#
+# Seule la photo du tas est masquée, et c'est voulu. Quelqu'un qui passe derrière un dépotoir
+# n'a rien demandé à personne : son visage ne doit pas finir dans une base municipale. La CNIB
+# et le portrait, eux, SONT l'identité que le déclarant a choisi de donner pour être témoin :
+# les flouter les viderait de leur sens. Ils ne sont d'ailleurs jamais servis au public et
+# s'effacent à la clôture du dossier.
 FICHIERS_JOINTS = {
-    "photo": ("photo", "image", False),              # photo du tas : visible de tous
-    "photo_cnib": ("photo_cnib", "image", True),     # pièce d'identité, facultative
-    "photo_visage": ("photo_visage", "image", True),  # portrait, facultatif
-    "message_vocal": ("message_vocal", "audio", True),  # signalement parlé : c'est une voix
+    "photo": ("photo", "image", False, True),         # photo du tas : visible de tous, masquée
+    "photo_cnib": ("photo_cnib", "image", True, False),      # pièce d'identité, facultative
+    "photo_visage": ("photo_visage", "image", True, False),  # portrait, facultatif
+    "message_vocal": ("message_vocal", "audio", True, False),  # signalement parlé : une voix
 }
 
 
@@ -377,7 +386,7 @@ def recevoir():
     motifs_fichiers = []
     if request.files or request.form:
         brut = {k: v for k, v in request.form.items()}
-        for champ, (cle, genre, prive) in FICHIERS_JOINTS.items():
+        for champ, (cle, genre, prive, a_masquer) in FICHIERS_JOINTS.items():
             fichier = request.files.get(champ)
             if fichier is None:
                 continue
@@ -388,6 +397,16 @@ def recevoir():
                 continue                      # une pièce jointe facultative illisible est ignorée
             if genre == "audio" and not controleur().controler_audio(contenu):
                 continue
+            if a_masquer:
+                # E18 : le masquage se fait ICI, avant le moindre enregistrement. L'image
+                # d'origine ne touche jamais le disque.
+                if not masquage_disponible():
+                    # Sans détecteur, on préfère perdre la photo que garder un visage en clair.
+                    motifs_fichiers.append("photo_non_masquable")
+                    continue
+                contenu, comptes = masquer(contenu)
+                brut["visages_masques"] = comptes["visages"]
+                brut["plaques_masquees"] = comptes["plaques"]
             brut[cle] = enregistrer_fichier(contenu, prive)
     else:
         brut = request.get_json(silent=True)
@@ -395,9 +414,12 @@ def recevoir():
     if motifs_fichiers:
         examine = Controleur.resultat(examine, list(examine["motifs"]) + motifs_fichiers)
     if isinstance(brut, dict) and examine["statut"] != "rejete":
-        for _, (cle, _genre, _prive) in FICHIERS_JOINTS.items():
+        for _, (cle, _genre, _prive, _masque) in FICHIERS_JOINTS.items():
             if brut.get(cle):
                 examine[cle] = brut[cle]
+        for compteur in ("visages_masques", "plaques_masquees"):
+            if brut.get(compteur) is not None:
+                examine[compteur] = brut[compteur]
     # Une fuite d'eau suit sa propre chaîne (mairie → ONEA) : elle n'entre pas dans les
     # tournées des camions, et ne devient donc jamais un dépotoir.
     nature = examine.get("nature")

@@ -29,6 +29,8 @@ MOTIFS = {
     "ampleur_invalide":       (REJET, "Ampleur de la fuite absente ou inconnue"),
     "gravite_invalide":       (REJET, "Gravité absente ou inconnue"),
     "nature_inconnue":        (REJET, "Nature du signalement inconnue"),
+    "photo_non_masquable":    (A_VERIFIER, "Photo écartée : le masquage des visages "
+                                           "n'est pas disponible sur ce serveur"),
 }
 
 # Ce qui est signalé. Un tas d'ordures part dans les tournées des camions ; une fuite d'eau

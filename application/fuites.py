@@ -99,8 +99,9 @@ class Fuites:
                 "INSERT INTO signalements (id_client, nature, latitude, longitude, precision_m,"
                 " date_observation, date_reception, ampleur, quartier, commentaire, photo, source,"
                 " statut, motifs, declarant_nom, declarant_telephone, photo_cnib, photo_visage,"
-                " message_vocal, source_position, lieu_nom, lot)"
-                " VALUES (?,'fuite_eau',?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                " message_vocal, source_position, lieu_nom, lot, visages_masques,"
+                " plaques_masquees)"
+                " VALUES (?,'fuite_eau',?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (examine.get("id_client"), examine.get("latitude"), examine.get("longitude"),
                  examine.get("precision_m"), examine.get("date_observation"), maintenant(),
                  examine.get("ampleur"), examine.get("quartier"), examine.get("commentaire", ""),
@@ -110,7 +111,8 @@ class Fuites:
                  examine.get("photo_cnib"), examine.get("photo_visage"),
                  examine.get("message_vocal"),
                  examine.get("source_position") or "gps", examine.get("lieu_nom"),
-                 examine.get("lot")))
+                 examine.get("lot"), examine.get("visages_masques"),
+                 examine.get("plaques_masquees")))
         except sqlite3.IntegrityError:
             # Même envoi arrivé deux fois en même temps : le premier a gagné.
             self.co.rollback()
@@ -230,6 +232,7 @@ class Fuites:
             "SELECT date, poste, auteur, etape, detail FROM journal_fuite"
             " WHERE fuite_id = ? ORDER BY id", (id_fuite,))]
         colonnes = ("id, date_observation, date_reception, ampleur, quartier, commentaire,"
+                    " visages_masques, plaques_masquees,"
                     " photo, message_vocal, source, statut, motifs,"
                     " precision_m, source_position, lieu_nom")
         if avec_declarants:

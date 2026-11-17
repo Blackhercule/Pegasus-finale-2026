@@ -98,6 +98,31 @@ de l'ordre de passage.
   enregistrements** faits par un locuteur natif (`interface/signaler/audio/moore/`), pas de la
   synthèse vocale. Une personne qui ne lit pas peut ainsi signaler de bout en bout.
 
+## Les visages et les plaques sont masqués avant d'être enregistrés
+
+Quelqu'un qui passe derrière un tas d'ordures n'a rien demandé à personne. Son visage ne doit
+pas finir dans une base municipale parce qu'il passait là, et une plaque d'immatriculation
+désigne un propriétaire.
+
+Chaque photo de signalement est donc analysée **à la réception**, et les visages et plaques
+trouvés sont noyés sous un flou épais. Le point qui compte : **l'image d'origine ne touche
+jamais le disque** — pas de fichier temporaire, pas de copie « au cas où ». C'est la différence
+entre masquer et cacher, et c'est vérifiable : relisez le fichier enregistré, le visage n'y est
+plus.
+
+Tout se fait sur la machine, hors ligne : les détecteurs sont livrés dans OpenCV, rien n'est
+envoyé nulle part.
+
+**Ce que la détection rate**, parce qu'il vaut mieux le dire que le laisser découvrir : un
+visage vu très de côté, un visage minuscule au fond de l'image, une plaque dont le format
+s'éloigne de ceux sur lesquels les détecteurs ont été entraînés. Chaque photo affiche donc à
+l'agent combien de zones ont été masquées, et il peut en masquer d'autres à la main.
+
+Deux exceptions, et elles sont voulues : la photo de CNIB et le portrait du déclarant ne sont
+pas floutés. Ce sont les pièces qu'il a **choisi** de donner pour être témoin ; les flouter les
+viderait de leur sens. Elles ne sont jamais servies au public et s'effacent à la clôture du
+dossier.
+
 ## Identité du déclarant : facultative
 
 Le signalement fonctionne **sans donner son nom**. Qui accepte d'être témoin dans une procédure
@@ -202,6 +227,7 @@ briques éprouvées, on les adapte à Ouagadougou, et on ajoute ce qui manque en
 | [MapLibre GL JS](https://maplibre.org/), [PMTiles](https://github.com/protomaps/PMTiles), [Protomaps basemaps](https://github.com/protomaps/basemaps) | carte hors ligne | BSD-3 |
 | [Lato](https://www.latofonts.com/) | police de l'interface | OFL-1.1 |
 | [Noto Sans](https://fonts.google.com/noto) (via `smp-noto-glyphs`) | polices de la carte | OFL-1.1, paquet MIT |
+| [OpenCV](https://opencv.org/) | masquage des visages et des plaques | Apache-2.0 |
 | [Caddy](https://caddyserver.com/) | HTTPS local | Apache-2.0 |
 | [Docker](https://www.docker.com/) | déploiement en une commande | Apache-2.0 |
 
@@ -226,12 +252,12 @@ Notre code est publié sous **AGPL-3.0** (`LICENSE`).
 
 ```bash
 pip install -r requirements.txt
-python -m pytest tests/ -q        # 93 tests : contrôles, pièges, chaînes, plan, simulation, fuites, export
+python -m pytest tests/ -q        # 175 tests : contrôles, pièges, chaînes, plan, simulation, fuites, export
 ```
 
 | Dossier | Contenu |
 |---|---|
-| `application/` | l'application : `geo.py`, `reseau.py`, `signalements/`, `dossiers.py`, `fuites.py`, `nuisances.py`, `plan/`, `simulation/` |
+| `application/` | l'application : `geo.py`, `reseau.py`, `signalements/`, `dossiers.py`, `fuites.py`, `nuisances.py`, `anonymiser.py`, `plan/`, `simulation/` |
 | `interface/` | pages servies telles quelles ; `vendor/` contient les bibliothèques de la carte |
 | `donnees/` | préparation des données d'une commune et fichiers produits |
 | `tests/` | tests automatisés, dont le jeu de 42 signalements piégés |

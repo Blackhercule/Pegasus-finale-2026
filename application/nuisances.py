@@ -144,8 +144,9 @@ class Nuisances:
                 "INSERT INTO signalements (id_client, nature, latitude, longitude, precision_m,"
                 " date_observation, date_reception, gravite, quartier, commentaire, photo,"
                 " source, statut, motifs, declarant_nom, declarant_telephone, photo_cnib,"
-                " photo_visage, message_vocal, source_position, lieu_nom, lot)"
-                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                " photo_visage, message_vocal, source_position, lieu_nom, lot,"
+                " visages_masques, plaques_masquees)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (examine.get("id_client"), examine.get("nature"), examine.get("latitude"),
                  examine.get("longitude"), examine.get("precision_m"),
                  examine.get("date_observation"), maintenant(), examine.get("gravite"),
@@ -156,7 +157,8 @@ class Nuisances:
                  examine.get("photo_cnib"), examine.get("photo_visage"),
                  examine.get("message_vocal"),
                  examine.get("source_position") or "gps", examine.get("lieu_nom"),
-                 examine.get("lot")))
+                 examine.get("lot"), examine.get("visages_masques"),
+                 examine.get("plaques_masquees")))
         except sqlite3.IntegrityError:
             self.co.rollback()
             return self.deja_recu(examine.get("id_client")) or {
@@ -289,6 +291,7 @@ class Nuisances:
             "SELECT date, poste, auteur, etape, detail FROM journal_nuisance"
             " WHERE nuisance_id = ? ORDER BY id", (id_nuisance,))]
         colonnes = ("id, date_observation, date_reception, gravite, quartier, commentaire,"
+                    " visages_masques, plaques_masquees,"
                     " photo, message_vocal, source, statut, motifs,"
                     " precision_m, source_position, lieu_nom")
         if avec_declarants:

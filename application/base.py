@@ -35,6 +35,10 @@ CREATE TABLE IF NOT EXISTS signalements (
     lot               TEXT,
     nuisance_id       INTEGER REFERENCES nuisances(id),
     gravite           TEXT,                 -- nuisances : leger | moyen | grave
+    -- E18 : combien de visages et de plaques ont été masqués sur la photo. Sert à
+    -- l'agent, qui peut en masquer d'autres à la main si la détection en a raté.
+    visages_masques   INTEGER,
+    plaques_masquees  INTEGER,
     -- Dépôt : à même le sol, dans un bac, dans un caniveau… et dimensions estimées au sol.
     depot             TEXT,
     longueur_m        REAL,

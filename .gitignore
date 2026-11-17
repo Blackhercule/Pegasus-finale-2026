@@ -25,3 +25,6 @@ donnees/*/photos/
 # Installation locale
 .env
 ca-assainissement.crt
+
+# Photos de test déposées par l'equipe pour eprouver la detection : jamais publiees.
+tests/photos/
