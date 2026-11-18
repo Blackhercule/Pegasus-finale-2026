@@ -14,6 +14,8 @@
     ["Fuites d'eau", "/decision/fuites.html"],
     ["Nuisances", "/decision/nuisances.html"],
     ["Vérifier", "/decision/verifier.html"],
+    ["Zones", "/decision/zones.html"],
+    ["Collecteurs", "/decision/collecteurs.html"],
     ["Simulation", "/decision/simulation.html"],
     ["Scénarios", "/decision/scenarios.html"],
   ];

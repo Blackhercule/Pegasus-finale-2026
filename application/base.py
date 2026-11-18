@@ -157,6 +157,67 @@ CREATE TABLE IF NOT EXISTS agents (
     desactive_le  TEXT,
     desactive_par TEXT
 );
+
+-- C14 : les acteurs de la collecte (entreprises et associations de pré-collecte), leurs
+-- véhicules, les quartiers qu'ils desservent et leurs jours de passage. Voir collecteurs.py.
+-- Aucune donnée personnelle : le téléphone est celui du SERVICE, affiché aux habitants.
+CREATE TABLE IF NOT EXISTS collecteurs (
+    id                 INTEGER PRIMARY KEY,
+    nom                TEXT NOT NULL,
+    genre              TEXT NOT NULL,          -- entreprise | association
+    telephone_service  TEXT,
+    quartiers          TEXT NOT NULL DEFAULT '[]',   -- liste JSON de noms de quartiers
+    jours              TEXT NOT NULL DEFAULT '[]',   -- liste JSON : lundi, mardi…
+    actif              INTEGER NOT NULL DEFAULT 1,
+    cree_le            TEXT NOT NULL,
+    cree_par           TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS vehicules (
+    id            INTEGER PRIMARY KEY,
+    collecteur_id INTEGER NOT NULL REFERENCES collecteurs(id),
+    genre         TEXT NOT NULL,               -- tricycle | camion | charrette
+    immatriculation TEXT,
+    capacite_m3   REAL
+);
+CREATE TABLE IF NOT EXISTS centres (
+    id         INTEGER PRIMARY KEY,
+    nom        TEXT NOT NULL,
+    latitude   REAL,
+    longitude  REAL,
+    capacite_t REAL
+);
+-- Ce que chaque collecteur déclare avoir évacué, et où il l'a déposé.
+CREATE TABLE IF NOT EXISTS collectes (
+    id            INTEGER PRIMARY KEY,
+    collecteur_id INTEGER NOT NULL REFERENCES collecteurs(id),
+    date          TEXT NOT NULL,
+    quartier      TEXT,
+    quantite_kg   REAL NOT NULL,
+    centre_id     INTEGER REFERENCES centres(id),
+    declare_par   TEXT NOT NULL
+);
+-- Un habitant signale qu'un collecteur n'est pas passé, ou pas sur son circuit. Sans texte
+-- libre (donc sans donnée personnelle) : un motif choisi dans une liste.
+CREATE TABLE IF NOT EXISTS plaintes (
+    id            INTEGER PRIMARY KEY,
+    collecteur_id INTEGER NOT NULL REFERENCES collecteurs(id),
+    quartier      TEXT,
+    motif         TEXT NOT NULL,
+    date          TEXT NOT NULL,
+    source        TEXT
+);
+-- Les campagnes de salubrité (opérations de nettoyage, challenges entre écoles) et leur
+-- résultat, publiés sur la page d'accueil.
+CREATE TABLE IF NOT EXISTS campagnes (
+    id            INTEGER PRIMARY KEY,
+    titre         TEXT NOT NULL,
+    date          TEXT NOT NULL,
+    quartier      TEXT,
+    organisateur  TEXT,                          -- école, association, mairie…
+    participants  INTEGER,
+    quantite_kg   REAL,
+    publie_par    TEXT NOT NULL
+);
 """
 
 

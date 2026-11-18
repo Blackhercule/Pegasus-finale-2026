@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Collecteurs — Assainissement de Ouaga</title>
+<link rel="stylesheet" href="/decision/plateforme.css">
+<link rel="stylesheet" href="/decision/barre.css">
+<link rel="stylesheet" href="/decision/collecteurs.css">
+<script src="/decision/barre.js" defer></script>
+<script src="/decision/plateforme.js" defer></script>
+<script src="/decision/collecteurs.js" defer></script>
+</head>
+<body>
+<main class="page">
+  <header class="entete-page">
+    <div>
+      <h1>Collecteurs</h1>
+      <p>Entreprises et associations de pré-collecte : leurs véhicules, leurs quartiers, leurs
+        jours de passage, et les quantités qu'elles évacuent.</p>
+    </div>
+    <p class="compte" id="total" aria-live="polite"></p>
+  </header>
+  <p class="erreur" id="erreur" role="alert" hidden></p>
+
+  <section class="panneau">
+    <div class="titre-panneau"><h2>Collecteurs enregistrés</h2></div>
+    <div class="defilant"><table class="tableau">
+      <thead><tr><th>Collecteur</th><th>Quartiers</th><th>Jours de passage</th><th>Véhicules</th>
+        <th>Évacué</th><th>Plaintes</th></tr></thead>
+      <tbody id="liste"></tbody>
+    </table></div>
+  </section>
+
+  <div class="deux">
+    <section class="panneau reserve-mairie">
+      <h2>Enregistrer un collecteur</h2>
+      <form id="form-collecteur" class="formulaire">
+        <label>Nom <input name="nom" required maxlength="120"></label>
+        <label>Genre <select name="genre"><option value="association">Association</option>
+          <option value="entreprise">Entreprise</option></select></label>
+        <label>Téléphone du service (affiché aux habitants) <input name="telephone_service" maxlength="30"></label>
+        <fieldset><legend>Jours de passage</legend><div id="choix-jours" class="cases"></div></fieldset>
+        <fieldset><legend>Quartiers desservis</legend><div id="choix-quartiers" class="cases quartiers"></div></fieldset>
+        <button class="bouton" type="submit">Enregistrer</button>
+      </form>
+    </section>
+
+    <section class="panneau reserve-mairie">
+      <h2>Ajouter un véhicule</h2>
+      <form id="form-vehicule" class="formulaire">
+        <label>Collecteur <select name="collecteur" class="choix-collecteur"></select></label>
+        <label>Véhicule <select name="genre"><option value="tricycle">Tricycle</option>
+          <option value="camion">Camion</option><option value="charrette">Charrette</option></select></label>
+        <label>Immatriculation <input name="immatriculation" maxlength="20"></label>
+        <label>Capacité (m³) <input name="capacite_m3" type="number" min="0" step="0.1"></label>
+        <button class="bouton" type="submit">Ajouter</button>
+      </form>
+    </section>
+  </div>
+
+  <section class="panneau">
+    <h2>Calendrier de passage</h2>
+    <p class="aide">Qui passe où, et quel jour. C'est ce que voient les habitants sur la page d'accueil.</p>
+    <div class="defilant"><table class="tableau calendrier" id="calendrier"></table></div>
+  </section>
+
+  <div class="deux">
+    <section class="panneau">
+      <h2>Déclarer une collecte effectuée</h2>
+      <form id="form-collecte" class="formulaire">
+        <label>Collecteur <select name="collecteur_id" class="choix-collecteur"></select></label>
+        <label>Date <input name="date" type="date" required></label>
+        <label>Quartier <select name="quartier" class="choix-quartier"><option value="">—</option></select></label>
+        <label>Quantité (kg) <input name="quantite_kg" type="number" min="0" step="1" required></label>
+        <label>Déposée au centre <select name="centre_id" id="choix-centre"><option value="">—</option></select></label>
+        <button class="bouton" type="submit">Déclarer</button>
+      </form>
+    </section>
+    <section class="panneau">
+      <h2>Quantités évacuées</h2>
+      <div class="defilant"><table class="tableau"><thead><tr><th>Mois</th><th>Collecteur</th>
+        <th>Collectes</th><th>Quantité</th></tr></thead><tbody id="bilan"></tbody></table></div>
+    </section>
+  </div>
+
+  <div class="deux">
+    <section class="panneau">
+      <h2>Centres de collecte</h2>
+      <ul class="liste-simple" id="centres"></ul>
+      <form id="form-centre" class="formulaire en-ligne reserve-mairie">
+        <label>Nom <input name="nom" required maxlength="120"></label>
+        <label>Latitude <input name="latitude" type="number" step="0.00001"></label>
+        <label>Longitude <input name="longitude" type="number" step="0.00001"></label>
+        <label>Capacité (t) <input name="capacite_t" type="number" min="0" step="0.1"></label>
+        <button class="bouton secondaire" type="submit">Ajouter le centre</button>
+      </form>
+    </section>
+    <section class="panneau">
+      <h2>Plaintes des habitants</h2>
+      <p class="aide">Envoyées depuis la page d'accueil, sans nom ni texte libre.</p>
+      <ul class="liste-simple" id="plaintes"></ul>
+    </section>
+  </div>
+
+  <section class="panneau">
+    <h2>Campagnes de salubrité</h2>
+    <p class="aide">Opérations de nettoyage, challenges entre écoles : leurs résultats sont publiés
+      sur la page d'accueil.</p>
+    <form id="form-campagne" class="formulaire en-ligne reserve-mairie">
+      <label>Titre <input name="titre" required maxlength="120"></label>
+      <label>Date <input name="date" type="date" required></label>
+      <label>Quartier <select name="quartier" class="choix-quartier"><option value="">—</option></select></label>
+      <label>Organisateur (école, association…) <input name="organisateur" maxlength="120"></label>
+      <label>Participants <input name="participants" type="number" min="0"></label>
+      <label>Ordures enlevées (kg) <input name="quantite_kg" type="number" min="0"></label>
+      <button class="bouton" type="submit">Publier</button>
+    </form>
+    <ul class="liste-simple" id="campagnes"></ul>
+  </section>
+</main>
+</body>
+</html>

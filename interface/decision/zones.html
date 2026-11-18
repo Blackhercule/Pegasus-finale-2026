@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zones à risque — Assainissement de Ouaga</title>
+<link rel="stylesheet" href="/decision/plateforme.css">
+<link rel="stylesheet" href="/decision/barre.css">
+<link rel="stylesheet" href="/vendor/maplibre-gl/maplibre-gl.css">
+<link rel="stylesheet" href="/decision/zones.css">
+<script src="/decision/barre.js" defer></script>
+<script src="/decision/plateforme.js" defer></script>
+<script src="/vendor/maplibre-gl/maplibre-gl-csp.js" defer></script>
+<script src="/vendor/pmtiles/pmtiles.js" defer></script>
+<script src="/vendor/protomaps-basemaps/basemaps.js" defer></script>
+<script src="/decision/fond-carte.js" defer></script>
+<script src="/decision/zones.js" defer></script>
+</head>
+<body>
+<main class="page">
+  <header class="entete-page">
+    <div>
+      <h1>Zones à risque</h1>
+      <p>Où les signalements se concentrent, où les dépôts reviennent, et quels caniveaux curer
+        avant la saison des pluies.</p>
+    </div>
+    <p class="compte" id="compte" aria-live="polite"></p>
+  </header>
+
+  <form class="filtres" id="filtres" aria-label="Filtrer la carte">
+    <label>Type de problème <select id="f-nature"><option value="">Tous</option></select></label>
+    <label>Quartier <select id="f-quartier"><option value="">Toute la commune</option></select></label>
+    <label>Période
+      <select id="f-jours">
+        <option value="">Depuis le début</option><option value="7">7 derniers jours</option>
+        <option value="30">30 derniers jours</option><option value="90">3 derniers mois</option>
+        <option value="365">12 derniers mois</option>
+      </select></label>
+    <label>Arrondissement
+      <select id="f-arrondissement" disabled title="Limites officielles des arrondissements à recevoir de la mairie">
+        <option>Limites à recevoir de la mairie</option></select></label>
+  </form>
+
+  <div class="zones-grille">
+    <section class="panneau carte-zone">
+      <div class="titre-panneau"><h2>Carte thermique des signalements</h2>
+        <span class="etat">Plus c'est rouge, plus il y a de signalements</span></div>
+      <div id="carte" class="carte-thermique" aria-label="Carte thermique des signalements"></div>
+      <p class="legende-chaleur"><span>peu</span><i aria-hidden="true"></i><span>beaucoup</span></p>
+    </section>
+
+    <section class="panneau">
+      <div class="titre-panneau"><h2>Quartiers les plus touchés</h2></div>
+      <p class="aide">Indice = signalements retenus + 3 × dossiers encore ouverts + 5 × dépôts
+        récurrents. Cliquez un quartier pour voir son historique.</p>
+      <ol class="classement" id="classement"><li class="vide">Chargement…</li></ol>
+    </section>
+  </div>
+
+  <div class="zones-grille">
+    <section class="panneau" id="bloc-historique">
+      <div class="titre-panneau"><h2 id="titre-historique">Historique d'une zone</h2></div>
+      <p class="aide" id="aide-historique">Choisissez un quartier dans la liste ou le filtre.</p>
+      <ol class="historique" id="historique"></ol>
+    </section>
+
+    <section class="panneau">
+      <div class="titre-panneau"><h2>Dépôts sauvages récurrents</h2></div>
+      <p class="aide">Le même endroit (à moins de 60 m) revient : plusieurs dossiers, ou des
+        signalements sur au moins deux semaines. Il faut y agir sur la cause : bac, pancarte,
+        brigade.</p>
+      <ol class="file" id="recurrents"><li class="vide">Chargement…</li></ol>
+    </section>
+  </div>
+
+  <section class="panneau prevention">
+    <div class="titre-panneau"><h2>Prévention : caniveaux à curer avant la saison des pluies</h2>
+      <strong class="compte-a-rebours" id="compte-a-rebours"></strong></div>
+    <p class="aide">Au lieu d'attendre l'inondation : caniveaux bouchés et tas d'ordures déposés
+      dans un caniveau, du plus urgent au moins urgent. Points : gravité + témoins + 2 si un cours
+      d'eau passe à moins de 300 m + volume d'ordures.</p>
+    <ol class="file" id="curage"><li class="vide">Chargement…</li></ol>
+  </section>
+</main>
+</body>
+</html>

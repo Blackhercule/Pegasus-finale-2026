@@ -1,0 +1,36 @@
+/* Zones à risque (C14) : carte thermique, quartiers, récurrents, curage. */
+.filtres { display: flex; flex-wrap: wrap; gap: var(--e3) var(--e5); align-items: flex-end;
+           margin-bottom: var(--e5); }
+.filtres label { display: grid; gap: var(--e1); font-size: var(--t1); color: var(--gris); font-weight: 700; }
+.filtres select { font: inherit; padding: var(--e2); border: 1px solid var(--trait); border-radius: 8px;
+                  min-width: 200px; background: var(--blanc); }
+.zones-grille { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: var(--e5);
+                margin-bottom: var(--e5); }
+.carte-thermique { height: 460px; border-radius: 10px; overflow: hidden; }
+.legende-chaleur { display: flex; align-items: center; gap: var(--e2); margin: var(--e2) 0 0;
+                   font-size: var(--t1); color: var(--gris); }
+.legende-chaleur i { display: inline-block; width: 160px; height: 10px; border-radius: 5px;
+  background: linear-gradient(90deg, #fde7c4, #f6a04d, #e2541f, #b3001b); }
+.aide { color: var(--gris); font-size: var(--t1); margin: 0 0 var(--e3); }
+.classement { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--e2);
+              max-height: 470px; overflow-y: auto; }
+.classement button { width: 100%; display: grid; grid-template-columns: 2.2em minmax(0, 1fr) auto;
+  gap: var(--e3); align-items: center; text-align: left; font: inherit; cursor: pointer;
+  padding: var(--e2) var(--e3); border: 1px solid var(--trait); border-radius: 10px; background: var(--blanc); }
+.classement button:hover, .classement button[aria-pressed="true"] { border-color: var(--marine);
+  background: var(--marine-clair); }
+.classement .rang { font-weight: 700; color: var(--gris); }
+.classement .nom { font-weight: 700; color: var(--marine); }
+.classement .detail { display: block; font-size: var(--t1); color: var(--gris); font-weight: 400; }
+.classement .indice { font-weight: 700; font-size: var(--t4); color: #b3001b; }
+.historique { list-style: none; margin: 0; padding: 0; max-height: 360px; overflow-y: auto; }
+.historique li { padding: var(--e2) 0; border-bottom: 1px solid var(--trait); font-size: var(--t2); }
+.historique time { display: block; font-size: var(--t1); color: var(--gris); }
+.compte-a-rebours { color: var(--marine); font-size: var(--t3); }
+.prevention { border-left: 4px solid var(--bleu-eau, #1f6fb2); }
+.file .points { display: inline-grid; place-items: center; min-width: 2.4em; height: 2.4em; border-radius: 50%;
+                background: #fdecea; color: #b3001b; font-weight: 700; }
+@media (max-width: 1024px) {
+  .zones-grille { grid-template-columns: minmax(0, 1fr); }
+  .carte-thermique { height: 360px; }
+}

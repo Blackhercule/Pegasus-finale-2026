@@ -72,6 +72,43 @@
         </ol>
       </section>
 
+      <section class="cadre bloc" aria-labelledby="titre-collecteurs">
+        <h2 id="titre-collecteurs">Les collecteurs de mon quartier</h2>
+        <p class="sous-bloc">Qui ramasse les ordures chez vous, et quel jour. S'il n'est pas passé,
+          dites-le à la mairie : sans compte, sans donner votre nom.</p>
+        <label class="choix-quartier">Mon quartier
+          <select id="quartier"><option value="">Choisir…</option></select></label>
+        <ul class="collecteurs" id="collecteurs" aria-live="polite"></ul>
+        <p class="merci" id="merci" role="status" hidden></p>
+      </section>
+
+      <section class="cadre bloc deux-colonnes">
+        <div aria-labelledby="titre-propres">
+          <h2 id="titre-propres">Les quartiers les plus propres</h2>
+          <p class="sous-bloc">Le moins de dépotoirs encore ouverts. Chaque tas ramassé fait monter
+            le quartier.</p>
+          <ol class="propres" id="propres"><li class="vide">Chargement…</li></ol>
+        </div>
+        <div aria-labelledby="titre-campagnes">
+          <h2 id="titre-campagnes">Campagnes de salubrité</h2>
+          <p class="sous-bloc">Opérations de nettoyage et challenges entre écoles : les résultats.</p>
+          <ul class="campagnes" id="campagnes"><li class="vide">Aucune campagne publiée pour l'instant.</li></ul>
+          <p class="points" id="mes-points" hidden></p>
+        </div>
+      </section>
+
+      <section class="cadre bloc" aria-labelledby="titre-gestes">
+        <h2 id="titre-gestes">Les bons gestes</h2>
+        <ul class="gestes">
+          <li><strong>Abonnez-vous à un collecteur</strong><span>Un tricycle qui passe deux fois par
+            semaine coûte moins cher qu'un caniveau bouché à l'hivernage.</span></li>
+          <li><strong>Rien dans les caniveaux</strong><span>Un sachet suffit à boucher un caniveau ;
+            à la première pluie, l'eau entre dans les cours.</span></li>
+          <li><strong>Signalez tôt</strong><span>Un petit tas signalé est ramassé en une tournée ; un
+            gros tas attire d'autres dépôts.</span></li>
+        </ul>
+      </section>
+
       <section class="cadre porte-services" aria-labelledby="titre-services">
         <div>
           <h2 id="titre-services">Vous travaillez pour la mairie, la brigade Laabal, la collecte ou l'ONEA ?</h2>

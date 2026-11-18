@@ -111,3 +111,37 @@ a:focus-visible { outline: 3px solid var(--vert-clair); outline-offset: 3px; }
 /* --- Icônes en trait (mêmes dessins que la page Signaler) --- */
 .ico { width: 1.25em; height: 1.25em; fill: none; stroke: currentColor; stroke-width: 2;
        stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* --- C14 : collecteurs, quartiers propres, campagnes, bons gestes --- */
+.sous-bloc { margin: calc(-1 * var(--e3)) 0 var(--e4); color: var(--gris); max-width: 46em; }
+.choix-quartier { display: grid; gap: var(--e1); font-weight: 700; color: var(--marine); max-width: 340px; }
+.choix-quartier select, .collecteur select { font: inherit; padding: var(--e2) var(--e3); border-radius: 10px;
+  border: 1px solid var(--trait); background: var(--blanc); color: var(--encre); }
+.collecteurs { list-style: none; margin: var(--e4) 0 0; padding: 0; display: grid; gap: var(--e3);
+               grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.collecteur { display: grid; gap: 2px; padding: var(--e4); border: 1px solid var(--trait); border-radius: 14px; min-width: 0; }
+.collecteur > * { min-width: 0; overflow-wrap: anywhere; }
+.collecteur strong { color: var(--marine); font-size: 18px; }
+.collecteur .genre, .collecteur .tel { color: var(--gris); font-size: 15px; }
+.collecteur .jours { font-weight: 700; color: var(--vert-clair); }
+.collecteur select { margin-top: var(--e2); font-size: 15px; width: 100%; }
+.merci { margin-top: var(--e3); padding: var(--e3) var(--e4); background: var(--vert-fond); color: var(--marine);
+         border-radius: 10px; font-weight: 700; }
+.deux-colonnes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--e7); }
+.propres, .campagnes { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--e2); counter-reset: rang; }
+.propres li, .campagnes li { display: grid; padding: var(--e3) var(--e4); border: 1px solid var(--trait);
+  border-radius: 12px; }
+.propres li { grid-template-columns: 2em minmax(0, 1fr); counter-increment: rang; }
+.propres li::before { content: counter(rang); grid-row: span 2; font-weight: 700; color: var(--vert-clair); font-size: 20px; }
+.propres strong, .campagnes strong { color: var(--marine); }
+.propres span, .campagnes span { color: var(--gris); font-size: 15px; }
+.points { margin-top: var(--e4); padding: var(--e3) var(--e4); border-radius: 12px; background: var(--vert-fond);
+          color: var(--marine); font-weight: 700; }
+.gestes { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--e4); grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.gestes li { display: grid; gap: var(--e1); padding: var(--e5); background: var(--vert-fond); border-radius: 14px; }
+.gestes strong { color: var(--marine); font-size: 18px; }
+.gestes span { color: var(--encre); }
+.vide { color: var(--gris); }
+@media (max-width: 900px) {
+  .deux-colonnes, .gestes { grid-template-columns: minmax(0, 1fr); gap: var(--e5); }
+}

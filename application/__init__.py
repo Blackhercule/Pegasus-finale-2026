@@ -38,6 +38,9 @@ from .simulation import simuler
 from .reglages import Reglages
 from .reseau import Reseau
 from .signalements import Controleur, Depotoirs
+from .territoire import Territoire, charger_cours_eau, charger_quartiers, NATURES as NATURES_TERRITOIRE
+from .collecteurs import (Collecteurs, ErreurCollecte, GENRES as GENRES_COLLECTEUR, JOURS,
+                          MOTIFS as MOTIFS_PLAINTE, VEHICULES)
 
 vues = Blueprint("api", __name__)
 
@@ -68,6 +71,9 @@ def creer_application(reglages: Reglages = None) -> Flask:
         fichier_zones=reglages.fichier("zones.geojson"),
         geo=app.extensions["geographie"],
         poids=reglages.parametres.get("priorite"))
+    # C14 : les noms de quartiers et les cours d'eau, lus une fois.
+    app.extensions["quartiers"] = charger_quartiers(reglages.fichier("quartiers.geojson"))
+    app.extensions["cours_eau"] = charger_cours_eau(reglages.fichier("cours_eau.geojson"))
     # T23 : les appels vers la mairie vivent en mémoire, jamais sur le disque.
     app.extensions["appels"] = Appels()
     app.register_blueprint(vues)
@@ -280,6 +286,13 @@ OUVERT_A_TOUS = {
     "api.appel_etat",          # GET  /api/appels/<id>          + X-Appel-Jeton
     "api.appel_position",      # POST /api/appels/<id>/position + X-Appel-Jeton
     "api.appel_raccrocher",    # POST /api/appels/<id>/raccrocher + X-Appel-Jeton
+    # C14 : ce que l'habitant voit sans compte. Des noms de quartiers, des collecteurs avec
+    # leurs jours, des comptes par quartier, des campagnes : jamais une position ni une personne.
+    "api.public_quartiers",       # GET  /api/public/quartiers : noms et classement des plus propres
+    "api.public_collecteurs",     # GET  /api/public/collecteurs?quartier=…
+    "api.public_plainte",         # POST /api/public/plaintes : « il n'est pas passé »
+    "api.public_campagnes",       # GET  /api/public/campagnes
+    "api.mes_points",             # GET  /api/public/points?source=… : les points de CE téléphone
 }
 # La page de connexion elle-même doit pouvoir s'afficher sans être connecté.
 PAGE_DE_CONNEXION = {"connexion.html", "connexion.js", "connexion.css"}
@@ -1217,3 +1230,165 @@ def appel_terminer(identifiant):
     protégée par le jeton de l'appel, l'autre est fermée et réservée au poste mairie."""
     return _reponse_d_appel(appels().raccrocher_agent, identifiant)
 
+
+
+# ------------------------------------------------------------------ C14 : territoire
+# Quartiers les plus touchés, carte thermique, historique d'une zone, dépôts récurrents et
+# curage avant la saison des pluies. Réservé aux agents : la page « Zones ».
+def territoire() -> Territoire:
+    from flask import current_app, g
+    depotoirs()                       # ouvre la connexion si besoin
+    if "territoire" not in g:
+        g.territoire = Territoire(g.co, current_app.extensions["quartiers"],
+                                  current_app.extensions["cours_eau"])
+    return g.territoire
+
+
+def _filtres_territoire():
+    nature = request.args.get("nature") or None
+    if nature and nature not in NATURES_TERRITOIRE:
+        abort(400)
+    jours = request.args.get("jours")
+    jours = int(jours) if jours and jours.isdigit() and 0 < int(jours) <= 3650 else None
+    return nature, jours
+
+
+@vues.route("/api/territoire/points")
+@agent_requis
+def territoire_points():
+    nature, jours = _filtres_territoire()
+    return jsonify({"points": territoire().points(nature, request.args.get("quartier") or None, jours)})
+
+
+@vues.route("/api/territoire/quartiers")
+@agent_requis
+def territoire_quartiers():
+    nature, jours = _filtres_territoire()
+    from flask import current_app
+    return jsonify({"quartiers": territoire().quartiers(nature, jours), "natures": NATURES_TERRITOIRE,
+                    "noms": [q[0] for q in current_app.extensions["quartiers"]],
+                    "positions": {q[0]: [q[2], q[1]] for q in current_app.extensions["quartiers"]}})
+
+
+@vues.route("/api/territoire/historique")
+@agent_requis
+def territoire_historique():
+    return jsonify({"historique": territoire().historique(request.args.get("quartier", ""))})
+
+
+@vues.route("/api/territoire/recurrents")
+@agent_requis
+def territoire_recurrents():
+    return jsonify({"recurrents": territoire().recurrents()})
+
+
+@vues.route("/api/territoire/curage")
+@agent_requis
+def territoire_curage():
+    return jsonify(territoire().curage())
+
+
+# ------------------------------------------------------------------ C14 : collecteurs
+def collecteurs() -> Collecteurs:
+    from flask import current_app, g
+    depotoirs()
+    if "collecteurs" not in g:
+        g.collecteurs = Collecteurs(g.co, current_app.extensions["quartiers"])
+    return g.collecteurs
+
+
+def _collecte(action):
+    try:
+        return jsonify(action())
+    except ErreurCollecte as erreur:
+        return jsonify({"erreur": str(erreur)}), 400
+
+
+POSTES_COLLECTE = ("mairie", "collecte")
+
+
+@vues.route("/api/collecteurs")
+@agent_requis
+def lister_collecteurs():
+    return jsonify({"collecteurs": collecteurs().liste(), "genres": GENRES_COLLECTEUR, "jours": JOURS,
+                    "vehicules": VEHICULES, "centres": collecteurs().centres(),
+                    "calendrier": collecteurs().calendrier(), "plaintes": collecteurs().plaintes(),
+                    "bilan": collecteurs().bilan(), "campagnes": collecteurs().campagnes(),
+                    "quartiers": collecteurs().noms_quartiers})
+
+
+@vues.route("/api/collecteurs", methods=["POST"])
+@agent_requis(postes=("mairie",))
+def creer_collecteur():
+    return _collecte(lambda: collecteurs().enregistrer(_envoi(), session["agent"]))
+
+
+@vues.route("/api/collecteurs/<int:identifiant>", methods=["POST"])
+@agent_requis(postes=("mairie",))
+def modifier_collecteur(identifiant):
+    return _collecte(lambda: collecteurs().enregistrer(_envoi(), session["agent"], identifiant))
+
+
+@vues.route("/api/collecteurs/<int:identifiant>/vehicules", methods=["POST"])
+@agent_requis(postes=("mairie",))
+def ajouter_vehicule(identifiant):
+    return _collecte(lambda: collecteurs().ajouter_vehicule(identifiant, _envoi()))
+
+
+@vues.route("/api/centres", methods=["POST"])
+@agent_requis(postes=("mairie",))
+def ajouter_centre():
+    return _collecte(lambda: collecteurs().ajouter_centre(_envoi()))
+
+
+@vues.route("/api/collectes", methods=["POST"])
+@agent_requis(postes=POSTES_COLLECTE)
+def declarer_collecte():
+    return _collecte(lambda: collecteurs().declarer(_envoi(), session["agent"]))
+
+
+@vues.route("/api/campagnes", methods=["POST"])
+@agent_requis(postes=("mairie",))
+def publier_campagne():
+    return _collecte(lambda: collecteurs().publier_campagne(_envoi(), session["agent"]))
+
+
+# ------------------------------------------------------------------ C14 : côté habitant
+@vues.route("/api/public/quartiers")
+def public_quartiers():
+    """Les noms de quartiers, et le classement des plus propres (comptes seulement)."""
+    from flask import current_app
+    return jsonify({"quartiers": [q[0] for q in current_app.extensions["quartiers"]],
+                    "classement": territoire().quartiers_propres(), "motifs": MOTIFS_PLAINTE})
+
+
+@vues.route("/api/public/collecteurs")
+def public_collecteurs():
+    return jsonify({"collecteurs": collecteurs().collecteurs_du_quartier(request.args.get("quartier", ""))})
+
+
+@vues.route("/api/public/plaintes", methods=["POST"])
+def public_plainte():
+    envoi = _envoi()
+    return _collecte(lambda: collecteurs().porter_plainte(envoi, envoi.get("source")) or {"ok": True})
+
+
+@vues.route("/api/public/campagnes")
+def public_campagnes():
+    return jsonify({"campagnes": collecteurs().campagnes()})
+
+
+# 10 points par signalement vérifié : de quoi encourager, sans rien révéler. Le pseudonyme est
+# un nombre tiré au hasard et gardé dans le téléphone : seul ce téléphone connaît le sien.
+POINTS_PAR_SIGNALEMENT_VERIFIE = 10
+
+
+@vues.route("/api/public/points")
+def mes_points():
+    source = (request.args.get("source") or "")[:64]
+    if len(source) < 8:
+        return jsonify({"verifies": 0, "points": 0})
+    (verifies,) = depotoirs().co.execute(
+        "SELECT COUNT(*) FROM signalements WHERE source = ? AND statut = 'verifie' AND lot IS NULL",
+        (source,)).fetchone()
+    return jsonify({"verifies": verifies, "points": verifies * POINTS_PAR_SIGNALEMENT_VERIFIE})
