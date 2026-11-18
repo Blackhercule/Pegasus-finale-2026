@@ -18,7 +18,7 @@
     <h2 id="accueil-titre">Bienvenue</h2>
     <p class="accueil-texte" id="accueil-texte"></p>
     <button type="button" id="accueil-ecouter" class="accueil-ecouter">
-      <span aria-hidden="true">🔊</span> <span id="accueil-ecouter-mot">Réécouter</span>
+      <span aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.5 9.5 0 0 1 0 13"/></svg></span> <span id="accueil-ecouter-mot">Réécouter</span>
     </button>
     <p id="accueil-etat" class="accueil-etat" aria-live="polite"></p>
     <button type="button" id="accueil-continuer" class="accueil-continuer">Continuer</button>
@@ -26,13 +26,13 @@
          et 3 restent cachées tant que ce téléphone ne sait pas passer un appel (voir appel.js). -->
     <div id="menu-accueil" class="menu-accueil" hidden>
       <button type="button" id="menu-1" class="menu-touche">
-        <span class="menu-chiffre">1</span><span class="menu-icone" aria-hidden="true">📝</span>
+        <span class="menu-chiffre">1</span><span class="menu-icone" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 20h8"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>
         <span class="menu-mots">Je signale moi-même</span></button>
       <button type="button" id="menu-2" class="menu-touche menu-appel" hidden>
-        <span class="menu-chiffre">2</span><span class="menu-icone" aria-hidden="true">📞</span>
+        <span class="menu-chiffre">2</span><span class="menu-icone" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.5h3.5l2 5L8 10a11 11 0 0 0 6 6l1.5-2.5 5 2V19a2 2 0 0 1-2 2A16.5 16.5 0 0 1 3 5.5a2 2 0 0 1 2-2z"/></svg></span>
         <span class="menu-mots">Parler à la mairie</span></button>
       <button type="button" id="menu-3" class="menu-touche menu-appel" hidden>
-        <span class="menu-chiffre">3</span><span class="menu-icone" aria-hidden="true">📞</span>
+        <span class="menu-chiffre">3</span><span class="menu-icone" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.5h3.5l2 5L8 10a11 11 0 0 0 6 6l1.5-2.5 5 2V19a2 2 0 0 1-2 2A16.5 16.5 0 0 1 3 5.5a2 2 0 0 1 2-2z"/></svg></span>
         <span class="menu-mots">Parler à la mairie</span></button>
     </div>
     <button type="button" id="accueil-passer" class="accueil-passer">Passer le guidage</button>
@@ -43,13 +43,13 @@
      l'autre (WebRTC) ; le serveur ne fait que mettre en relation. -->
 <div id="appel" class="appel-ecran" hidden role="dialog" aria-modal="true" aria-labelledby="appel-titre">
   <div class="appel-boite">
-    <p class="appel-icone" aria-hidden="true">📞</p>
+    <p class="appel-icone" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.5h3.5l2 5L8 10a11 11 0 0 0 6 6l1.5-2.5 5 2V19a2 2 0 0 1-2 2A16.5 16.5 0 0 1 3 5.5a2 2 0 0 1 2-2z"/></svg></p>
     <h2 id="appel-titre">Appel de la mairie…</h2>
     <p id="appel-texte" class="appel-texte" aria-live="polite"></p>
     <audio id="appel-voix" autoplay></audio>
     <button type="button" id="appel-raccrocher" class="appel-raccrocher">Raccrocher</button>
     <button type="button" id="appel-formulaire" class="menu-touche appel-formulaire" hidden>
-      <span class="menu-chiffre">1</span><span class="menu-icone" aria-hidden="true">📝</span>
+      <span class="menu-chiffre">1</span><span class="menu-icone" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 20h8"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>
       <span class="menu-mots">Je signale moi-même</span></button>
   </div>
 </div>
@@ -58,10 +58,10 @@
   <div class="entete">
     <h1>Signaler</h1>
     <button type="button" id="revoir-accueil" class="guidage" aria-label="Revoir les messages d'accueil">
-      <span aria-hidden="true">▶</span> Accueil
+      <span aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/></svg></span> Accueil
     </button>
     <button type="button" id="guidage" class="guidage" aria-pressed="false">
-      <span aria-hidden="true">🔊</span> Mooré
+      <span aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.5 9.5 0 0 1 0 13"/></svg></span> Mooré
     </button>
   </div>
   <p id="reseau" class="reseau">—</p>
@@ -76,26 +76,26 @@
   <form id="formulaire" novalidate>
     <section class="carte-bloc">
       <h2>Que signalez-vous ? <button type="button" class="parler" data-audio="nature"
-          aria-label="Écouter la consigne">🔊</button></h2>
+          aria-label="Écouter la consigne"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.5 9.5 0 0 1 0 13"/></svg></button></h2>
       <div class="choix nature" id="nature" role="radiogroup" aria-label="Que signalez-vous">
         <button type="button" data-valeur="ordures" class="actif">
-          <span class="icone" aria-hidden="true">🗑</span>Un tas d'ordures<small>dépotoir sauvage</small></button>
+          <span class="icone" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M5 6l1 14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-14"/><path d="M10 11v6M14 11v6"/></svg></span>Un tas d'ordures<small>dépotoir sauvage</small></button>
         <button type="button" data-valeur="fuite_eau">
-          <span class="icone" aria-hidden="true">💧</span>Une fuite d'eau<small>conduite percée</small></button>
+          <span class="icone" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 6.5-6 11a6 6 0 0 0 12 0c0-4.5-6-11-6-11z"/></svg></span>Une fuite d'eau<small>conduite percée</small></button>
         <button type="button" data-valeur="caniveau_bouche">
-          <span class="icone" aria-hidden="true">🚧</span>Un caniveau bouché<small>l'eau ne passe plus</small></button>
+          <span class="icone" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="6" rx="1"/><path d="m7 7-4 6M13 7l-4 6M19 7l-4 6"/><path d="M5 13v7M19 13v7M5 7V4M19 7V4"/></svg></span>Un caniveau bouché<small>l'eau ne passe plus</small></button>
         <button type="button" data-valeur="toilettes_plein_air">
-          <span class="icone" aria-hidden="true">🚽</span>Toilettes vidées dehors<small>matières répandues</small></button>
+          <span class="icone" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h5v7H7z"/><path d="M4 10h15c0 3.5-2.5 6-6 6H9.5l.5 5H6l.5-5.3C5 14.6 4 12.5 4 10z"/></svg></span>Toilettes vidées dehors<small>matières répandues</small></button>
         <button type="button" data-valeur="abattoir_clandestin">
-          <span class="icone" aria-hidden="true">🐄</span>Abattoir clandestin<small>bêtes tuées hors d'un abattoir officiel</small></button>
+          <span class="icone" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7 3 5M18 7l3-2"/><path d="M6 7h12l-1.5 7a4.5 4.5 0 0 1-9 0z"/><path d="M10 10h.01M14 10h.01"/><path d="M10 16h4"/></svg></span>Abattoir clandestin<small>bêtes tuées hors d'un abattoir officiel</small></button>
         <button type="button" data-valeur="eaux_usees_animales">
-          <span class="icone" aria-hidden="true">🐟</span>Eaux de poisson ou poulet<small>eaux de lavage déversées</small></button>
+          <span class="icone" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12c3-4.5 9-6 14-2l4-3v10l-4-3c-5 4-11 2.5-14-2z"/><path d="M8 11h.01"/></svg></span>Eaux de poisson ou poulet<small>eaux de lavage déversées</small></button>
       </div>
     </section>
 
     <section class="carte-bloc">
       <h2>Position <button type="button" class="parler" data-audio="position"
-          aria-label="Écouter la consigne">🔊</button></h2>
+          aria-label="Écouter la consigne"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.5 9.5 0 0 1 0 13"/></svg></button></h2>
       <p id="position" class="position">Recherche de votre position…</p>
       <button type="button" id="relancer-position" class="secondaire">Relancer la localisation</button>
       <button type="button" id="sans-gps" class="lien-lieu" aria-expanded="false"
@@ -113,7 +113,7 @@
 
     <section class="carte-bloc" data-pour="ordures">
       <h2>Taille du tas <button type="button" class="parler" data-audio="taille"
-          aria-label="Écouter la consigne">🔊</button></h2>
+          aria-label="Écouter la consigne"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.5 9.5 0 0 1 0 13"/></svg></button></h2>
       <div class="choix" id="taille" role="radiogroup" aria-label="Taille du tas">
         <button type="button" data-valeur="petit"><span class="icone">▪</span>Petit<small>un sac</small></button>
         <button type="button" data-valeur="moyen" class="actif"><span class="icone">▪▪</span>Moyen<small>une brouette</small></button>
@@ -133,7 +133,7 @@
 
     <section class="carte-bloc" data-pour="ordures">
       <h2>Où sont les ordures ? <button type="button" class="parler" data-audio="depot"
-          aria-label="Écouter la consigne">🔊</button></h2>
+          aria-label="Écouter la consigne"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.5 9.5 0 0 1 0 13"/></svg></button></h2>
       <div class="choix compact" id="depot" role="radiogroup" aria-label="Où sont les ordures">
         <button type="button" data-valeur="plein_air" class="actif">À même le sol</button>
         <button type="button" data-valeur="bac">Dans un bac</button>
@@ -146,17 +146,17 @@
 
     <section class="carte-bloc" data-pour="fuite_eau" hidden>
       <h2>Quelle est l'ampleur ? <button type="button" class="parler" data-audio="ampleur"
-          aria-label="Écouter la consigne">🔊</button></h2>
+          aria-label="Écouter la consigne"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.5 9.5 0 0 1 0 13"/></svg></button></h2>
       <div class="choix" id="ampleur" role="radiogroup" aria-label="Ampleur de la fuite">
-        <button type="button" data-valeur="suintement"><span class="icone" aria-hidden="true">💦</span>Ça suinte<small>le sol est humide</small></button>
-        <button type="button" data-valeur="jet" class="actif"><span class="icone" aria-hidden="true">🚿</span>Ça gicle<small>un jet d'eau sort</small></button>
-        <button type="button" data-valeur="inondation"><span class="icone" aria-hidden="true">🌊</span>C'est inondé<small>la rue est noyée</small></button>
+        <button type="button" data-valeur="suintement"><span class="icone" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6s-4 4.5-4 7.5a4 4 0 0 0 8 0C12 10.5 8 6 8 6z"/><path d="M17 3s-3 3.2-3 5.5a3 3 0 0 0 6 0C20 6.2 17 3 17 3z"/></svg></span>Ça suinte<small>le sol est humide</small></button>
+        <button type="button" data-valeur="jet" class="actif"><span class="icone" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 10h8v4H2z"/><path d="M10 12h3"/><path d="m16 8 4-3M16 12h6M16 16l4 3"/></svg></span>Ça gicle<small>un jet d'eau sort</small></button>
+        <button type="button" data-valeur="inondation"><span class="icone" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 7c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg></span>C'est inondé<small>la rue est noyée</small></button>
       </div>
     </section>
 
     <section class="carte-bloc" data-pour="caniveau_bouche toilettes_plein_air abattoir_clandestin eaux_usees_animales" hidden>
       <h2 id="titre-gravite">Quelle est la gravité ? <button type="button" class="parler" data-audio="gravite"
-          aria-label="Écouter la consigne">🔊</button></h2>
+          aria-label="Écouter la consigne"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.5 9.5 0 0 1 0 13"/></svg></button></h2>
       <div class="choix" id="gravite" role="radiogroup" aria-label="Gravité">
         <button type="button" data-valeur="leger"><span class="icone" aria-hidden="true">▪</span><span class="mot">Léger</span></button>
         <button type="button" data-valeur="moyen" class="actif"><span class="icone" aria-hidden="true">▪▪</span><span class="mot">Moyen</span></button>
@@ -184,7 +184,7 @@
 
     <section class="carte-bloc">
       <h2><span id="titre-photo">Photo du tas</span> <span class="facultatif">(conseillé)</span>
-        <button type="button" class="parler" data-audio="photo" aria-label="Écouter la consigne">🔊</button></h2>
+        <button type="button" class="parler" data-audio="photo" aria-label="Écouter la consigne"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.5 9.5 0 0 1 0 13"/></svg></button></h2>
       <label class="bouton-photo" for="photo">Prendre une photo</label>
       <input type="file" id="photo" accept="image/*" capture="environment" hidden>
       <img id="apercu" alt="Aperçu de la photo" hidden>
@@ -192,7 +192,7 @@
 
     <section class="carte-bloc">
       <h2>Parler plutôt qu'écrire <span class="facultatif">(facultatif)</span>
-        <button type="button" class="parler" data-audio="vocal" aria-label="Écouter la consigne">🔊</button></h2>
+        <button type="button" class="parler" data-audio="vocal" aria-label="Écouter la consigne"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.5 9.5 0 0 1 0 13"/></svg></button></h2>
       <p class="aide">Dites où se trouve le tas et depuis quand. Vous pouvez parler en mooré,
         en dioula ou en français : un agent de la mairie vous écoutera.</p>
       <button type="button" id="enregistrer" class="bouton-vocal">Appuyer pour parler</button>
@@ -204,7 +204,7 @@
 
     <section class="carte-bloc">
       <h2>Vous identifier <span class="facultatif">(facultatif)</span>
-        <button type="button" class="parler" data-audio="identite" aria-label="Écouter la consigne">🔊</button></h2>
+        <button type="button" class="parler" data-audio="identite" aria-label="Écouter la consigne"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.5 9.5 0 0 1 0 13"/></svg></button></h2>
       <p class="aide">Le signalement fonctionne <strong>sans donner votre nom</strong>. Ne
         remplissez cette partie que si vous acceptez d'être témoin dans une procédure : la
         brigade Laabal pourra alors vous recontacter. Ces renseignements ne sont vus que par

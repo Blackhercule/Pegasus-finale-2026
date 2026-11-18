@@ -4,10 +4,10 @@
    position ou lieu connu, photo, voix, identité facultative, file d'attente hors ligne).
    Bleu marine, blanc ; le jaune vif seulement sur fond bleu marine, où il est lisible. */
 @import url("/vendor/polices/lato/lato.css");
-:root { --vert: #1e2455; --vert-clair: #2b3372; --marine-fonce: #161a3f; --or: #ffff00;
-        --or-fonce: #8a7a00; --or-fond: #fdf7cc; --rouge: #c8102e; --papier: #f5f6fa;
-        --trait: #dfe2ec; --gris: #5f6680; --sur-accent: #1e2455; --succes: #0e6b3a;
-        --selection: #eceefa; --rayon: 14px;
+:root { --vert: #0b5e47; --vert-clair: #12805f; --marine-fonce: #08463a; --or: #ffffff;
+        --or-fonce: #0b5e47; --or-fond: #fdf7cc; --rouge: #c8102e; --papier: #f5f6fa;
+        --trait: #dfe2ec; --gris: #5f6680; --sur-accent: #0b5e47; --succes: #0e6b3a;
+        --selection: #e6f4ee; --rayon: 14px;
         --ombre: 0 1px 2px rgba(27, 32, 51, .06), 0 4px 14px rgba(27, 32, 51, .06); }
 /* « hidden » doit l'emporter sur nos propres règles d'affichage. */
 [hidden] { display: none !important; }
@@ -33,7 +33,7 @@ header {
 .entete { display: flex; align-items: center; justify-content: space-between; gap: .5rem;
           max-width: 600px; margin: 0 auto; }
 header h1 { font-size: 1.35rem; margin: 0; margin-right: auto; letter-spacing: .01em; }
-.reseau { max-width: 600px; margin: .25rem auto 0; font-size: .82rem; color: #c9cfe8; }
+.reseau { max-width: 600px; margin: .25rem auto 0; font-size: .82rem; color: #cdeadf; }
 .reseau::before { content: "● "; color: #6fdc9b; }
 .reseau.hors-ligne { color: #ffe08a; }
 .reseau.hors-ligne::before { color: #ffb347; }
@@ -91,10 +91,12 @@ h2 { font-size: 1.08rem; color: var(--vert); margin: 0 0 .8rem; font-weight: 700
   padding: .9rem 1rem; border-radius: 12px; text-align: center; border: 2px solid var(--vert);
 }
 .bouton-photo { background: #fff; color: var(--vert); }
-.bouton-photo::before { content: "📷  "; }
+.bouton-photo::before { content: ""; display: inline-block; width: 1.25em; height: 1.25em; margin-right: .45em;
+  vertical-align: -.25em; background: currentColor; -webkit-mask: var(--ico-photo) center / contain no-repeat;
+  mask: var(--ico-photo) center / contain no-repeat; }
 .bouton-photo:hover, .secondaire:hover { background: var(--selection); }
 button[type=submit] { background: var(--vert); color: #fff; border-color: var(--vert); font-size: 1.15rem;
-                      padding: 1.05rem 1rem; box-shadow: 0 4px 14px rgba(30, 36, 85, .3); }
+                      padding: 1.05rem 1rem; box-shadow: 0 4px 14px rgba(11, 94, 71, .3); }
 button[type=submit]:hover { background: var(--marine-fonce); }
 button[type=submit]:disabled { background: #9aa0bf; border-color: #9aa0bf; box-shadow: none; }
 .secondaire { background: #fff; color: var(--vert); margin-top: .6rem; }
@@ -149,7 +151,9 @@ textarea { resize: vertical; }
   padding: 1rem; border-radius: 12px; text-align: center;
   border: 2px solid var(--vert); background: #fff; color: var(--vert); font-size: 1.05rem;
 }
-.bouton-vocal::before { content: "🎙  "; }
+.bouton-vocal::before { content: ""; display: inline-block; width: 1.2em; height: 1.2em; margin-right: .45em;
+  vertical-align: -.22em; background: currentColor; -webkit-mask: var(--ico-micro) center / contain no-repeat;
+  mask: var(--ico-micro) center / contain no-repeat; }
 .bouton-vocal:hover { background: var(--selection); }
 .bouton-vocal.enregistre { background: var(--rouge); border-color: var(--rouge); color: #fff; }
 #ecoute-vocal { width: 100%; margin: .7rem 0; }
@@ -160,7 +164,7 @@ textarea { resize: vertical; }
    quelqu'un qui ne lit pas. */
 .accueil-guidage {
   position: fixed; inset: 0; z-index: 50; background: var(--vert);
-  background-image: radial-gradient(circle at 50% 0%, #2b3372 0%, var(--vert) 60%);
+  background-image: radial-gradient(circle at 50% 0%, #138a66 0%, var(--vert) 65%);
   display: flex; align-items: center; justify-content: center; padding: 1.2rem;
 }
 .accueil-boite { width: 100%; max-width: 420px; text-align: center; color: #fff; }
@@ -221,32 +225,34 @@ textarea { resize: vertical; }
   width: 100%; font: inherit; cursor: pointer; display: grid; text-align: left;
   grid-template-columns: 3.4rem 2.2rem 1fr; align-items: center; gap: .6rem;
   padding: .85rem 1rem; min-height: 76px; border-radius: 16px; border: 0;
-  background: var(--or); color: var(--sur-accent); box-shadow: 0 6px 18px rgba(0, 0, 0, .25);
+  background: #fff; color: var(--vert); box-shadow: 0 6px 18px rgba(0, 0, 0, .25);
 }
 .menu-touche.menu-appel { background: #fff; }
 .menu-chiffre {
   width: 3.4rem; height: 3.4rem; line-height: 3.4rem; border-radius: 50%; text-align: center;
-  background: var(--vert); color: var(--or); font-size: 1.9rem; font-weight: 700;
+  background: var(--vert); color: #fff; font-size: 1.9rem; font-weight: 700;
 }
-.menu-icone { font-size: 1.8rem; text-align: center; }
+.menu-icone { display: grid; place-items: center; color: var(--vert); }
+.menu-icone .ico { width: 1.9rem; height: 1.9rem; }
 .menu-mots { font-size: 1.12rem; font-weight: 700; line-height: 1.25; }
 .menu-touche:active { transform: translateY(1px); }
 
 /* L'écran d'appel couvre toute la page, comme l'accueil. */
 .appel-ecran {
   position: fixed; inset: 0; z-index: 60; background: var(--vert);
-  background-image: radial-gradient(circle at 50% 0%, #2b3372 0%, var(--vert) 60%);
+  background-image: radial-gradient(circle at 50% 0%, #138a66 0%, var(--vert) 65%);
   display: flex; align-items: center; justify-content: center; padding: 1.2rem;
 }
 .appel-boite { width: 100%; max-width: 420px; text-align: center; color: #fff; }
 .appel-icone {
-  margin: 0 auto 1rem; width: 6rem; height: 6rem; line-height: 6rem; font-size: 3rem;
+  margin: 0 auto 1rem; width: 6rem; height: 6rem; display: grid; place-items: center;
   border-radius: 50%; background: rgba(255, 255, 255, .12);
 }
+.appel-icone .ico { width: 2.8rem; height: 2.8rem; }
 /* Tant que ça sonne, l'icône bat doucement. */
 .appel-ecran[data-etat="sonne"] .appel-icone,
 .appel-ecran[data-etat="preparation"] .appel-icone { animation: appel-bat 1.2s ease-in-out infinite; }
-.appel-ecran[data-etat="en_communication"] .appel-icone { background: #0e6b3a; }
+.appel-ecran[data-etat="en_communication"] .appel-icone { background: #22a06b; }
 .appel-ecran[data-etat="echec"] .appel-icone,
 .appel-ecran[data-etat="fini"] .appel-icone { opacity: .5; }
 @keyframes appel-bat { 50% { transform: scale(1.08); background: rgba(255, 255, 255, .22); } }
@@ -258,5 +264,29 @@ textarea { resize: vertical; }
   border-radius: 999px; border: 0; background: var(--rouge); color: #fff; cursor: pointer;
   box-shadow: 0 6px 18px rgba(0, 0, 0, .3);
 }
-.appel-raccrocher::before { content: "📵  "; }
+.appel-raccrocher::before { content: ""; display: inline-block; width: 1.3em; height: 1.3em; margin-right: .5em;
+  vertical-align: -.25em; background: currentColor; -webkit-mask: var(--ico-raccrocher) center / contain no-repeat;
+  mask: var(--ico-raccrocher) center / contain no-repeat; }
 .appel-ecran button:focus-visible { outline: 3px solid var(--or); outline-offset: 3px; }
+
+/* ------------------------------------------------------------ icônes
+   Des icônes dessinées en trait (SVG dans la page), à la place des emojis : même rendu sur
+   tous les téléphones, couleur du texte qui les entoure, rien à télécharger. */
+:root {
+  --ico-photo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7h3l2-3h6l2 3h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z'/%3E%3Ccircle cx='12' cy='13' r='4'/%3E%3C/svg%3E");
+  --ico-micro: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='2' width='6' height='12' rx='3'/%3E%3Cpath d='M5 10a7 7 0 0 0 14 0M12 17v5'/%3E%3C/svg%3E");
+  --ico-raccrocher: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.5 14.5c5.3-5 13.7-5 19 0l-2.2 3-4.3-1.5v-3a10 10 0 0 0-6 0v3l-4.3 1.5z'/%3E%3C/svg%3E");
+}
+.ico { width: 1.25em; height: 1.25em; fill: none; stroke: currentColor; stroke-width: 2;
+       stroke-linecap: round; stroke-linejoin: round; vertical-align: -.25em; flex: none; }
+.nature button .icone { color: var(--vert); }
+.nature button .icone .ico { width: 2rem; height: 2rem; }
+.choix button .icone .ico { width: 1.7rem; height: 1.7rem; }
+.parler { display: inline-grid; place-items: center; color: var(--vert); }
+.parler .ico { width: 1.15rem; height: 1.15rem; }
+.accueil-ecouter .ico, .guidage .ico { width: 1.15em; height: 1.15em; }
+/* Touche 1 : vert plein ; touches 2 et 3 : blanches. */
+#menu-1, .appel-formulaire { background: var(--vert-clair); color: #fff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .7) inset, 0 6px 18px rgba(0, 0, 0, .25); }
+#menu-1 .menu-chiffre, .appel-formulaire .menu-chiffre { background: #fff; color: var(--vert); }
+#menu-1 .menu-icone, .appel-formulaire .menu-icone { color: #fff; }

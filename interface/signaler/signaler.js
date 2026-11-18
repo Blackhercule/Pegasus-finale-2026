@@ -442,7 +442,8 @@ function afficherLAccueil(automatique) {
   element("accueil-progression").textContent =
     ACCUEIL.length > 1 ? `${rangAccueil + 1} sur ${ACCUEIL.length}` : "";
   element("accueil-numero").textContent = String(rangAccueil + 1);
-  element("accueil-numero").hidden = !ecran.fichier;
+  // Sur le dernier écran, le gros numéro est caché : seules les touches 1-2-3 portent un chiffre.
+  element("accueil-numero").hidden = !ecran.fichier || dernier;
   element("accueil-titre").textContent = ecran.titre;
   element("accueil-texte").textContent = ecran.texte;
   element("accueil-continuer").hidden = dernier;
