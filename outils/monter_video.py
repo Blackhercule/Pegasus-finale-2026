@@ -24,27 +24,29 @@ import tempfile
 # paramètres et le plan recalculé ».
 SCENES = [
     ("01-signaler", "1. Un habitant signale un dépotoir depuis son téléphone",
-     "Accueil parlé en mooré, mesure du tas, message vocal — sans compte, et même sans réseau"),
-    ("02-sans-gps", "Sans GPS : il choisit un lieu connu",
-     "Marchés, écoles, centres de santé ; la mairie saura que la position est approximative"),
-    ("03-pieges", "2. Le jury injecte 42 signalements piégés",
+     "Accueil parlé en mooré, menu 1-2-3, mesure du tas, message vocal — sans compte, même sans réseau"),
+    ("02-appel", "Touche 2 ou 3 : l'habitant appelle la mairie",
+     "L'agent décroche dans la plateforme et voit la position de l'habitant en direct"),
+    ("04-pieges", "2. Le jury injecte 42 signalements piégés",
      "Chacun est écarté avec son motif, aucun n'entre dans le plan, le serveur tient"),
-    ("04-chaine", "3. Le signalement ouvre un dossier qui passe de poste en poste",
-     "Mairie, brigade Laabal, mairie : chaque passage est daté et signé"),
-    ("05-tournee", "4. Jusqu'à la tournée : le camion passe par le dépotoir",
+    ("05-verifier", "3. La mairie vérifie le signalement",
+     "Le nom de l'agent qui a vérifié reste attaché à sa décision"),
+    ("06-chaine", "4. Le dossier passe de poste en poste",
+     "Photo en grand, position sur la carte, et pour chaque étape : qui a fait quoi, et quand"),
+    ("07-tournee", "5. Jusqu'à la tournée : le camion passe par le dépotoir",
      "Points de regroupement et tournées optimisées, tracées rue par rue"),
-    ("06-parametres", "5. Le jury change les paramètres : 8 camions en panne, saison des pluies",
-     "Le plan se recalcule en quelques secondes et affiche ses propres contrôles de cohérence"),
-    ("07-scenarios", "6. Comparer des scénarios",
+    ("08-parametres", "6. Le jury change les paramètres : 8 camions en panne, saison des pluies",
+     "Le plan se recalcule en quelques secondes et affiche ses contrôles de cohérence"),
+    ("09-scenarios", "7. Comparer des scénarios",
      "Camions, fréquence de passage, abonnements : chaque levier chiffré côte à côte"),
-    ("08-simulation", "7. Simulation multi-agents de la filière",
+    ("10-simulation", "8. Simulation multi-agents de la filière",
      "Ménages, pré-collecteurs, brigade Laabal et mairie, un jour par pas de temps"),
 ]
 
 TITRE = ("Assainissement de Ouaga", "Du signalement d'un dépotoir au plan de gestion de la ville",
          "Équipe PEGASUS — Université Joseph Ki-Zerbo")
 FIN = ("Code libre, données ouvertes", "AGPL-3.0 · OpenStreetMap (ODbL) · aucune dépendance à Internet",
-       "175 tests automatisés · déploiement en une commande")
+       "266 tests automatisés · déploiement en une commande")
 
 # Une scène qui attend un long calcul commence AVANT_RESULTAT secondes avant que le résultat
 # s'affiche (moment noté par filmer.mjs dans coupes.json) : on ne montre pas l'attente.
@@ -52,13 +54,18 @@ AVANT_RESULTAT = 2.0
 
 # Début coupé (secondes) des scènes de carte : la connexion y a déjà été montrée (scènes 3 et
 # 4), et la page clignote le temps que la barre se pose.
-COUPER_LE_DEBUT = {"05-tournee": 3.0, "06-parametres": 3.5}
+COUPER_LE_DEBUT = {"07-tournee": 4.0, "08-parametres": 4.0}
+
+# L'énoncé demande 3 minutes : les scènes où l'on tape et où l'on attend sont accélérées
+# (1,5 = une fois et demie plus vite). Les gestes restent lisibles ; rien n'est coupé.
+ACCELERER = {"01-signaler": 1.3, "02-appel": 1.2, "04-pieges": 1.3, "06-chaine": 1.5,
+             "07-tournee": 1.3, "08-parametres": 1.5}
 
 POLICE = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 POLICE_GRASSE = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 LARGEUR, HAUTEUR = 1280, 720
-# Bleu marine et jaune des portails de l'administration, comme l'interface.
-VERT, OR = "0x1e2455", "0xfcd116"
+# Vert foncé et vert clair, comme l'interface depuis C11.
+VERT, OR = "0x0b5e47", "0x8ee0bd"
 
 
 def echapper(texte: str) -> str:
@@ -67,7 +74,7 @@ def echapper(texte: str) -> str:
 
 
 def carton(chemin: str, lignes, secondes: float = 3.0) -> None:
-    """Un carton de texte, sur fond bleu marine."""
+    """Un carton de texte, sur fond vert foncé."""
     dessins = []
     tailles = (54, 30, 24)
     positions = (HAUTEUR // 2 - 90, HAUTEUR // 2 - 10, HAUTEUR // 2 + 50)
@@ -83,11 +90,13 @@ def carton(chemin: str, lignes, secondes: float = 3.0) -> None:
             "-preset", "veryfast", "-crf", "23", chemin])
 
 
-def scene(source: str, chemin: str, titre: str, sous_titre: str, debut: float = 0) -> None:
-    """Met la scène au format, puis pose le bandeau de texte en bas. `debut` coupe l'attente."""
+def scene(source: str, chemin: str, titre: str, sous_titre: str, debut: float = 0,
+          vitesse: float = 1.0) -> None:
+    """Met la scène au format, puis pose le bandeau de texte en bas. `debut` coupe l'attente,
+    `vitesse` accélère la scène (le bandeau, lui, est posé après : il reste net)."""
     bandeau = HAUTEUR - 112
-    filtres = [
-        # La scène garde ses proportions ; le reste de l'image est rempli en bleu marine.
+    filtres = [f"setpts=PTS/{vitesse}",
+        # La scène garde ses proportions ; le reste de l'image est rempli en vert foncé.
         f"scale={LARGEUR}:{HAUTEUR}:force_original_aspect_ratio=decrease",
         f"pad={LARGEUR}:{HAUTEUR}:(ow-iw)/2:(oh-ih)/2:color={VERT}",
         f"drawbox=x=0:y={bandeau}:w=iw:h=112:color=black@0.72:t=fill",
@@ -206,7 +215,7 @@ def principal():
 
     for nom, titre, sous_titre in SCENES:
         dossier = os.path.join(options.source, nom)
-        fichiers = ([f for f in sorted(os.listdir(dossier)) if f.endswith(".webm")]
+        fichiers = ([f for f in sorted(os.listdir(dossier)) if f.endswith((".webm", ".mp4"))]
                     if os.path.isdir(dossier) else [])
         if not fichiers:
             print(f"scène absente, ignorée : {nom}")
@@ -217,7 +226,8 @@ def principal():
         if os.path.exists(coupes):
             with open(coupes, encoding="utf-8") as f:
                 coupe = max(0.0, float(json.load(f)["resultat"]) - AVANT_RESULTAT)
-        scene(os.path.join(dossier, fichiers[0]), chemin, titre, sous_titre, coupe)
+        scene(os.path.join(dossier, fichiers[0]), chemin, titre, sous_titre, coupe,
+              ACCELERER.get(nom, 1.0))
         lu = None
         if options.voix:
             lu = os.path.join(travail, nom + ".wav")

@@ -2,7 +2,7 @@
 
 ## `Demonstration-Assainissement-de-Ouaga.mp4`
 
-Vidéo de démonstration (E23) : 2 min 54 s, 1280 × 720, voix et musique.
+Vidéo de démonstration (E23) : 3 min 01 s, 1280 × 720, voix et musique (refaite le 18/11 avec l'appel à la mairie, la vérification signée et le nouvel habillage vert).
 
 - **Images** : les vraies pages de l'outil, filmées dans un navigateur (`outils/filmer.mjs`).
 - **Voix** : voix de synthèse française lisant le bandeau de chaque scène, sans le modifier.
