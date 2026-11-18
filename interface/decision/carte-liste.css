@@ -6,14 +6,14 @@ body.avec-liste #carte { flex: 1; min-width: 0; height: 100%; }
                background: #fff; border-right: 1px solid var(--trait); }
 .liste-carte__entete { display: flex; align-items: baseline; justify-content: space-between;
                        padding: 16px 16px 8px; }
-.liste-carte h2 { margin: 0; font-size: 17px; color: var(--panneau); text-transform: none; letter-spacing: 0; }
+.liste-carte h2 { margin: 0; font-size: 17px; color: var(--vert); text-transform: none; letter-spacing: 0; }
 .liste-carte__compte { font-weight: 700; color: var(--gris); }
 .liste-carte__filtres { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 12px;
                         border-bottom: 1px solid var(--trait); }
 .liste-carte__filtres button { font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
                                padding: 4px 10px; border-radius: 999px; border: 1px solid var(--trait);
                                background: #fff; color: var(--encre); }
-.liste-carte__filtres button[aria-pressed="true"] { background: var(--panneau); border-color: var(--panneau); color: #fff; }
+.liste-carte__filtres button[aria-pressed="true"] { background: var(--vert); border-color: var(--vert); color: #fff; }
 .liste-carte__elements { list-style: none; margin: 0; padding: 8px; overflow-y: auto; flex: 1; display: grid;
                          gap: 6px; align-content: start; }
 .liste-carte__elements li { border: 1px solid var(--trait); border-left: 4px solid var(--trait);
@@ -21,13 +21,13 @@ body.avec-liste #carte { flex: 1; min-width: 0; height: 100%; }
 .liste-carte__elements li.famille-ordures { border-left-color: #a0522d; }
 .liste-carte__elements li.famille-eau { border-left-color: #0077b6; }
 .liste-carte__elements li.famille-nuisance { border-left-color: #6b3fa0; }
-.liste-carte__elements li.choisi { background: #eceefa; border-color: var(--panneau); }
+.liste-carte__elements li.choisi { background: #e6f4ee; border-color: var(--vert); }
 .liste-carte__choisir { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: center;
                         width: 100%; font: inherit; text-align: left; cursor: pointer; border: 0; background: none;
                         padding: 10px 10px 4px; color: inherit; }
-.liste-carte__choisir strong { display: block; color: var(--panneau); font-size: 14px; }
+.liste-carte__choisir strong { display: block; color: var(--vert); font-size: 14px; }
 .liste-carte__choisir .quoi { display: block; color: var(--gris); font-size: 13px; }
-.liste-carte__ouvrir { display: inline-block; margin: 0 10px 8px 56px; font-size: 13px; color: var(--panneau); }
+.liste-carte__ouvrir { display: inline-block; margin: 0 10px 8px 56px; font-size: 13px; color: var(--vert); }
 .liste-carte__vide { color: var(--gris); font-size: 14px; padding: 12px; border: 0 !important; }
 .liste-carte button:focus-visible, .liste-carte a:focus-visible, .liste-carte__bascule:focus-visible {
   outline: 3px solid #8a7a00; outline-offset: 2px; }
@@ -37,11 +37,11 @@ body.avec-liste #carte { flex: 1; min-width: 0; height: 100%; }
                         font-weight: 700; font-size: 13px; }
 .liste-carte .urgence.haute { background: #c8102e; color: #fff; }
 .liste-carte .urgence.moyenne { background: #fdf7cc; color: #8a7a00; border: 1px solid #e4d57a; }
-.liste-carte .urgence.basse { background: #eceefa; color: var(--panneau); }
+.liste-carte .urgence.basse { background: #e6f4ee; color: var(--vert); }
 
 /* Le repère posé sur le dossier choisi. */
-.liste-carte__repere { width: 26px; height: 26px; border-radius: 50%; border: 4px solid #ffff00;
-                       background: var(--panneau); box-shadow: 0 0 0 3px var(--panneau), 0 4px 10px rgba(0,0,0,.35); }
+.liste-carte__repere { width: 26px; height: 26px; border-radius: 50%; border: 4px solid #fff;
+                       background: var(--vert); box-shadow: 0 0 0 3px var(--vert), 0 4px 10px rgba(0,0,0,.35); }
 
 .liste-carte__bascule { display: none; }
 
@@ -52,5 +52,5 @@ body.avec-liste #carte { flex: 1; min-width: 0; height: 100%; }
   body.liste-ouverte .liste-carte { transform: none; visibility: visible; }
   .liste-carte__bascule { display: block; position: absolute; left: 12px; bottom: 34px; z-index: 6;
                           font: inherit; font-weight: 700; cursor: pointer; padding: 10px 16px; border-radius: 999px;
-                          border: 0; background: var(--panneau); color: #fff; box-shadow: 0 4px 14px rgba(0,0,0,.3); }
+                          border: 0; background: var(--vert); color: #fff; box-shadow: 0 4px 14px rgba(0,0,0,.3); }
 }

@@ -31,41 +31,40 @@ body {
 #carte { height: 100%; }
 
 #panneau {
-  background: var(--panneau); color: #f3f1ea; overflow-y: auto;
+  background: #fff; color: var(--encre); overflow-y: auto;
   display: flex; flex-direction: column; gap: 1.1rem; padding: 1.2rem 1.1rem 1rem;
-  border-right: 4px solid var(--or);
+  border-right: 1px solid var(--trait); accent-color: var(--vert);
 }
-#panneau h1 { font-size: 1.15rem; margin: 0; letter-spacing: .01em; }
-.sous-titre { margin: .2rem 0 0; font-size: .82rem; color: #c9cfe8; }
+#panneau h1 { font-size: 1.15rem; margin: 0; letter-spacing: .01em; color: var(--vert); }
+.sous-titre { margin: .2rem 0 0; font-size: .82rem; color: var(--gris); }
 #panneau h2 {
   font-size: .78rem; text-transform: uppercase; letter-spacing: .08em;
-  color: #aab2d6; margin: 0 0 .55rem; font-weight: 600;
+  color: var(--gris); margin: 0 0 .55rem; font-weight: 700;
 }
-.bloc { border-top: 1px solid rgba(255,255,255,.12); padding-top: .9rem; }
+.bloc { border-top: 1px solid var(--trait); padding-top: .9rem; }
 
 .chiffres { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
 .chiffre {
-  background: rgba(255,255,255,.06); border-radius: 8px; padding: .5rem .6rem;
+  background: #f3f8f6; border: 1px solid #dcebe4; border-radius: 8px; padding: .5rem .6rem;
   display: flex; flex-direction: column;
 }
-.chiffre .valeur { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.chiffre .etiquette { font-size: .75rem; color: #c9cfe8; }
-.chiffre.rejet .valeur { color: #ff9b8f; }
+.chiffre .valeur { font-size: 1.5rem; font-weight: 700; color: var(--vert); font-variant-numeric: tabular-nums; }
+.chiffre .etiquette { font-size: .75rem; color: var(--gris); }
+.chiffre.rejet .valeur { color: var(--rouge); }
 
 .couches { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
 .couches label { display: flex; align-items: center; gap: .5rem; font-size: .88rem; cursor: pointer; }
 .pastille { width: 11px; height: 11px; border-radius: 3px; flex: none;
-  /* Le panneau est bleu marine, et trois couches de la carte le sont aussi : sans ce liseré
-     blanc, leur pastille se fondrait dans le fond et on ne la verrait plus du tout. */
-  box-shadow: 0 0 0 2.5px #fff; }
+  /* Un fin liseré gris : les couches pâles restent visibles sur le fond blanc du panneau. */
+  box-shadow: 0 0 0 1.5px rgba(27, 32, 51, .35); }
 
 #selection { display: grid; grid-template-columns: max-content 1fr; gap: .3rem .8rem; margin: 0; font-size: .88rem; }
-#selection dt { color: #aab2d6; }
+#selection dt { color: var(--gris); }
 #selection dd { margin: 0; font-variant-numeric: tabular-nums; }
 
 #panneau footer { margin-top: auto; }
-#etat-chargement { font-size: .82rem; color: #c9cfe8; margin: 0 0 .5rem; }
-.mentions { font-size: .72rem; color: #8f98c4; margin: 0; }
+#etat-chargement { font-size: .82rem; color: var(--gris); margin: 0 0 .5rem; }
+.mentions { font-size: .72rem; color: var(--gris); margin: 0; }
 
 .maplibregl-popup-content {
   font-family: inherit; font-size: .86rem; border-radius: 8px; padding: .7rem .8rem;
@@ -74,20 +73,21 @@ body {
 
 @media (max-width: 760px) {
   #application { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
-  #panneau { border-right: 0; border-bottom: 4px solid var(--or); max-height: 45vh; }
+  #panneau { border-right: 0; border-bottom: 1px solid var(--trait); max-height: 45vh; }
 }
 
 /* ------------------------------------------------------------ panneau du plan */
 .reglages { display: grid; gap: .5rem; margin-bottom: .7rem; }
-.reglages label { font-size: .82rem; color: #dde1f2; display: grid; gap: .15rem; }
+.reglages label { font-size: .82rem; color: var(--encre); display: grid; gap: .15rem; }
 .reglages .ligne { display: flex; align-items: center; gap: .5rem; }
-.reglages input[type=range] { flex: 1; accent-color: var(--or); }
-.reglages output { font-variant-numeric: tabular-nums; font-weight: 700; color: #fff; min-width: 3.2rem; text-align: right; }
+.reglages input[type=range] { flex: 1; accent-color: var(--vert); }
+.reglages output { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--vert); min-width: 3.2rem; text-align: right; }
 .reglages label.case { display: flex; align-items: center; gap: .5rem; }
 #recalculer {
   font: inherit; font-weight: 700; cursor: pointer; width: 100%; padding: .6rem;
-  border-radius: 8px; border: 0; background: var(--or); color: var(--sur-accent);
+  border-radius: 8px; border: 0; background: var(--vert); color: #fff;
 }
+#recalculer:hover { background: #0a5530; }
 #recalculer:disabled { opacity: .6; cursor: progress; }
 .resume { margin-top: .7rem; font-size: .85rem; display: grid; gap: .2rem; }
 .resume .ligne { display: flex; justify-content: space-between; gap: .6rem; }
@@ -95,11 +95,11 @@ body {
 .controles { list-style: none; margin: 0; padding: 0; display: grid; gap: .45rem; font-size: .82rem; }
 .controles li { display: grid; grid-template-columns: 1.1rem 1fr; gap: .4rem; align-items: start; }
 .controles .marque { font-weight: 700; }
-.controles .ok .marque { color: #7fe0a8; }
-.controles .attention .marque { color: var(--or); }
-.controles .probleme .marque { color: #ff9b8f; }
-.controles .nom { display: block; font-weight: 600; color: #f2f3fb; }
-.controles .detail { color: #c9cfe8; }
+.controles .ok .marque { color: var(--vert); }
+.controles .attention .marque { color: #b45309; }
+.controles .probleme .marque { color: var(--rouge); }
+.controles .nom { display: block; font-weight: 600; color: var(--encre); }
+.controles .detail { color: var(--gris); }
 
 .liens { margin: .4rem 0 0; font-size: .8rem; }
-.liens a { color: var(--or); }
+.liens a { color: var(--vert); font-weight: 700; }
