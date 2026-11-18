@@ -1,13 +1,14 @@
 /* Page de vérification : un tableau lisible sur l'écran d'un portable. */
 .page-verifier { background: var(--papier); }
 .bandeau {
-  background: var(--panneau); color: #f3f1ea; padding: .9rem 1.2rem;
-  border-bottom: 4px solid var(--or); display: flex; justify-content: space-between;
+  background: #fff; color: var(--encre); padding: .9rem 1.2rem;
+  border-bottom: 1px solid var(--trait); display: flex; justify-content: space-between;
   align-items: center; gap: 1rem; flex-wrap: wrap;
 }
-.bandeau h1 { font-size: 1.1rem; margin: 0; }
+.bandeau h1 { font-size: 1.1rem; margin: 0; color: var(--panneau); }
+.bandeau .sous-titre { color: var(--gris); }
 .bandeau nav { display: flex; align-items: center; gap: 1rem; font-size: .9rem; }
-.bandeau nav a { color: #fff; }
+.bandeau nav a { color: var(--panneau); }
 main { max-width: 1100px; margin: 0 auto; padding: 1.2rem; display: grid; gap: 1rem; }
 
 .carte-bloc { background: #fff; border: 1px solid var(--trait); border-radius: 10px; padding: 1rem 1.1rem; }
@@ -48,7 +49,7 @@ tr.rejete td { color: var(--gris); background: #faf9f6; }
 
 /* T16 : position tirée d'un lieu connu, et non d'un GPS. */
 .position-lieu { display: block; margin: .3rem 0; padding: .3rem .5rem; border-radius: 6px;
-                 background: var(--or-clair); color: #5c4f00; font-weight: 700; font-size: .82rem; }
+                 background: var(--or-clair); color: #8a3d06; font-weight: 700; font-size: .82rem; }
 
 /* Pastille d'urgence de la file priorisée. Trois niveaux seulement : un agent pressé lit une
    couleur, pas un nombre à deux décimales. Le détail des raisons est sur la ligne en dessous

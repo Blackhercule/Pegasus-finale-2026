@@ -5,7 +5,7 @@
    Bleu marine, blanc ; le jaune vif seulement sur fond bleu marine, où il est lisible. */
 @import url("/vendor/polices/lato/lato.css");
 :root { --vert: #0b5e47; --vert-clair: #12805f; --marine-fonce: #08463a; --or: #ffffff;
-        --or-fonce: #0b5e47; --or-fond: #fdf7cc; --rouge: #c8102e; --papier: #f5f6fa;
+        --or-fonce: #0b5e47; --or-fond: #fdf0e2; --rouge: #c8102e; --papier: #f5f6fa;
         --trait: #dfe2ec; --gris: #5f6680; --sur-accent: #0b5e47; --succes: #0e6b3a;
         --selection: #e6f4ee; --rayon: 14px;
         --ombre: 0 1px 2px rgba(27, 32, 51, .06), 0 4px 14px rgba(27, 32, 51, .06); }
@@ -82,7 +82,7 @@ h2 { font-size: 1.08rem; color: var(--vert); margin: 0 0 .8rem; font-weight: 700
 .position { margin: 0 0 .7rem; font-size: .98rem; padding: .7rem .8rem; border-radius: 10px;
             background: var(--papier); }
 .position.bonne { color: var(--succes); font-weight: 700; background: #dcf1e4; }
-.position.faible { color: #5c4f00; background: var(--or-fond); font-weight: 700; }
+.position.faible { color: #8a3d06; background: var(--or-fond); font-weight: 700; }
 .position.absente { color: var(--rouge); background: #fbe4e6; font-weight: 700; }
 
 /* ------------------------------------------------------------ boutons */
@@ -109,7 +109,7 @@ textarea { resize: vertical; }
 .message { padding: .9rem 1rem; border-radius: 12px; margin: 0; font-weight: 700; }
 .message.succes { background: #dcf1e4; color: var(--succes); border: 1px solid #a9dcc0; }
 .message.erreur { background: #fbe4e6; color: var(--rouge); border: 1px solid #efb3b3; }
-.message.attente { background: var(--or-fond); color: #5c4f00; border: 1px solid #e8cf6a; }
+.message.attente { background: var(--or-fond); color: #8a3d06; border: 1px solid #f2c9a0; }
 .mentions { font-size: .8rem; color: var(--gris); text-align: center; margin: .3rem auto 0;
             max-width: 600px; padding: 0 1rem; }
 
@@ -123,8 +123,8 @@ textarea { resize: vertical; }
 .guidage:focus-visible { outline-color: var(--or); }
 .guidage.actif { background: var(--or); border-color: var(--or); color: var(--sur-accent); }
 .accueil {
-  background: var(--or-fond); border: 1px solid #ded06a; border-radius: 12px; padding: .8rem 1rem;
-  margin: 0; font-size: .9rem; color: #5c4f00;
+  background: var(--or-fond); border: 1px solid #f2c9a0; border-radius: 12px; padding: .8rem 1rem;
+  margin: 0; font-size: .9rem; color: #8a3d06;
 }
 .parler {
   font: inherit; cursor: pointer; border: 0; background: var(--papier); border-radius: 999px;

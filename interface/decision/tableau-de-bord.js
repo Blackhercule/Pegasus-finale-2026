@@ -56,7 +56,7 @@
                                 role: "img", "aria-label": "Carte des dossiers ouverts" });
     const trace = polygones.map((polygone) => polygone.map((anneau) =>
       "M" + anneau.map((p) => x(p[0]).toFixed(1) + "," + y(p[1]).toFixed(1)).join("L") + "Z").join("")).join("");
-    dessin.append(svg("path", { d: trace, fill: "#ffffff", stroke: "#1e2455", "stroke-width": 1.5,
+    dessin.append(svg("path", { d: trace, fill: "#ffffff", stroke: "#0b5e47", "stroke-width": 1.5,
                                 "stroke-dasharray": "5 3" }));
     // Les plus urgents en dernier, pour qu'ils soient dessinés par-dessus.
     for (const { type, d } of [...dossiers].sort((a, b) => a.note - b.note)) {

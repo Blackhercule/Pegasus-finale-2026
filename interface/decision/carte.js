@@ -306,7 +306,7 @@ function dessinerLePlan(plan) {
   carte.addSource("decharge", { type: "geojson", data: pointDecharge(plan) });
   carte.addLayer({ id: "decharge", type: "circle", source: "decharge",
     paint: { "circle-radius": 9, "circle-color": "#1b2033", "circle-stroke-width": 3,
-             "circle-stroke-color": "#ffff00" } });
+             "circle-stroke-color": "#ffffff" } });
 
   carte.on("click", "points", (evenement) => {
     const p = evenement.features[0].properties;

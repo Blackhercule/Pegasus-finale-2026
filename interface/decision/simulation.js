@@ -7,7 +7,7 @@ const nombre = (v, d = 0) => (v == null ? "—"
 
 const SERIES = [
   { cle: "produit_m3", nom: "Produits", couleur: "#666e85" },
-  { cle: "collecte_m3", nom: "Collectés par les camions", couleur: "#1e2455" },
+  { cle: "collecte_m3", nom: "Collectés par les camions", couleur: "#0b5e47" },
   { cle: "precollecte_m3", nom: "Ramassés par les pré-collecteurs", couleur: "#c8102e" },
 ];
 

@@ -3,17 +3,18 @@
 
    Une seule échelle d'espacements (4, 8, 12, 16, 24, 32, 48 px) et une seule échelle de
    tailles de texte (13, 15, 17, 20, 26, 32 px). Police Lato, servie par notre machine.
-   Couleurs de l'équipe : bleu marine, blanc, jaune vif sur fond sombre seulement (#8a7a00
-   sur fond clair, où le jaune vif serait illisible). */
+   Couleurs : vert foncé, blanc, et orange pour ce qui attend (C11 ; avant : bleu marine et
+   jaune). */
 @import url("/vendor/polices/lato/lato.css");
 
 :root {
-  --marine: #1e2455;
-  --marine-fonce: #161a3f;
-  --marine-clair: #eceefa;
-  --jaune: #ffff00;
-  --jaune-texte: #8a7a00;
-  --jaune-fond: #fdf7cc;
+  /* C11 : les noms restent, les couleurs passent au vert (plus de bleu marine ni de jaune). */
+  --marine: #0b5e47;
+  --marine-fonce: #08463a;
+  --marine-clair: #e6f4ee;
+  --jaune: #8ee0bd;
+  --jaune-texte: #b45309;
+  --jaune-fond: #fdf0e2;
   --encre: #1b2033;
   --gris: #5f6680;
   --trait: #dfe2ec;

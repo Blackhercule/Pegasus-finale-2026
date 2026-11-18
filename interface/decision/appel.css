@@ -8,14 +8,14 @@ body[data-appel="en_communication"] .appel-phrase { color: #0e6b3a; }
 body[data-appel="en_communication"] .appel-phrase::before { content: "● "; }
 body[data-appel="fini"] .appel-phrase, body[data-appel="echec"] .appel-phrase { color: #5f6680; }
 .appel-duree { margin: 0 0 1rem; color: #5f6680; font-variant-numeric: tabular-nums; min-height: 1.4em; }
-.appel-avertissement { background: #fdf7cc; color: #5c4f00; border: 1px solid #e8cf6a;
+.appel-avertissement { background: #fdf0e2; color: #8a3d06; border: 1px solid #f2c9a0;
                        border-radius: 10px; padding: .6rem .8rem; font-size: .9rem; }
 
 .appel-actions { display: grid; gap: .6rem; margin-bottom: 1rem; }
 .appel-bouton { font: inherit; font-weight: 700; font-size: 1.05rem; padding: .85rem 1rem;
-                border-radius: 999px; cursor: pointer; border: 2px solid #1e2455;
-                background: #fff; color: #1e2455; }
-.appel-bouton[aria-pressed="true"] { background: #fdf7cc; border-color: #8a7a00; color: #5c4f00; }
+                border-radius: 999px; cursor: pointer; border: 2px solid #0b5e47;
+                background: #fff; color: #0b5e47; }
+.appel-bouton[aria-pressed="true"] { background: #fdf0e2; border-color: #b45309; color: #8a3d06; }
 .appel-rouge { background: #c8102e; border-color: #c8102e; color: #fff; }
 .appel-rouge::before { content: "📵 "; }
 .appel-bouton:disabled { opacity: .45; cursor: default; }

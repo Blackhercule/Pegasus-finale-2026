@@ -3,7 +3,7 @@
   flex: 1 1 150px; background: #fff; border: 1px solid var(--trait); border-radius: 10px;
   padding: .6rem .7rem; border-top: 4px solid var(--trait); position: relative;
 }
-.chaine li.mon-poste { border-top-color: var(--or-fonce); background: var(--or-clair); }
+.chaine li.mon-poste { border-top-color: var(--panneau); background: #e6f4ee; }
 .chaine li.close { opacity: .65; }
 .chaine .nombre { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; display: block; }
 .chaine .nom { font-size: .8rem; font-weight: 600; }

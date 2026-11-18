@@ -21,7 +21,7 @@
 }
 .barre__sections a:hover { background: rgba(255, 255, 255, .15); }
 .barre__sections a[aria-current="page"] {          /* la section ouverte */
-  background: #fff; color: #1e2455; font-weight: 700;
+  background: #fff; color: #0b5e47; font-weight: 700;
 }
 .barre__compte { display: flex; align-items: center; gap: .6rem; margin-left: auto; }
 .barre__poste { font-size: .85rem; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,.4); }

@@ -10,7 +10,7 @@ img[src^="/api/fichiers/public/"] { cursor: zoom-in; }
 .visionneuse__bouton { position: absolute; border: 0; cursor: pointer; color: #fff; line-height: 1;
                        background: rgba(255, 255, 255, .16); border-radius: 999px; }
 .visionneuse__bouton:hover { background: rgba(255, 255, 255, .3); }
-.visionneuse__bouton:focus-visible { outline: 3px solid #ffff00; outline-offset: 2px; }
+.visionneuse__bouton:focus-visible { outline: 3px solid #8ee0bd; outline-offset: 2px; }
 .visionneuse__fermer { top: 12px; right: 12px; width: 44px; height: 44px; font-size: 22px; }
 .visionneuse__prec, .visionneuse__suiv { top: 50%; transform: translateY(-50%); width: 52px; height: 52px;
                                          font-size: 36px; padding-bottom: 5px; }
