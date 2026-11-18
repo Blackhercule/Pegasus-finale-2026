@@ -210,7 +210,7 @@ async function afficherFuite(identifiant) {
     <h3 class="aide">Qui a fait quoi</h3>
     <ul class="journal">${f.journal.length ? f.journal.map((e) => `
       <li><span class="quand">${dateCourte(e.date)}</span> —
-        <span class="qui">${echapper(e.auteur)}</span>
+        <span class="qui">${echapper(e.auteur_nom || e.auteur)}</span>
         : ${echapper(chaine.etapes[e.etape]?.nom || e.etape)}${e.detail ? " — " + echapper(e.detail) : ""}</li>`).join("")
       : "<li>Rien encore : la fuite vient d'être signalée.</li>"}</ul>
     ${aMoi ? `

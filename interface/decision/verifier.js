@@ -93,7 +93,12 @@ async function charger() {
       ? `<span class="motifs">${echapper(s.motifs.join(", "))}</span>` : "";
     const commentaire = s.commentaire
       ? `<span class="motifs" style="color:inherit">${echapper(s.commentaire)}</span>` : "";
-    const decision = s.statut === "verifie" || s.statut === "rejete" ? ""
+    // C12 : sur une décision déjà prise, on montre qui l'a prise et quand.
+    const faite = s.decide_par
+      ? `<span class="decide-par">${s.statut === "rejete" ? "Écarté" : "Vérifié"} par
+           <strong>${echapper(s.decide_par_nom || s.decide_par)}</strong><br>${heure(s.decide_le)}</span>`
+      : (s.statut === "verifie" ? `<span class="decide-par">Vérifié automatiquement</span>` : "");
+    const decision = s.statut === "verifie" || s.statut === "rejete" ? faite
       : `<div class="decision">
            <button type="button" data-id="${s.id}" data-action="verifier">Vérifier</button>
            <button type="button" class="rejeter" data-id="${s.id}" data-action="rejeter">Écarter</button>

@@ -20,6 +20,7 @@ import datetime
 import json
 import sqlite3
 
+from .base import signer
 from .geo import distance_m, origines
 from .signalements.controles import REJET, date_retenue
 
@@ -232,6 +233,7 @@ class Fuites:
         fuite["journal"] = [dict(l) for l in self.co.execute(
             "SELECT date, poste, auteur, etape, detail FROM journal_fuite"
             " WHERE fuite_id = ? ORDER BY id", (id_fuite,))]
+        signer(self.co, fuite["journal"])
         colonnes = ("id, date_observation, date_reception, ampleur, quartier, commentaire,"
                     " visages_masques, plaques_masquees,"
                     " photo, message_vocal, source, statut, motifs,"

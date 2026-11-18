@@ -39,7 +39,8 @@ tr.rejete td { color: var(--gris); background: #faf9f6; }
 .etat.recevable { background: #e3ebf6; color: #1d4f91; }
 .etat.a_verifier { background: var(--or-clair); color: var(--or-fonce); }
 .etat.rejete { background: var(--rouge-clair); color: var(--rouge); }
-.motifs { display: block; color: var(--rouge); font-size: .78rem; margin-top: .2rem; }
+.motifs { display: block; color: var(--rouge); font-size: .78rem; margin-top: .2rem;
+           overflow-wrap: anywhere; }  /* un piège de 1000 caractères sans espace ne déforme plus le tableau */
 .decision { display: flex; gap: .3rem; }
 .decision button { padding: .3rem .6rem; font-size: .82rem; }
 .decision .rejeter { background: #fff; color: var(--rouge); border-color: #efb3b3; }
@@ -77,3 +78,5 @@ tr.rejete td { color: var(--gris); background: #faf9f6; }
 /* Sous les deux colonnes, sur toute la largeur : le bouton n'a pas besoin de s'étirer. */
 #bloc-tournee { margin-top: 1rem; }
 #bloc-tournee button { width: auto; }
+.decide-par { font-size: .82rem; color: var(--gris); line-height: 1.35; }
+.decide-par strong { color: var(--panneau); }

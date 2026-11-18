@@ -15,6 +15,8 @@ si le tas n'existe plus sur place).
 import datetime
 import json
 
+from .base import signer
+
 # Pour chaque étape : qui agit, et vers quoi elle mène.
 CHAINE = {
     "signale": {
@@ -109,6 +111,16 @@ class Dossiers:
         for s in signalements:
             s["motifs"] = json.loads(s.get("motifs") or "[]")
         dossier["signalements"] = signalements
+        # C12 : les décisions de la page Vérifier entrent aussi dans « Qui a fait quoi ».
+        for s in self.co.execute(
+                "SELECT id, statut, decide_par, decide_le FROM signalements"
+                " WHERE depotoir_id = ? AND decide_par IS NOT NULL", (id_depotoir,)):
+            dossier["journal"].append({
+                "date": s["decide_le"], "poste": "mairie", "auteur": s["decide_par"],
+                "etape": "Signalement n° %d %s" % (s["id"], "écarté" if s["statut"] == "rejete" else "vérifié"),
+                "detail": ""})
+        dossier["journal"].sort(key=lambda e: e["date"] or "")
+        signer(self.co, dossier["journal"])
         return dossier
 
     @staticmethod

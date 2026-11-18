@@ -9,6 +9,7 @@ import datetime
 import json
 import sqlite3
 
+from ..base import signer
 from ..geo import distance_m, origines
 from .controles import REJET, date_retenue
 
@@ -149,11 +150,16 @@ class Depotoirs:
             self.co.execute("UPDATE signalements SET statut = 'verifie'"
                             " WHERE depotoir_id = ? AND statut = 'recevable'", (id_depotoir,))
 
-    def decider(self, id_signalement: int, verifie: bool) -> bool:
-        """Décision d'un agent : « vérifié » ou « rejeté »."""
+    def decider(self, id_signalement: int, verifie: bool, auteur: str = None) -> bool:
+        """Décision d'un agent : « vérifié » ou « rejeté ». C12 : on garde QUI a décidé et
+        quand, pour savoir qui a fait quoi. Ce nom n'est servi qu'aux agents connectés."""
         s = self.co.execute("SELECT depotoir_id FROM signalements WHERE id = ?", (id_signalement,)).fetchone()
         if s is None:
             return False
+        if auteur:
+            quand = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+            self.co.execute("UPDATE signalements SET decide_par = ?, decide_le = ? WHERE id = ?",
+                            (auteur[:120], quand, id_signalement))
         if verifie:
             self.co.execute("UPDATE signalements SET statut = 'verifie' WHERE id = ?", (id_signalement,))
             if s["depotoir_id"] is None:
@@ -184,7 +190,7 @@ class Depotoirs:
         lignes = [dict(l) for l in self.co.execute(requete, valeurs)]
         for l in lignes:
             l["motifs"] = json.loads(l["motifs"] or "[]")
-        return lignes
+        return signer(self.co, lignes, "decide_par")
 
     def retenus(self, mode_strict: bool) -> list:
         """Les dépotoirs qui entrent dans le plan de gestion."""

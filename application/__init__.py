@@ -1114,14 +1114,14 @@ def deconnecter():
 @vues.route("/api/signalements/<int:identifiant>/verifier", methods=["POST"])
 @agent_requis(postes=("mairie",))
 def verifier(identifiant):
-    return (jsonify({"ok": True}) if depotoirs().decider(identifiant, True)
+    return (jsonify({"ok": True}) if depotoirs().decider(identifiant, True, session["agent"])
             else (jsonify({"erreur": "Signalement inconnu."}), 404))
 
 
 @vues.route("/api/signalements/<int:identifiant>/rejeter", methods=["POST"])
 @agent_requis(postes=("mairie",))
 def rejeter(identifiant):
-    return (jsonify({"ok": True}) if depotoirs().decider(identifiant, False)
+    return (jsonify({"ok": True}) if depotoirs().decider(identifiant, False, session["agent"])
             else (jsonify({"erreur": "Signalement inconnu."}), 404))
 
 

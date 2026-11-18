@@ -115,7 +115,7 @@
     return d.journal.map((e) => el("li", {},
       el("span", { class: "quand" }, date(e.date)),
       el("span", { class: "quoi" }, (etapes.etapes[e.etape]?.nom || e.etape)),
-      " — ", e.auteur, " (", POSTES[e.poste] || e.poste, ")",
+      " — ", e.auteur_nom || e.auteur, " (", POSTES[e.poste] || e.poste, ")",
       e.detail ? el("span", { class: "detail" }, e.detail) : null));
   }
 

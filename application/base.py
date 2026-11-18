@@ -182,7 +182,9 @@ AJOUTS = {
                      # C2 : l'envoi groupé d'où vient le signalement (un lot = un seul témoin).
                      ("lot", "TEXT"),
                      # T17 : combien de visages et de plaques ont été masqués sur la photo.
-                     ("visages_masques", "INTEGER"), ("plaques_masquees", "INTEGER")],
+                     ("visages_masques", "INTEGER"), ("plaques_masquees", "INTEGER"),
+                     # C12 : qui a vérifié ou écarté le signalement, et quand (agents seulement).
+                     ("decide_par", "TEXT"), ("decide_le", "TEXT")],
     "depotoirs": [("etape", "TEXT NOT NULL DEFAULT 'signale'"), ("surface_m2", "REAL"),
                   ("depot", "TEXT")],
 }
@@ -208,3 +210,16 @@ def creer(chemin: str) -> None:
         for index in INDEX_APRES_AJOUTS:
             co.execute(index)
     co.close()
+
+
+def signer(co: sqlite3.Connection, entrees: list, cle: str = "auteur") -> list:
+    """C12 : ajoute à chaque entrée « <cle>_nom », le nom de l'agent à afficher : « Awa
+    Ouédraogo (awa.ouedraogo) » pour un compte individuel, l'identifiant seul (« agent »,
+    « brigade »…) pour un compte de démarrage. La valeur gardée en base reste l'identifiant."""
+    noms = {l["identifiant"]: l["nom"] for l in co.execute("SELECT identifiant, nom FROM agents")}
+    for e in entrees:
+        identifiant = e.get(cle)
+        if identifiant:
+            nom = noms.get(identifiant)
+            e[cle + "_nom"] = f"{nom} ({identifiant})" if nom else identifiant
+    return entrees

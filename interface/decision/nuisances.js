@@ -233,7 +233,7 @@ async function afficherNuisance(identifiant) {
     <h3 class="aide">Qui a fait quoi</h3>
     <ul class="journal">${n.journal.length ? n.journal.map((e) => `
       <li><span class="quand">${dateCourte(e.date)}</span> —
-        <span class="qui">${echapper(e.auteur)}</span> (${echapper(SERVICES[e.poste] || e.poste)})
+        <span class="qui">${echapper(e.auteur_nom || e.auteur)}</span> (${echapper(SERVICES[e.poste] || e.poste)})
         : ${echapper(chaine.etapes[e.etape]?.nom || e.etape)}${e.detail ? " — " + echapper(e.detail) : ""}</li>`).join("")
       : "<li>Rien encore : le dossier vient d'être ouvert par un signalement.</li>"}</ul>
     ${aMoi ? `
