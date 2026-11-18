@@ -2,7 +2,7 @@
 
 ## `Demonstration-Assainissement-de-Ouaga.mp4`
 
-Vidéo de démonstration (E23) : 3 min 01 s, 1280 × 720, voix et musique (refaite le 18/11 avec l'appel à la mairie, la vérification signée et le nouvel habillage vert).
+Vidéo de démonstration (E23) : 3 min 01 s, 1280 × 720, voix et texte en bas de l'écran (refaite le 18/11 : page d'accueil avec photos, appel à la mairie, zones à risque, collecteurs).
 
 - **Images** : les vraies pages de l'outil, filmées dans un navigateur (`outils/filmer.mjs`).
 - **Voix** : voix de synthèse française lisant le bandeau de chaque scène, sans le modifier.
@@ -14,3 +14,4 @@ Vidéo de démonstration (E23) : 3 min 01 s, 1280 × 720, voix et musique (refai
 - **Montage** : `outils/monter_video.py` avec ffmpeg.
 
 Pour la refaire, voir `comptes-rendus/T21.md`.
+- `Rapport-projet-Pegasus.pdf` : rapport de projet (6 pages) — une plateforme pour toute la population, y compris ceux qui ne savent ni lire ni écrire.

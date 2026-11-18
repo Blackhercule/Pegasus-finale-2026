@@ -91,6 +91,22 @@ async function seConnecter(page, adresse, nom) {
   }
 }
 
+// 0. La page d'accueil publique : photos, écrans qui défilent, collecteurs du quartier.
+await scene("00-accueil", ECRAN, async (page) => {
+  await page.goto(base + "/", { waitUntil: "networkidle" });
+  await attendre(page, 3000);
+  const descendre = async (selecteur, pause) => {
+    await page.evaluate((s) => document.querySelector(s).scrollIntoView({ behavior: "smooth", block: "start" }), selecteur);
+    await attendre(page, pause);
+  };
+  await descendre("#titre-natures", 2500);
+  await descendre("#titre-etapes", 5000);                     // le téléphone fait défiler les écrans
+  await descendre("#titre-collecteurs", 1200);
+  await page.selectOption("#quartier", "Tampouy");
+  await attendre(page, 3000);
+  await descendre("#titre-propres", 3000);
+});
+
 // 1. Un habitant : la page d'accueil, puis le signalement sur son téléphone.
 await scene("01-signaler", TEL, async (page) => {
   await page.goto(base + "/", { waitUntil: "networkidle" });
@@ -255,6 +271,17 @@ await scene("06-chaine", ECRAN, async (page) => {
   await ouvrir();
   await page.locator(".journal").scrollIntoViewIfNeeded();      // qui a fait quoi, avec les noms
   await attendre(page, 5000);
+});
+
+// 6 bis. Les zones à risque : carte thermique, quartiers, curage avant la saison des pluies.
+await scene("065-zones", ECRAN, async (page) => {
+  await seConnecter(page, "/decision/zones.html", "awa.kabore");
+  await page.goto(base + "/decision/zones.html", { waitUntil: "networkidle" });
+  await attendre(page, 3500);
+  await page.click("#classement button");                      // le quartier le plus touché
+  await attendre(page, 3500);
+  await page.evaluate(() => document.querySelector(".prevention").scrollIntoView({ behavior: "smooth", block: "center" }));
+  await attendre(page, 4000);
 });
 
 // 7. Jusqu'à la tournée : la carte, puis une tournée qui passe par un dépotoir, rue par rue.

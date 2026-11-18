@@ -1,7 +1,7 @@
 /* Garde la page utilisable sans réseau : les fichiers sont mis de côté à la première visite. */
 "use strict";
-const CACHE = "signaler-v5";
-const FICHIERS = ["/signaler/", "/signaler/index.html", "/signaler/style.css",
+const CACHE = "signaler-v6";
+const FICHIERS = ["/signaler/", "/accueil/images/brigade-verte.jpg", "/accueil/images/nettoyage-rue.jpg", "/signaler/index.html", "/signaler/style.css",
                   "/signaler/signaler.js", "/signaler/appel.js", "/signaler/manifeste.webmanifest",
                   // T16 : la liste des lieux connus, pour choisir un lieu même hors ligne.
                   "/api/lieux"];

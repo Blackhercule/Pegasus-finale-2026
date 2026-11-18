@@ -42,6 +42,7 @@
         </div>
       </section>
 
+      <div class="fond fond--tas">
       <section class="cadre bloc" aria-labelledby="titre-natures">
         <h2 id="titre-natures">Ce que vous pouvez signaler</h2>
         <ul class="natures">
@@ -53,8 +54,11 @@
           <li><span class="icone" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12c3-4.5 9-6 14-2l4-3v10l-4-3c-5 4-11 2.5-14-2z"/><path d="M8 11h.01"/></svg></span><strong>Des eaux de poisson ou de poulet</strong><span>eaux de lavage déversées</span></li>
         </ul>
       </section>
+      </div>
 
-      <section class="cadre bloc" aria-labelledby="titre-etapes">
+      <div class="fond fond--etapes">
+      <section class="cadre bloc etapes-avec-telephone" aria-labelledby="titre-etapes">
+        <div>
         <h2 id="titre-etapes">Comment ça marche</h2>
         <ol class="etapes">
           <li><span class="numero" aria-hidden="true">1</span>
@@ -70,8 +74,21 @@
             <span>Brigade Laabal, équipe de collecte, ONEA : chacun à son tour, et chaque passage
               est daté et signé jusqu'à l'enlèvement.</span></li>
         </ol>
+        </div>
+        <!-- Les écrans de la page Signaler défilent dans un téléphone, comme une démonstration. -->
+        <figure class="telephone" aria-label="Les écrans d'un signalement, l'un après l'autre">
+          <div class="telephone__ecran">
+            <img src="/accueil/images/etapes/1-menu.jpg" alt="Accueil parlé et touches 1, 2, 3">
+            <img src="/accueil/images/etapes/2-nature.jpg" alt="Choisir ce qu'on signale">
+            <img src="/accueil/images/etapes/3-taille.jpg" alt="Position et taille du tas">
+            <img src="/accueil/images/etapes/4-photo.jpg" alt="Photo du tas">
+            <img src="/accueil/images/etapes/5-envoye.jpg" alt="Signalement enregistré">
+          </div>
+        </figure>
       </section>
+      </div>
 
+      <div class="fond fond--camion">
       <section class="cadre bloc" aria-labelledby="titre-collecteurs">
         <h2 id="titre-collecteurs">Les collecteurs de mon quartier</h2>
         <p class="sous-bloc">Qui ramasse les ordures chez vous, et quel jour. S'il n'est pas passé,
@@ -81,7 +98,9 @@
         <ul class="collecteurs" id="collecteurs" aria-live="polite"></ul>
         <p class="merci" id="merci" role="status" hidden></p>
       </section>
+      </div>
 
+      <div class="fond fond--monument">
       <section class="cadre bloc deux-colonnes">
         <div aria-labelledby="titre-propres">
           <h2 id="titre-propres">Les quartiers les plus propres</h2>
@@ -116,13 +135,15 @@
         </div>
         <a class="bouton-services" href="/decision/">Espace des services</a>
       </section>
-    </main>
 
     <footer class="pied">
       <div class="cadre">
         Outil libre (AGPL-3.0) · données cartographiques © les contributeurs d'OpenStreetMap ·
-        aucune connexion à Internet nécessaire.
+        aucune connexion à Internet nécessaire · photos : brigade verte de Ouagadougou (visages
+        masqués), monument des Héros nationaux © Mr. Oosman.
       </div>
     </footer>
+      </div>
+    </main>
   </body>
 </html>

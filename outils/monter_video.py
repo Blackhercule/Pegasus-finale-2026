@@ -23,6 +23,8 @@ import tempfile
 # Dans l'ordre imposé par l'énoncé : « du signalement à la tournée, puis un changement de
 # paramètres et le plan recalculé ».
 SCENES = [
+    ("00-accueil", "Une plateforme pour toute la population",
+     "Signaler sans savoir lire, trouver son collecteur, voir les quartiers les plus propres"),
     ("01-signaler", "1. Un habitant signale un dépotoir depuis son téléphone",
      "Accueil parlé en mooré, menu 1-2-3, mesure du tas, message vocal — sans compte, même sans réseau"),
     ("02-appel", "Touche 2 ou 3 : l'habitant appelle la mairie",
@@ -33,6 +35,8 @@ SCENES = [
      "Le nom de l'agent qui a vérifié reste attaché à sa décision"),
     ("06-chaine", "4. Le dossier passe de poste en poste",
      "Photo en grand, position sur la carte, et pour chaque étape : qui a fait quoi, et quand"),
+    ("065-zones", "Zones à risque : où agir en premier",
+     "Carte thermique, quartiers les plus touchés, caniveaux à curer avant la saison des pluies"),
     ("07-tournee", "5. Jusqu'à la tournée : le camion passe par le dépotoir",
      "Points de regroupement et tournées optimisées, tracées rue par rue"),
     ("08-parametres", "6. Le jury change les paramètres : 8 camions en panne, saison des pluies",
@@ -46,7 +50,7 @@ SCENES = [
 TITRE = ("Assainissement de Ouaga", "Du signalement d'un dépotoir au plan de gestion de la ville",
          "Équipe PEGASUS — Université Joseph Ki-Zerbo")
 FIN = ("Code libre, données ouvertes", "AGPL-3.0 · OpenStreetMap (ODbL) · aucune dépendance à Internet",
-       "266 tests automatisés · déploiement en une commande")
+       "279 tests automatisés · déploiement en une commande")
 
 # Une scène qui attend un long calcul commence AVANT_RESULTAT secondes avant que le résultat
 # s'affiche (moment noté par filmer.mjs dans coupes.json) : on ne montre pas l'attente.
@@ -58,8 +62,9 @@ COUPER_LE_DEBUT = {"07-tournee": 4.0, "08-parametres": 4.0}
 
 # L'énoncé demande 3 minutes : les scènes où l'on tape et où l'on attend sont accélérées
 # (1,5 = une fois et demie plus vite). Les gestes restent lisibles ; rien n'est coupé.
-ACCELERER = {"01-signaler": 1.3, "02-appel": 1.2, "04-pieges": 1.3, "06-chaine": 1.5,
-             "07-tournee": 1.3, "08-parametres": 1.5}
+ACCELERER = {"00-accueil": 1.35, "01-signaler": 1.35, "02-appel": 1.25, "04-pieges": 1.5,
+             "05-verifier": 1.2, "06-chaine": 1.7, "065-zones": 1.1, "07-tournee": 1.7,
+             "08-parametres": 1.9, "09-scenarios": 1.8, "10-simulation": 1.4}
 
 POLICE = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 POLICE_GRASSE = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"

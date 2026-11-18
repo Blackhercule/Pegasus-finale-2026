@@ -145,3 +145,83 @@ a:focus-visible { outline: 3px solid var(--vert-clair); outline-offset: 3px; }
 @media (max-width: 900px) {
   .deux-colonnes, .gestes { grid-template-columns: minmax(0, 1fr); gap: var(--e5); }
 }
+
+/* =====================================================================================
+   Photos en arrière-plan (18/11). Chaque photo est posée sous un voile en dégradé qui garde
+   le texte lisible ; les visages ont été masqués par notre propre outil (anonymiser.py).
+   Toutes les images sont servies par notre machine : rien ne vient d'Internet.
+   ===================================================================================== */
+
+/* Le haut de page, comme la barre des postes : le drapeau du Burkina en dégradé. */
+.haut { position: relative; isolation: isolate; color: var(--blanc); border-bottom: 0;
+        background: linear-gradient(90deg, #ef2b2d 0%, #c8402c 35%, #3d8a3c 65%, #009e49 100%); }
+.haut::before { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, .3); z-index: -1; }
+.haut .marque, .haut .haut__services { color: var(--blanc); }
+.haut__services { padding: 6px 14px; border: 1px solid rgba(255, 255, 255, .7); border-radius: 8px;
+                  text-decoration: none; background: rgba(0, 0, 0, .2); }
+.haut__services:hover { background: var(--blanc); color: var(--marine); }
+.haut a:focus-visible { outline-color: var(--blanc); }
+
+/* La une : les dames de la brigade verte qui nettoient la ville. */
+.une { background: linear-gradient(90deg, rgba(255, 255, 255, .97) 0%, rgba(255, 255, 255, .9) 42%,
+                                   rgba(255, 255, 255, .35) 75%, rgba(255, 255, 255, .15) 100%),
+                   url("/accueil/images/nettoyage-rue.jpg") center 35% / cover no-repeat; }
+.chiffres p { background: rgba(255, 255, 255, .9); backdrop-filter: blur(4px);
+              box-shadow: 0 6px 20px rgba(0, 0, 0, .12); }
+
+.fond { position: relative; background-size: cover; background-position: center; }
+.fond > .bloc { padding-top: var(--e7); padding-bottom: var(--e7); margin: 0 auto; }
+
+/* Ce que vous pouvez signaler : un vrai tas d'ordures de la ville. */
+.fond--tas { background-image: linear-gradient(180deg, rgba(255, 255, 255, .93), rgba(255, 255, 255, .86)),
+                               url("/accueil/images/tas-ordures.jpg"); }
+.fond--tas .natures li { background: rgba(255, 255, 255, .94); }
+
+/* Comment ça marche : les écrans du signalement défilent dans un téléphone. */
+.fond--etapes { background: linear-gradient(135deg, #e6f4ee 0%, #f7fbf9 60%, #ffffff 100%); }
+.etapes-avec-telephone { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: var(--e7);
+                         align-items: center; }
+.etapes-avec-telephone .etapes { grid-template-columns: minmax(0, 1fr); }
+.etapes-avec-telephone .etapes li { grid-template-columns: 44px minmax(0, 1fr); column-gap: var(--e4); }
+.etapes-avec-telephone .etapes .numero { grid-row: span 2; }
+.telephone { margin: 0; justify-self: center; width: 240px; padding: 12px; border-radius: 34px;
+             background: #1b2033; box-shadow: 0 18px 40px rgba(11, 94, 71, .35); }
+.telephone__ecran { position: relative; aspect-ratio: 1 / 2; overflow: hidden; border-radius: 24px; background: #0b5e47; }
+.telephone__ecran img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+                        opacity: 0; animation: ecran-suivant 15s infinite; }
+.telephone__ecran img:nth-child(2) { animation-delay: 3s; }
+.telephone__ecran img:nth-child(3) { animation-delay: 6s; }
+.telephone__ecran img:nth-child(4) { animation-delay: 9s; }
+.telephone__ecran img:nth-child(5) { animation-delay: 12s; }
+@keyframes ecran-suivant {
+  0% { opacity: 0; transform: translateY(12px); }
+  4%, 20% { opacity: 1; transform: none; }
+  24%, 100% { opacity: 0; }
+}
+
+/* Les collecteurs : le camion vert de la ville. */
+.fond--camion { background-image: linear-gradient(90deg, rgba(255, 255, 255, .97) 0%, rgba(255, 255, 255, .9) 55%,
+                                                  rgba(255, 255, 255, .45) 100%),
+                                  url("/accueil/images/camion-vert.jpg");
+                background-position: right 30%; }
+.fond--camion .collecteur { background: rgba(255, 255, 255, .95); }
+
+/* Des quartiers les plus propres jusqu'en bas : le monument, un peu effacé. */
+.fond--monument { background-image: linear-gradient(180deg, rgba(255, 255, 255, .92) 0%, rgba(255, 255, 255, .8) 55%,
+                                                    rgba(255, 255, 255, .7) 100%),
+                                    url("/accueil/images/monument.jpg");
+                  background-attachment: scroll; background-position: center bottom; }
+.fond--monument .propres li, .fond--monument .campagnes li { background: rgba(255, 255, 255, .92); }
+.fond--monument .gestes li { background: rgba(230, 244, 238, .94); }
+.fond--monument .porte-services { border-top-color: rgba(0, 0, 0, .1); }
+.fond--monument .pied { background: rgba(255, 255, 255, .75); }
+
+@media (max-width: 900px) {
+  .etapes-avec-telephone { grid-template-columns: minmax(0, 1fr); }
+  .une { background: linear-gradient(180deg, rgba(255, 255, 255, .95) 0%, rgba(255, 255, 255, .88) 100%),
+                     url("/accueil/images/nettoyage-rue.jpg") center / cover no-repeat; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .telephone__ecran img { animation: none; }
+  .telephone__ecran img:first-child { opacity: 1; }
+}

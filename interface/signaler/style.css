@@ -290,3 +290,33 @@ textarea { resize: vertical; }
   box-shadow: 0 0 0 2px rgba(255, 255, 255, .7) inset, 0 6px 18px rgba(0, 0, 0, .25); }
 #menu-1 .menu-chiffre, .appel-formulaire .menu-chiffre { background: #fff; color: var(--vert); }
 #menu-1 .menu-icone, .appel-formulaire .menu-icone { color: #fff; }
+
+/* ------------------------------------------------------------------ photos de l'accueil parlé
+   Deux photos de la brigade verte (visages masqués par notre propre outil) passent l'une après
+   l'autre derrière l'accueil, sous un voile vert en dégradé qui garde le texte lisible.
+   Rien que du CSS : pas de script, et les photos sont gardées hors ligne par le service worker. */
+.accueil-guidage { isolation: isolate; overflow: hidden; }
+.accueil-guidage::before, .accueil-guidage::after {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background-size: cover; background-position: center;
+  animation: fondu-accueil 16s ease-in-out infinite;
+}
+.accueil-guidage::before {
+  background-image: linear-gradient(180deg, rgba(8, 70, 58, .55) 0%, rgba(11, 94, 71, .78) 45%, rgba(8, 70, 58, .95) 100%),
+                    url("/accueil/images/brigade-verte.jpg");
+}
+.accueil-guidage::after {
+  background-image: linear-gradient(180deg, rgba(8, 70, 58, .55) 0%, rgba(11, 94, 71, .78) 45%, rgba(8, 70, 58, .95) 100%),
+                    url("/accueil/images/nettoyage-rue.jpg");
+  animation-delay: -8s;
+}
+@keyframes fondu-accueil {
+  0%, 40% { opacity: 1; transform: scale(1.04); }
+  50%, 90% { opacity: 0; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.04); }
+}
+.accueil-boite { position: relative; z-index: 1; text-shadow: 0 1px 3px rgba(0, 0, 0, .35); }
+@media (prefers-reduced-motion: reduce) {
+  .accueil-guidage::before, .accueil-guidage::after { animation: none; }
+  .accueil-guidage::after { opacity: 0; }
+}
