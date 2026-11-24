@@ -1,0 +1,50 @@
+{% extends "cave/base.html" %}
+{% load cave_extras %}
+{% block titre %}Accueil{% endblock %}
+{% block contenu %}
+<div class="entete-page">
+  <div>
+    <h1>Bonjour {{ user.first_name|default:user.username }}</h1>
+    <div class="discret">{{ jour|date:"l j F Y"|capfirst }}</div>
+  </div>
+</div>
+
+<div class="raccourcis">
+  <a class="raccourci principal" href="{% url 'nouvelle_vente' %}"><span class="icone" aria-hidden="true">🛒</span>Nouvelle vente</a>
+  <a class="raccourci" href="{% url 'clients' %}"><span class="icone" aria-hidden="true">💰</span>Crédit / remboursement</a>
+  <a class="raccourci" href="{% url 'arrivages' %}"><span class="icone" aria-hidden="true">🚚</span>Arrivage</a>
+  <a class="raccourci" href="{% url 'pertes' %}"><span class="icone" aria-hidden="true">💥</span>Casse / perte</a>
+  <a class="raccourci" href="{% url 'point_du_jour' %}"><span class="icone" aria-hidden="true">🧾</span>Mes comptes du jour</a>
+</div>
+
+<div class="grille">
+  <div class="tuile accent"><div class="libelle">Mes ventes aujourd'hui</div><div class="valeur">{{ resume.chiffre_affaires|fcfa }}</div><div class="detail">{{ resume.nombre_ventes }} vente{{ resume.nombre_ventes|pluralize }} · {{ resume.caisses }} caisse{{ resume.caisses|pluralize }}</div></div>
+  <div class="tuile"><div class="libelle">Argent que j'ai encaissé</div><div class="valeur">{{ resume.encaisse|fcfa }}</div><div class="detail">ventes + remboursements</div></div>
+  <div class="tuile"><div class="libelle">Crédit que j'ai accordé</div><div class="valeur">{{ resume.credit_accorde|fcfa }}</div></div>
+</div>
+
+<div class="deux-colonnes">
+  <div class="carte">
+    <h2>Mes dernières ventes <a href="{% url 'ventes' %}">Toutes</a></h2>
+    <table>
+      <tbody>
+      {% for v in dernieres_ventes %}
+        <tr class="{% if v.annulee %}annulee{% endif %}">
+          <td>{{ v.date|date:"H:i" }}</td>
+          <td><a href="{% url 'recu_vente' v.pk %}">{{ v.numero }}</a> <span class="badge {{ v.type_vente }}">{{ v.get_type_vente_display }}</span></td>
+          <td class="droite nombre">{{ v.montant_total|fcfa }}</td>
+        </tr>
+      {% empty %}
+        <tr><td class="vide">Pas encore de vente aujourd'hui.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="carte">
+    <h2>Stock bas <a href="{% url 'stock' %}">Tout le stock</a></h2>
+    {% if alertes %}
+    <table><tbody>{% for p in alertes %}<tr><td>{{ p }}</td><td class="droite"><span class="badge alerte">{{ p.stock_texte }}</span></td></tr>{% endfor %}</tbody></table>
+    {% else %}<p class="vide">Rien à signaler.</p>{% endif %}
+  </div>
+</div>
+{% endblock %}

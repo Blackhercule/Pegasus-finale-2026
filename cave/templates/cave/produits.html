@@ -1,0 +1,32 @@
+{% extends "cave/base.html" %}
+{% load cave_extras %}
+{% block titre %}Produits et prix{% endblock %}
+{% block contenu %}
+<div class="entete-page">
+  <div><h1>Produits et prix</h1><div class="discret">Prix d'une caisse, au détail et en gros. Les gérants ne peuvent pas modifier les prix.</div></div>
+  <div class="actions"><a class="bouton principal" href="{% url 'produit_nouveau' %}">+ Nouveau produit</a></div>
+</div>
+<div class="carte">
+  <div class="defilant">
+  <table>
+    <thead><tr><th>Boisson</th><th>Catégorie</th><th class="droite">Bt / caisse</th><th class="droite">Prix détail</th><th class="droite">Prix gros</th><th class="droite">Prix d'achat</th><th>Stock</th><th></th></tr></thead>
+    <tbody>
+    {% for p in produits %}
+      <tr>
+        <td>{{ p }}{% if not p.actif %} <span class="badge inactif">Retiré</span>{% endif %}</td>
+        <td>{{ p.get_categorie_display }}</td>
+        <td class="droite nombre">{{ p.bouteilles_par_caisse }}</td>
+        <td class="droite nombre">{{ p.prix_detail_caisse|fcfa }}</td>
+        <td class="droite nombre">{{ p.prix_gros_caisse|fcfa }}</td>
+        <td class="droite nombre">{{ p.prix_achat_caisse|fcfa }}</td>
+        <td class="nombre">{{ p.stock_texte }}</td>
+        <td class="actions"><a class="bouton petit" href="{% url 'produit_modifier' p.pk %}">Modifier</a></td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="8" class="vide">Aucun produit. Commencez par ajouter les boissons que vend la cave.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

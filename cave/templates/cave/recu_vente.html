@@ -1,0 +1,44 @@
+{% extends "cave/base.html" %}
+{% load cave_extras %}
+{% block titre %}Reçu {{ vente.numero }}{% endblock %}
+{% block contenu %}
+<div class="actions-recu">
+  <button class="bouton principal" type="button" data-imprimer>Imprimer le reçu</button>
+  <a class="bouton" href="{% url 'nouvelle_vente' %}">+ Nouvelle vente</a>
+  {% if vente.client %}<a class="bouton" href="{% url 'client_detail' vente.client.pk %}">Compte du client</a>{% endif %}
+  {% if user.est_patron and not vente.annulee %}<a class="bouton danger" href="{% url 'annuler' 'vente' vente.pk %}?suite={{ request.path|urlencode }}">Annuler cette vente</a>{% endif %}
+</div>
+
+<div class="recu">
+  {% if vente.annulee %}<div class="tampon-annule">VENTE ANNULÉE<br><small>{{ vente.annulee_le|date:"d/m/Y H:i" }} par {{ vente.annulee_par }} — {{ vente.motif_annulation }}</small></div>{% endif %}
+  <div class="entete-recu">
+    <strong>{{ parametres_cave.nom }}</strong>
+    {% if parametres_cave.adresse %}<div>{{ parametres_cave.adresse }}</div>{% endif %}
+    {% if parametres_cave.telephone %}<div>Tél. {{ parametres_cave.telephone }}</div>{% endif %}
+  </div>
+  <div class="lignes-infos">
+    <div><span>Reçu n°</span><strong>{{ vente.numero }}</strong></div>
+    <div><span>Date</span><span>{{ vente.date|date:"d/m/Y à H:i" }}</span></div>
+    <div><span>Vente</span><span>{{ vente.get_type_vente_display }}</span></div>
+    <div><span>Servi par</span><span>{{ vente.vendeur }}</span></div>
+    {% if vente.client %}<div><span>Client</span><span>{{ vente.client }}</span></div>{% endif %}
+  </div>
+  <table>
+    <thead><tr><th>Boisson</th><th class="droite">Caisses</th><th class="droite">Prix</th><th class="droite">Montant</th></tr></thead>
+    <tbody>
+    {% for l in vente.lignes.all %}
+      <tr><td>{{ l.produit }}</td><td class="droite">{{ l.quantite_caisses }}</td><td class="droite nombre">{{ l.prix_caisse|fcfa }}</td><td class="droite nombre">{{ l.montant|fcfa }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div class="lignes-infos total-recu"><div><span>TOTAL</span><span class="nombre">{{ vente.montant_total|fcfa }}</span></div></div>
+  <div class="lignes-infos">
+    <div><span>Nombre de caisses</span><span>{{ vente.nb_caisses }}</span></div>
+    <div><span>Payé ({{ vente.get_mode_paiement_display }})</span><span class="nombre">{{ vente.montant_paye|fcfa }}</span></div>
+    {% if vente.a_credit %}<div><strong>Reste à payer (crédit)</strong><strong class="nombre">{{ vente.reste_a_payer|fcfa }}</strong></div>{% endif %}
+    {% if solde_client and solde_client > 0 %}<div><span>Total dû par le client ce jour</span><span class="nombre">{{ solde_client|fcfa }}</span></div>{% endif %}
+  </div>
+  {% if vente.note %}<p class="petit" style="margin-top:.5rem">Note : {{ vente.note }}</p>{% endif %}
+  <div class="pied-recu">{{ parametres_cave.message_recu }}</div>
+</div>
+{% endblock %}

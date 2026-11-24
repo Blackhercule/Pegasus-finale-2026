@@ -1,0 +1,56 @@
+{% extends "cave/base.html" %}
+{% load cave_extras %}
+{% block titre %}Stock{% endblock %}
+{% block contenu %}
+<div class="entete-page">
+  <div><h1>Stock</h1><div class="discret">Calculé à partir des arrivages, des ventes et des pertes enregistrés.</div></div>
+  <div class="actions"><a class="bouton" href="{% url 'arrivages' %}">+ Arrivage</a><a class="bouton" href="{% url 'pertes' %}">Déclarer une perte</a></div>
+</div>
+<div class="grille">
+  <div class="tuile{% if nb_alertes %} attention{% endif %}"><div class="libelle">Produits sous le seuil d'alerte</div><div class="valeur">{{ nb_alertes }}</div></div>
+  {% if user.est_patron %}<div class="tuile accent"><div class="libelle">Valeur du stock (prix d'achat)</div><div class="valeur">{{ valeur_stock|fcfa }}</div></div>{% endif %}
+</div>
+<div class="carte">
+  <div class="defilant">
+  <table>
+    <thead><tr><th>Boisson</th><th>Catégorie</th><th>En stock</th><th class="droite">Seuil</th><th>État</th>{% if user.est_patron %}<th class="droite">Valeur</th>{% endif %}</tr></thead>
+    <tbody>
+    {% for p in produits %}
+      <tr>
+        <td>{{ p }}<div class="petit discret">caisse de {{ p.bouteilles_par_caisse }}</div></td>
+        <td>{{ p.get_categorie_display }}</td>
+        <td class="nombre"><strong>{{ p.stock_texte }}</strong></td>
+        <td class="droite nombre">{{ p.seuil_alerte_caisses }}</td>
+        <td>{% if p.stock_bouteilles <= 0 %}<span class="badge credit">Épuisé</span>{% elif p.en_alerte %}<span class="badge alerte">Stock bas</span>{% else %}<span class="badge ok">Correct</span>{% endif %}</td>
+        {% if user.est_patron %}<td class="droite nombre">{{ p.valeur_stock|fcfa }}</td>{% endif %}
+      </tr>
+    {% empty %}
+      <tr><td colspan="6" class="vide">Aucun produit.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% if besoins %}
+<div class="carte">
+  <h2>Besoins pour les 30 prochains jours</h2>
+  <p class="discret petit">Estimation d'après le rythme des ventes des {{ besoins.jours_observes }} derniers jours. Couverture : nombre de jours avant d'être à court si les ventes continuent au même rythme.</p>
+  <div class="defilant">
+  <table>
+    <thead><tr><th>Boisson</th><th class="droite">En stock</th><th class="droite">Ventes prévues (30 j)</th><th class="droite">Couverture</th><th class="droite">À commander</th></tr></thead>
+    <tbody>
+    {% for b in besoins.lignes %}
+      <tr>
+        <td>{{ b.produit }}</td>
+        <td class="droite nombre">{{ b.produit.stock_caisses }} cs</td>
+        <td class="droite nombre">{{ b.ventes_30j }} cs</td>
+        <td class="droite nombre">{% if b.couverture_jours is None %}—{% else %}{{ b.couverture_jours }} j{% endif %}</td>
+        <td class="droite nombre">{% if b.a_commander %}<span class="badge alerte">{{ b.a_commander }} caisses</span>{% else %}—{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "cave/base.html" %}
+{% block titre %}Paramètres{% endblock %}
+{% block contenu %}
+<div class="entete-page"><div><h1>Informations de la cave</h1><div class="discret">Elles apparaissent en haut de chaque reçu.</div></div></div>
+<div class="carte" style="max-width:560px">
+  <form method="post">
+    {% csrf_token %}
+    {% include "cave/_form.html" %}
+    <button class="bouton principal" type="submit">Enregistrer</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "cave/base.html" %}
+{% load cave_extras %}
+{% block titre %}Tableau de bord{% endblock %}
+{% block tete %}<meta http-equiv="refresh" content="60">{% endblock %}
+{% block contenu %}
+<div class="entete-page">
+  <div>
+    <h1>Tableau de bord</h1>
+    <div class="discret">{{ jour|date:"l j F Y"|capfirst }} · la page se met à jour toute seule chaque minute</div>
+  </div>
+  <div class="actions">
+    <a class="bouton principal" href="{% url 'nouvelle_vente' %}">+ Nouvelle vente</a>
+    <a class="bouton" href="{% url 'point_du_jour' %}">Point du jour</a>
+  </div>
+</div>
+
+<div class="grille">
+  <div class="tuile accent">
+    <div class="libelle">Ventes aujourd'hui</div>
+    <div class="valeur">{{ resume.chiffre_affaires|fcfa }}</div>
+    <div class="detail">{{ resume.nombre_ventes }} vente{{ resume.nombre_ventes|pluralize }} · {{ resume.caisses }} caisse{{ resume.caisses|pluralize }} · hier {{ resume_hier.chiffre_affaires|fcfa }}</div>
+  </div>
+  <div class="tuile">
+    <div class="libelle">Argent encaissé aujourd'hui</div>
+    <div class="valeur">{{ resume.encaisse|fcfa }}</div>
+    <div class="detail">dont remboursements de crédit : {{ resume.remboursements|fcfa }}</div>
+  </div>
+  <div class="tuile">
+    <div class="libelle">Crédit accordé aujourd'hui</div>
+    <div class="valeur">{{ resume.credit_accorde|fcfa }}</div>
+    <div class="detail">à récupérer auprès des clients</div>
+  </div>
+  <a class="tuile{% if total_dettes %} attention{% endif %}" href="{% url 'clients' %}" style="text-decoration:none;color:inherit">
+    <div class="libelle">Total des dettes clients</div>
+    <div class="valeur">{{ total_dettes|fcfa }}</div>
+    <div class="detail">voir qui doit combien →</div>
+  </a>
+  <a class="tuile" href="{% url 'statistiques' %}" style="text-decoration:none;color:inherit">
+    <div class="libelle">Ventes de {{ nom_mois }}</div>
+    <div class="valeur">{{ ca_mois|fcfa }}</div>
+    <div class="detail">voir les statistiques →</div>
+  </a>
+  <div class="tuile{% if resume.pertes_valeur %} attention{% endif %}">
+    <div class="libelle">Casses et pertes aujourd'hui</div>
+    <div class="valeur">{{ resume.pertes_valeur|fcfa }}</div>
+    <div class="detail">au prix d'achat</div>
+  </div>
+</div>
+
+<div class="deux-colonnes">
+  <div class="carte">
+    <h2>Chaque gérant aujourd'hui <a href="{% url 'point_du_jour' %}">Comptes détaillés</a></h2>
+    <div class="defilant">
+    <table>
+      <thead><tr><th>Personne</th><th class="droite">Ventes</th><th class="droite">Montant</th><th class="droite">Encaissé</th><th class="droite">Crédit</th></tr></thead>
+      <tbody>
+      {% for p in par_personne %}
+        <tr>
+          <td><a href="{% url 'point_du_jour' %}?vendeur={{ p.utilisateur.id }}">{{ p.utilisateur }}</a></td>
+          <td class="droite nombre">{{ p.nombre_ventes }}</td>
+          <td class="droite nombre">{{ p.chiffre_affaires|fcfa }}</td>
+          <td class="droite nombre">{{ p.encaisse|fcfa }}</td>
+          <td class="droite nombre">{{ p.credit_accorde|fcfa }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" class="vide">Aucun gérant pour l'instant. <a href="{% url 'gerant_nouveau' %}">Créer un compte gérant</a></td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+  <div class="carte">
+    <h2>Alertes de stock <a href="{% url 'stock' %}">Tout le stock</a></h2>
+    {% if alertes %}
+    <table>
+      <tbody>
+      {% for p in alertes %}
+        <tr><td>{{ p }}</td><td class="droite"><span class="badge alerte">{{ p.stock_texte }}</span></td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="vide">Aucun produit sous son seuil d'alerte.</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="carte">
+  <h2>Ce qui se passe dans la cave <a href="{% url 'journal' %}">Tout le journal</a></h2>
+  {% include "cave/_journal.html" with entrees=journal %}
+</div>
+{% endblock %}

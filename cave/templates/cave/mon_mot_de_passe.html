@@ -1,0 +1,12 @@
+{% extends "cave/base.html" %}
+{% block titre %}Mon mot de passe{% endblock %}
+{% block contenu %}
+<div class="entete-page"><h1>Changer mon mot de passe</h1></div>
+<div class="carte" style="max-width:560px">
+  <form method="post">
+    {% csrf_token %}
+    {% include "cave/_form.html" %}
+    <button class="bouton principal" type="submit">Changer le mot de passe</button>
+  </form>
+</div>
+{% endblock %}

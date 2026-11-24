@@ -1,0 +1,36 @@
+{% extends "cave/base.html" %}
+{% load cave_extras %}
+{% block titre %}Clients et crédits{% endblock %}
+{% block contenu %}
+<div class="entete-page">
+  <div><h1>Clients et crédits</h1><div class="discret">Ceux qui doivent de l'argent apparaissent en premier.</div></div>
+  <div class="actions"><a class="bouton principal" href="{% url 'client_nouveau' %}">+ Nouveau client</a></div>
+</div>
+<div class="grille">
+  <div class="tuile attention"><div class="libelle">Total à récupérer</div><div class="valeur">{{ total_dettes|fcfa }}</div><div class="detail">{{ nb_debiteurs }} client{{ nb_debiteurs|pluralize }} avec une dette</div></div>
+</div>
+<form class="filtres" method="get">
+  <input type="search" name="q" value="{{ recherche }}" placeholder="Nom ou téléphone…" aria-label="Chercher un client">
+  <button class="bouton petit" type="submit">Chercher</button>
+  {% if recherche %}<a class="bouton petit" href="{% url 'clients' %}">Effacer</a>{% endif %}
+</form>
+<div class="carte">
+  <div class="defilant">
+  <table>
+    <thead><tr><th>Client</th><th>Téléphone</th><th class="droite">Doit</th><th></th></tr></thead>
+    <tbody>
+    {% for c in clients %}
+      <tr>
+        <td><a href="{% url 'client_detail' c.pk %}">{{ c.nom }}</a>{% if c.note %}<div class="petit discret">{{ c.note }}</div>{% endif %}</td>
+        <td>{{ c.telephone|default:"—" }}</td>
+        <td class="droite nombre">{% if c.solde > 0 %}<span class="badge credit">{{ c.solde|fcfa }}</span>{% elif c.solde < 0 %}<span class="badge ok">avance {{ c.solde|fcfa|cut:"−" }}</span>{% else %}<span class="discret">0</span>{% endif %}</td>
+        <td class="actions">{% if c.solde > 0 %}<a class="bouton petit principal" href="{% url 'nouveau_reglement' c.pk %}">Remboursement</a> {% endif %}<a class="bouton petit" href="{% url 'client_detail' c.pk %}">Compte</a></td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="4" class="vide">Aucun client{% if recherche %} trouvé{% endif %}.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

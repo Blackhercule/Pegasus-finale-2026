@@ -1,0 +1,81 @@
+{% extends "cave/base.html" %}
+{% load cave_extras %}
+{% block titre %}Nouvelle vente{% endblock %}
+{% block contenu %}
+<div class="entete-page"><h1>Nouvelle vente</h1></div>
+<form method="post" data-grille-produits novalidate>
+  {% csrf_token %}
+  <div class="carte">
+    <h2>1. Type de vente</h2>
+    <div class="choix grand">
+      <label><input type="radio" name="type_vente" value="detail" {% if valeurs.type_vente != "gros" %}checked{% endif %}><span>Détail</span></label>
+      <label><input type="radio" name="type_vente" value="gros" {% if valeurs.type_vente == "gros" %}checked{% endif %}><span>Gros</span></label>
+    </div>
+    <p class="discret petit">Détail : une ou quelques caisses. Gros : grandes quantités pour les revendeurs, au prix de gros.</p>
+  </div>
+
+  <div class="carte">
+    <h2>2. Boissons (en caisses)</h2>
+    <input type="search" class="recherche-produit" data-recherche placeholder="Chercher une boisson…" aria-label="Chercher une boisson">
+    <div class="produits">
+      {% for p in produits %}
+      <div class="produit-ligne{% if p.stock_caisses == 0 %} epuise{% endif %}" data-nom="{{ p }}" data-prix-detail="{{ p.prix_detail_caisse }}" data-prix-gros="{{ p.prix_gros_caisse }}">
+        <div>
+          <div class="nom">{{ p }}</div>
+          <div class="infos"><span data-prix>{% if valeurs.type_vente == "gros" %}{{ p.prix_gros_caisse|fcfa }}{% else %}{{ p.prix_detail_caisse|fcfa }}{% endif %} la caisse</span> · stock {{ p.stock_texte }}</div>
+        </div>
+        <div class="compteur">
+          <button type="button" data-pas="-1" aria-label="Une caisse de moins de {{ p }}">−</button>
+          <input type="number" name="q_{{ p.id }}" min="0" max="{{ p.stock_caisses }}" step="1" inputmode="numeric" value="{{ p.quantite_saisie }}" placeholder="0" aria-label="Caisses de {{ p }}">
+          <button type="button" data-pas="1" aria-label="Une caisse de plus de {{ p }}">+</button>
+        </div>
+      </div>
+      {% empty %}
+      <p class="vide">Aucune boisson en vente. {% if user.est_patron %}<a href="{% url 'produit_nouveau' %}">Ajouter un produit</a>{% else %}Demandez au patron d'ajouter les produits.{% endif %}</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="carte">
+    <h2>3. Paiement</h2>
+    <div class="choix">
+      <label><input type="radio" name="paiement" value="comptant" {% if valeurs.paiement != "credit" %}checked{% endif %}><span>Payé comptant</span></label>
+      <label><input type="radio" name="paiement" value="credit" {% if valeurs.paiement == "credit" %}checked{% endif %}><span>Crédit (tout ou partie)</span></label>
+    </div>
+    <div data-zone-credit>
+      <div class="champ">
+        <label for="montant_verse">Montant versé maintenant (F CFA)</label>
+        <input type="number" id="montant_verse" name="montant_verse" min="0" inputmode="numeric" value="{{ valeurs.montant_verse|default:'0' }}">
+        <span class="aide">Mettez 0 si le client prend tout à crédit. Le reste sera inscrit à son compte.</span>
+      </div>
+    </div>
+    <div class="ligne-champs">
+      <div class="champ">
+        <label for="client">Client <span class="aide" style="display:inline">(obligatoire pour un crédit)</span></label>
+        <select name="client" id="client">
+          <option value="">— Client de passage —</option>
+          {% for c in clients %}<option value="{{ c.id }}" {% if valeurs.client == c.id|stringformat:"s" %}selected{% endif %}>{{ c.nom }}{% if c.telephone %} · {{ c.telephone }}{% endif %}{% if c.solde > 0 %} (doit {{ c.solde|fcfa }}){% endif %}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="champ">
+        <label for="nouveau_client_nom">… ou nouveau client</label>
+        <input type="text" id="nouveau_client_nom" name="nouveau_client_nom" maxlength="100" placeholder="Nom du client" value="{{ valeurs.nouveau_client_nom|default:'' }}">
+        <input type="tel" name="nouveau_client_tel" maxlength="30" placeholder="Téléphone (facultatif)" aria-label="Téléphone du nouveau client" style="margin-top:.4rem" value="{{ valeurs.nouveau_client_tel|default:'' }}">
+      </div>
+    </div>
+    <label>Mode de paiement</label>
+    <div class="choix">
+      {% for code, libelle in modes %}<label><input type="radio" name="mode_paiement" value="{{ code }}" {% if valeurs.mode_paiement == code %}checked{% endif %}><span>{{ libelle }}</span></label>{% endfor %}
+    </div>
+    <div class="champ">
+      <label for="note">Note (facultatif)</label>
+      <input type="text" id="note" name="note" maxlength="200" value="{{ valeurs.note|default:'' }}">
+    </div>
+  </div>
+
+  <div class="barre-total">
+    <div><div class="discret petit" data-caisses></div><div class="total" data-total></div></div>
+    <button class="bouton principal" type="submit">Valider la vente</button>
+  </div>
+</form>
+{% endblock %}

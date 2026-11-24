@@ -1,0 +1,38 @@
+{% extends "cave/base.html" %}
+{% load cave_extras %}
+{% block titre %}Casses et pertes{% endblock %}
+{% block contenu %}
+<div class="entete-page"><div><h1>Casses et pertes</h1><div class="discret">Bouteilles cassées, caisses disparues, produits avariés : tout est retiré du stock et visible par le patron.</div></div></div>
+<div class="carte">
+  <h2>Déclarer une perte</h2>
+  <form method="post">
+    {% csrf_token %}
+    {% include "cave/_form.html" %}
+    <button class="bouton principal" type="submit">Enregistrer la perte</button>
+  </form>
+</div>
+<div class="carte">
+  <h2>Dernières pertes</h2>
+  <div class="defilant">
+  <table>
+    <thead><tr><th>Date</th><th>Boisson</th><th>Quantité</th><th>Type</th><th>Explication</th><th>Par</th>{% if user.est_patron %}<th class="droite">Valeur</th><th></th>{% endif %}</tr></thead>
+    <tbody>
+    {% for p in historique %}
+      <tr class="{% if p.annulee %}annulee{% endif %}">
+        <td>{{ p.date|date:"d/m H:i" }}</td>
+        <td>{{ p.produit }}{% if p.annulee %} <span class="badge annulee" title="{{ p.motif_annulation }}">Annulée</span>{% endif %}</td>
+        <td class="nombre">{{ p.bouteilles|stock:p.produit.bouteilles_par_caisse }}</td>
+        <td>{{ p.get_type_perte_display }}</td>
+        <td class="petit">{{ p.note|default:"—" }}</td>
+        <td>{{ p.enregistre_par }}</td>
+        {% if user.est_patron %}<td class="droite nombre">{{ p.valeur|fcfa }}</td>
+        <td class="actions garder">{% if not p.annulee %}<a class="bouton petit danger" href="{% url 'annuler' 'perte' p.pk %}?suite={{ request.path|urlencode }}">Annuler</a>{% endif %}</td>{% endif %}
+      </tr>
+    {% empty %}
+      <tr><td colspan="8" class="vide">Aucune perte enregistrée.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

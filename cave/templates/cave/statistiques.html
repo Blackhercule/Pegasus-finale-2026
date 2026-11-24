@@ -1,0 +1,108 @@
+{% extends "cave/base.html" %}
+{% load cave_extras %}
+{% block titre %}Statistiques{% endblock %}
+{% block contenu %}
+<div class="entete-page">
+  <div><h1>Statistiques de {{ s.nom_mois }}</h1><div class="discret">Ventes non annulées. Marge = prix de vente − prix d'achat des caisses vendues.</div></div>
+  <div class="actions navigation-date">
+    <a class="bouton petit" href="?mois={{ mois_precedent }}">← Mois précédent</a>
+    {% if mois_suivant %}<a class="bouton petit" href="?mois={{ mois_suivant }}">Mois suivant →</a>{% endif %}
+  </div>
+</div>
+
+<div class="grille">
+  <div class="tuile accent">
+    <div class="libelle">Chiffre d'affaires</div>
+    <div class="valeur">{{ s.chiffre_affaires|fcfa }}</div>
+    <div class="detail">{% if s.evolution is not None %}<span class="{% if s.evolution >= 0 %}hausse{% else %}baisse{% endif %}">{% if s.evolution >= 0 %}+{% endif %}{{ s.evolution }} %</span> par rapport à la période {{ s.periode_comparee }}{% else %}Période {{ s.periode_comparee }} : pas de ventes{% endif %}</div>
+  </div>
+  <div class="tuile"><div class="libelle">Marge brute estimée</div><div class="valeur">{{ s.marge|fcfa }}</div></div>
+  <div class="tuile"><div class="libelle">Ventes</div><div class="valeur">{{ s.nombre_ventes }}</div><div class="detail">{{ s.caisses }} caisse{{ s.caisses|pluralize }} vendue{{ s.caisses|pluralize }}</div></div>
+  <div class="tuile"><div class="libelle">Gros / détail</div><div class="valeur">{{ s.par_type.gros.ca|fcfa }}</div><div class="detail">en gros · détail {{ s.par_type.detail.ca|fcfa }}</div></div>
+  <div class="tuile"><div class="libelle">Crédit accordé</div><div class="valeur">{{ s.credit_accorde|fcfa }}</div><div class="detail">remboursements reçus : {{ s.reglements|fcfa }}</div></div>
+  <div class="tuile{% if s.pertes_valeur %} attention{% endif %}"><div class="libelle">Casses et pertes</div><div class="valeur">{{ s.pertes_valeur|fcfa }}</div><div class="detail">{{ s.pertes_bouteilles }} bouteille{{ s.pertes_bouteilles|pluralize }}</div></div>
+</div>
+
+<div class="carte">
+  <h2>Évolution sur 12 mois</h2>
+  <div class="legende"><span><span class="cle detail"></span>Détail</span><span><span class="cle gros"></span>Gros</span></div>
+  <div class="graphique">
+    <div class="axe" aria-hidden="true"><span>{{ echelle_evolution|compact }}</span><span>{{ demi_evolution|compact }}</span><span>0</span></div>
+    <div class="colonnes" role="img" aria-label="Chiffre d'affaires des 12 derniers mois, détail et gros">
+      {% for e in evolution %}
+      <div class="colonne" tabindex="0" data-titre="{{ e.nom|capfirst }}" data-total="{{ e.total|fcfa }}" data-detail="{{ e.detail|fcfa }}" data-gros="{{ e.gros|fcfa }}">
+        {% if e.total %}<div class="pile" style="height:{{ e.total|pourcentage:echelle_evolution }}%">{% if e.detail %}<div class="seg detail" style="flex-grow:{{ e.detail }}"></div>{% endif %}{% if e.gros %}<div class="seg gros" style="flex-grow:{{ e.gros }}"></div>{% endif %}</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    <div></div>
+    <div class="etiquettes">{% for e in evolution %}<span>{{ e.etiquette }}</span>{% endfor %}</div>
+  </div>
+  <details class="tableau-donnees">
+    <summary>Voir les chiffres</summary>
+    <div class="defilant"><table>
+      <thead><tr><th>Mois</th><th class="droite">Détail</th><th class="droite">Gros</th><th class="droite">Total</th></tr></thead>
+      <tbody>{% for e in evolution %}<tr><td><a href="?mois={{ e.annee }}-{{ e.mois|stringformat:'02d' }}">{{ e.nom|capfirst }}</a></td><td class="droite nombre">{{ e.detail|fcfa }}</td><td class="droite nombre">{{ e.gros|fcfa }}</td><td class="droite nombre">{{ e.total|fcfa }}</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </details>
+</div>
+
+<div class="carte">
+  <h2>Ventes de chaque jour</h2>
+  <div class="legende"><span><span class="cle detail"></span>Détail</span><span><span class="cle gros"></span>Gros</span></div>
+  <div class="graphique">
+    <div class="axe" aria-hidden="true"><span>{{ echelle_jour|compact }}</span><span>{{ demi_jour|compact }}</span><span>0</span></div>
+    <div class="colonnes" role="img" aria-label="Chiffre d'affaires de chaque jour de {{ s.nom_mois }}">
+      {% for j in s.par_jour %}
+      <div class="colonne" tabindex="0" data-titre="{{ j.jour|date:'l j F'|capfirst }}" data-total="{{ j.total|fcfa }}" data-detail="{{ j.detail|fcfa }}" data-gros="{{ j.gros|fcfa }}">
+        {% if j.total %}<div class="pile" style="height:{{ j.total|pourcentage:echelle_jour }}%">{% if j.detail %}<div class="seg detail" style="flex-grow:{{ j.detail }}"></div>{% endif %}{% if j.gros %}<div class="seg gros" style="flex-grow:{{ j.gros }}"></div>{% endif %}</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    <div></div>
+    <div class="etiquettes serrees">{% for j in s.par_jour %}<span>{{ j.jour|date:"j" }}</span>{% endfor %}</div>
+  </div>
+  <details class="tableau-donnees">
+    <summary>Voir les chiffres</summary>
+    <div class="defilant"><table>
+      <thead><tr><th>Jour</th><th class="droite">Détail</th><th class="droite">Gros</th><th class="droite">Total</th></tr></thead>
+      <tbody>{% for j in s.par_jour %}{% if j.total %}<tr><td><a href="{% url 'point_du_jour' %}?date={{ j.jour|date:'Y-m-d' }}">{{ j.jour|date:"l j F"|capfirst }}</a></td><td class="droite nombre">{{ j.detail|fcfa }}</td><td class="droite nombre">{{ j.gros|fcfa }}</td><td class="droite nombre">{{ j.total|fcfa }}</td></tr>{% endif %}{% endfor %}</tbody>
+    </table></div>
+  </details>
+</div>
+
+<div class="deux-colonnes">
+  <div class="carte">
+    <h2>Boissons les plus vendues</h2>
+    <div class="legende"><span><span class="cle detail"></span>Caisses au détail</span><span><span class="cle gros"></span>Caisses en gros</span></div>
+    <div class="barres-h">
+      {% for p in produits_par_caisses %}
+      <div class="ligne-barre" tabindex="0" data-titre="{{ p.produit }}" data-total="{{ p.caisses }} caisses · {{ p.ca|fcfa }}" data-detail="{{ p.caisses_detail }} caisses" data-gros="{{ p.caisses_gros }} caisses">
+        <span class="petit">{{ p.produit }}</span>
+        <div class="piste"><div class="rempli" style="width:{{ p.caisses|pourcentage:max_caisses_produit }}%">{% if p.caisses_detail %}<div class="seg detail" style="flex-grow:{{ p.caisses_detail }}"></div>{% endif %}{% if p.caisses_gros %}<div class="seg gros" style="flex-grow:{{ p.caisses_gros }}"></div>{% endif %}</div></div>
+        <span class="nombre petit">{{ p.caisses }} cs</span>
+      </div>
+      {% empty %}
+      <p class="vide">Aucune vente ce mois-ci.</p>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="carte">
+    <h2>Chiffre d'affaires et marge par boisson</h2>
+    <div class="defilant">
+    <table>
+      <thead><tr><th>Boisson</th><th class="droite">Caisses</th><th class="droite">Montant</th><th class="droite">Marge</th></tr></thead>
+      <tbody>{% for p in s.par_produit %}<tr><td>{{ p.produit }}</td><td class="droite nombre">{{ p.caisses }}</td><td class="droite nombre">{{ p.ca|fcfa }}</td><td class="droite nombre">{{ p.marge|fcfa }}</td></tr>{% empty %}<tr><td colspan="4" class="vide">—</td></tr>{% endfor %}</tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<div class="carte">
+  <h2>Ventes de chaque gérant</h2>
+  <table>
+    <thead><tr><th>Personne</th><th class="droite">Ventes</th><th class="droite">Montant</th></tr></thead>
+    <tbody>{% for v in s.par_vendeur %}<tr><td>{{ v.utilisateur }}</td><td class="droite nombre">{{ v.nombre }}</td><td class="droite nombre">{{ v.ca|fcfa }}</td></tr>{% empty %}<tr><td colspan="3" class="vide">—</td></tr>{% endfor %}</tbody>
+  </table>
+</div>
+{% endblock %}

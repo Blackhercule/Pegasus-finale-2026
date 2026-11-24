@@ -1,0 +1,27 @@
+{% extends "cave/base.html" %}
+{% block titre %}Gérants{% endblock %}
+{% block contenu %}
+<div class="entete-page">
+  <div><h1>Gérants et comptes</h1><div class="discret">Chaque gérant a son identifiant et son mot de passe. Ses opérations portent son nom.</div></div>
+  <div class="actions"><a class="bouton principal" href="{% url 'gerant_nouveau' %}">+ Nouveau gérant</a></div>
+</div>
+<div class="carte">
+  <div class="defilant">
+  <table>
+    <thead><tr><th>Nom</th><th>Identifiant</th><th>Rôle</th><th>État</th><th>Dernière connexion</th><th></th></tr></thead>
+    <tbody>
+    {% for c in comptes %}
+      <tr>
+        <td>{{ c }}</td>
+        <td><code>{{ c.username }}</code></td>
+        <td>{{ c.get_role_display }}</td>
+        <td>{% if c.is_active %}<span class="badge ok">Actif</span>{% else %}<span class="badge inactif">Désactivé</span>{% endif %}</td>
+        <td>{{ c.last_login|date:"d/m/Y H:i"|default:"jamais" }}</td>
+        <td class="actions">{% if c.role == "gerant" %}<a class="bouton petit" href="{% url 'gerant_modifier' c.pk %}">Modifier</a> <a class="bouton petit" href="{% url 'gerant_mot_de_passe' c.pk %}">Mot de passe</a>{% else %}<a class="bouton petit" href="{% url 'mon_mot_de_passe' %}">Mon mot de passe</a>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

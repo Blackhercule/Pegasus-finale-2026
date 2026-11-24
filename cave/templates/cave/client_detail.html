@@ -1,0 +1,62 @@
+{% extends "cave/base.html" %}
+{% load cave_extras %}
+{% block titre %}{{ client }}{% endblock %}
+{% block contenu %}
+<div class="entete-page">
+  <div><h1>{{ client }}</h1><div class="discret">{% if client.telephone %}Tél. {{ client.telephone }} · {% endif %}client depuis le {{ client.cree_le|date:"d/m/Y" }}{% if client.note %} · {{ client.note }}{% endif %}</div></div>
+  <div class="actions">
+    {% if solde > 0 %}<a class="bouton principal" href="{% url 'nouveau_reglement' client.pk %}">Enregistrer un remboursement</a>{% endif %}
+    <a class="bouton" href="{% url 'client_modifier' client.pk %}">Modifier la fiche</a>
+  </div>
+</div>
+<div class="grille">
+  <div class="tuile {% if solde > 0 %}attention{% else %}accent{% endif %}">
+    <div class="libelle">{% if solde >= 0 %}Doit à la cave{% else %}Avance du client{% endif %}</div>
+    <div class="valeur">{% if solde >= 0 %}{{ solde|fcfa }}{% else %}{{ solde|fcfa|cut:"−" }}{% endif %}</div>
+  </div>
+</div>
+<div class="deux-colonnes">
+  <div class="carte">
+    <h2>Achats</h2>
+    <div class="defilant">
+    <table>
+      <thead><tr><th>Date</th><th>N°</th><th class="droite">Total</th><th class="droite">Versé</th><th class="droite">Crédit</th></tr></thead>
+      <tbody>
+      {% for v in ventes %}
+        <tr class="{% if v.annulee %}annulee{% endif %}">
+          <td>{{ v.date|date:"d/m/Y" }}</td>
+          <td><a href="{% url 'recu_vente' v.pk %}">{{ v.numero }}</a> <span class="badge {{ v.type_vente }}">{{ v.get_type_vente_display }}</span></td>
+          <td class="droite nombre">{{ v.montant_total|fcfa }}</td>
+          <td class="droite nombre">{{ v.montant_paye|fcfa }}</td>
+          <td class="droite nombre">{% if v.a_credit %}{{ v.reste_a_payer|fcfa }}{% else %}—{% endif %}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" class="vide">Aucun achat.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+  <div class="carte">
+    <h2>Remboursements</h2>
+    <div class="defilant">
+    <table>
+      <thead><tr><th>Date</th><th>N°</th><th class="droite">Montant</th><th>Reçu par</th><th></th></tr></thead>
+      <tbody>
+      {% for r in reglements %}
+        <tr class="{% if r.annulee %}annulee{% endif %}">
+          <td>{{ r.date|date:"d/m/Y" }}</td>
+          <td><a href="{% url 'recu_reglement' r.pk %}">{{ r.numero }}</a></td>
+          <td class="droite nombre">{{ r.montant|fcfa }}<div class="petit discret">{{ r.get_mode_paiement_display }}</div></td>
+          <td>{{ r.recu_par }}</td>
+          <td class="actions garder">{% if user.est_patron and not r.annulee %}<a class="bouton petit danger" href="{% url 'annuler' 'reglement' r.pk %}?suite={{ request.path|urlencode }}">Annuler</a>{% endif %}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" class="vide">Aucun remboursement.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

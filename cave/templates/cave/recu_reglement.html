@@ -1,0 +1,28 @@
+{% extends "cave/base.html" %}
+{% load cave_extras %}
+{% block titre %}Reçu {{ reglement.numero }}{% endblock %}
+{% block contenu %}
+<div class="actions-recu">
+  <button class="bouton principal" type="button" data-imprimer>Imprimer le reçu</button>
+  <a class="bouton" href="{% url 'client_detail' reglement.client.pk %}">Compte du client</a>
+</div>
+<div class="recu">
+  {% if reglement.annulee %}<div class="tampon-annule">REMBOURSEMENT ANNULÉ<br><small>{{ reglement.motif_annulation }}</small></div>{% endif %}
+  <div class="entete-recu">
+    <strong>{{ parametres_cave.nom }}</strong>
+    {% if parametres_cave.adresse %}<div>{{ parametres_cave.adresse }}</div>{% endif %}
+    {% if parametres_cave.telephone %}<div>Tél. {{ parametres_cave.telephone }}</div>{% endif %}
+    <div style="margin-top:.3rem">REÇU DE REMBOURSEMENT DE CRÉDIT</div>
+  </div>
+  <div class="lignes-infos">
+    <div><span>Reçu n°</span><strong>{{ reglement.numero }}</strong></div>
+    <div><span>Date</span><span>{{ reglement.date|date:"d/m/Y à H:i" }}</span></div>
+    <div><span>Client</span><span>{{ reglement.client }}</span></div>
+    <div><span>Reçu par</span><span>{{ reglement.recu_par }}</span></div>
+    <div><span>Mode de paiement</span><span>{{ reglement.get_mode_paiement_display }}</span></div>
+  </div>
+  <div class="lignes-infos total-recu"><div><span>MONTANT VERSÉ</span><span class="nombre">{{ reglement.montant|fcfa }}</span></div></div>
+  <div class="lignes-infos"><div><span>Reste dû à ce jour</span><strong class="nombre">{% if solde_client > 0 %}{{ solde_client|fcfa }}{% else %}0 F — soldé{% endif %}</strong></div></div>
+  <div class="pied-recu">{{ parametres_cave.message_recu }}</div>
+</div>
+{% endblock %}

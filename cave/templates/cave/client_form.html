@@ -1,0 +1,13 @@
+{% extends "cave/base.html" %}
+{% block titre %}{% if client %}Modifier {{ client }}{% else %}Nouveau client{% endif %}{% endblock %}
+{% block contenu %}
+<div class="entete-page"><h1>{% if client %}Modifier {{ client }}{% else %}Nouveau client{% endif %}</h1></div>
+<div class="carte" style="max-width:560px">
+  <form method="post">
+    {% csrf_token %}
+    {% include "cave/_form.html" %}
+    <button class="bouton principal" type="submit">Enregistrer</button>
+    <a class="bouton" href="{% if client %}{% url 'client_detail' client.pk %}{% else %}{% url 'clients' %}{% endif %}">Retour</a>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends "cave/base.html" %}
+{% load cave_extras %}
+{% block titre %}Point du jour{% endblock %}
+{% block contenu %}
+<div class="entete-page">
+  <div>
+    <h1>Point du jour{% if vendeur %} — {{ vendeur }}{% endif %}</h1>
+    <div class="discret">{{ jour|date:"l j F Y"|capfirst }}{% if est_aujourdhui %} · journée en cours{% endif %}</div>
+  </div>
+  <div class="actions no-print"><button class="bouton principal" type="button" data-imprimer>Imprimer les comptes</button></div>
+</div>
+<form class="filtres" method="get">
+  <div class="navigation-date">
+    <a class="bouton petit" href="?date={{ veille|date:'Y-m-d' }}{% if vendeur and user.est_patron %}&vendeur={{ vendeur.id }}{% endif %}" aria-label="Jour précédent">←</a>
+    <input type="date" name="date" value="{{ jour|date:'Y-m-d' }}" aria-label="Date">
+    <a class="bouton petit" href="?date={{ lendemain|date:'Y-m-d' }}{% if vendeur and user.est_patron %}&vendeur={{ vendeur.id }}{% endif %}" aria-label="Jour suivant">→</a>
+  </div>
+  {% if vendeurs %}
+  <select name="vendeur" aria-label="Caisse de">
+    <option value="">Toute la cave</option>
+    {% for v in vendeurs %}<option value="{{ v.id }}" {% if vendeur.id == v.id %}selected{% endif %}>{{ v }}</option>{% endfor %}
+  </select>
+  {% endif %}
+  <button class="bouton petit" type="submit">Afficher</button>
+</form>
+
+<div class="grille">
+  <div class="tuile accent"><div class="libelle">Chiffre d'affaires</div><div class="valeur">{{ r.chiffre_affaires|fcfa }}</div><div class="detail">{{ r.nombre_ventes }} vente{{ r.nombre_ventes|pluralize }} · {{ r.caisses_vendues }} caisse{{ r.caisses_vendues|pluralize }}</div></div>
+  <div class="tuile"><div class="libelle">Total encaissé</div><div class="valeur">{{ r.total_encaisse|fcfa }}</div><div class="detail">ventes {{ r.encaisse_ventes|fcfa }} + remboursements {{ r.total_reglements|fcfa }}</div></div>
+  <div class="tuile accent"><div class="libelle">Espèces attendues en caisse</div><div class="valeur">{{ r.especes_attendues|fcfa }}</div><div class="detail">à comparer avec l'argent compté</div></div>
+  <div class="tuile{% if r.credit_accorde %} attention{% endif %}"><div class="libelle">Crédit accordé</div><div class="valeur">{{ r.credit_accorde|fcfa }}</div><div class="detail">{{ r.ventes_a_credit|length }} vente{{ r.ventes_a_credit|length|pluralize }} à crédit</div></div>
+  <div class="tuile{% if r.pertes_valeur %} attention{% endif %}"><div class="libelle">Casses et pertes</div><div class="valeur">{{ r.pertes_valeur|fcfa }}</div><div class="detail">{{ r.pertes_bouteilles }} bouteille{{ r.pertes_bouteilles|pluralize }}</div></div>
+  <div class="tuile"><div class="libelle">Caisses reçues</div><div class="valeur">{{ r.caisses_recues }}</div><div class="detail">{{ r.arrivages|length }} arrivage{{ r.arrivages|length|pluralize }}</div></div>
+</div>
+
+<div class="deux-colonnes">
+  <div class="carte">
+    <h2>Détail et gros</h2>
+    <table>
+      <thead><tr><th>Type</th><th class="droite">Ventes</th><th class="droite">Caisses</th><th class="droite">Montant</th></tr></thead>
+      <tbody>
+      {% for code, t in r.par_type.items %}
+        <tr><td><span class="badge {{ code }}">{{ t.libelle }}</span></td><td class="droite nombre">{{ t.nombre }}</td><td class="droite nombre">{{ t.caisses }}</td><td class="droite nombre">{{ t.montant|fcfa }}</td></tr>
+      {% endfor %}
+      </tbody>
+      <tfoot><tr><td>Total</td><td class="droite nombre">{{ r.nombre_ventes }}</td><td class="droite nombre">{{ r.caisses_vendues }}</td><td class="droite nombre">{{ r.chiffre_affaires|fcfa }}</td></tr></tfoot>
+    </table>
+  </div>
+  <div class="carte">
+    <h2>Argent encaissé</h2>
+    <table>
+      <thead><tr><th>Mode</th><th class="droite">Ventes</th><th class="droite">Rembours.</th><th class="droite">Total</th></tr></thead>
+      <tbody>
+      {% for m in r.modes %}
+        <tr><td>{{ m.libelle }}</td><td class="droite nombre">{{ m.ventes|fcfa }}</td><td class="droite nombre">{{ m.reglements|fcfa }}</td><td class="droite nombre"><strong>{{ m.total|fcfa }}</strong></td></tr>
+      {% endfor %}
+      </tbody>
+      <tfoot><tr><td>Total</td><td class="droite nombre">{{ r.encaisse_ventes|fcfa }}</td><td class="droite nombre">{{ r.total_reglements|fcfa }}</td><td class="droite nombre">{{ r.total_encaisse|fcfa }}</td></tr></tfoot>
+    </table>
+  </div>
+</div>
+
+{% if r.par_vendeur %}
+<div class="carte">
+  <h2>Chaque caisse</h2>
+  <div class="defilant">
+  <table>
+    <thead><tr><th>Personne</th><th class="droite">Ventes</th><th class="droite">Montant vendu</th><th class="droite">Encaissé ventes</th><th class="droite">Remboursements</th><th class="droite">Doit remettre</th></tr></thead>
+    <tbody>
+    {% for c in r.par_vendeur %}
+      <tr><td><a href="?date={{ jour|date:'Y-m-d' }}&vendeur={{ c.utilisateur.id }}">{{ c.utilisateur }}</a></td><td class="droite nombre">{{ c.nombre }}</td><td class="droite nombre">{{ c.total|fcfa }}</td><td class="droite nombre">{{ c.paye|fcfa }}</td><td class="droite nombre">{{ c.reglements|fcfa }}</td><td class="droite nombre"><strong>{{ c.encaisse|fcfa }}</strong></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="carte">
+  <h2>Par boisson</h2>
+  <div class="defilant">
+  <table>
+    <thead><tr><th>Boisson</th><th class="droite">Caisses détail</th><th class="droite">Caisses gros</th><th class="droite">Montant</th></tr></thead>
+    <tbody>
+    {% for p in r.par_produit %}
+      <tr><td>{{ p.produit }}</td><td class="droite nombre">{{ p.caisses_detail }}</td><td class="droite nombre">{{ p.caisses_gros }}</td><td class="droite nombre">{{ p.montant|fcfa }}</td></tr>
+    {% empty %}
+      <tr><td colspan="4" class="vide">Aucune vente.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="deux-colonnes">
+  <div class="carte">
+    <h2>Ventes à crédit</h2>
+    <table>
+      <tbody>
+      {% for v in r.ventes_a_credit %}
+        <tr><td><a href="{% url 'recu_vente' v.pk %}">{{ v.numero }}</a> · {{ v.client }}</td><td class="droite nombre">versé {{ v.montant_paye|fcfa }}</td><td class="droite nombre"><span class="badge credit">reste {{ v.reste_a_payer|fcfa }}</span></td></tr>
+      {% empty %}
+        <tr><td class="vide">Aucune vente à crédit.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="carte">
+    <h2>Remboursements reçus</h2>
+    <table>
+      <tbody>
+      {% for g in r.reglements %}
+        <tr><td><a href="{% url 'recu_reglement' g.pk %}">{{ g.numero }}</a> · {{ g.client }}</td><td>{{ g.get_mode_paiement_display }}</td><td class="droite nombre">{{ g.montant|fcfa }}</td></tr>
+      {% empty %}
+        <tr><td class="vide">Aucun remboursement.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="deux-colonnes">
+  <div class="carte">
+    <h2>Casses et pertes</h2>
+    <table>
+      <tbody>
+      {% for p in r.pertes %}
+        <tr><td>{{ p.produit }}<div class="petit discret">{{ p.get_type_perte_display }}{% if p.note %} — {{ p.note }}{% endif %} · {{ p.enregistre_par }}</div></td><td class="droite nombre">{{ p.bouteilles|stock:p.produit.bouteilles_par_caisse }}</td><td class="droite nombre">{{ p.valeur|fcfa }}</td></tr>
+      {% empty %}
+        <tr><td class="vide">Aucune perte.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="carte">
+    <h2>Ventes annulées</h2>
+    <table>
+      <tbody>
+      {% for v in r.annulees %}
+        <tr><td><a href="{% url 'recu_vente' v.pk %}">{{ v.numero }}</a> · vendue par {{ v.vendeur }}<div class="petit discret">annulée par {{ v.annulee_par }} : {{ v.motif_annulation }}</div></td><td class="droite nombre">{{ v.montant_total|fcfa }}</td></tr>
+      {% empty %}
+        <tr><td class="vide">Aucune vente annulée.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="carte">
+  <h2>Toutes les ventes de la journée</h2>
+  <div class="defilant">
+  <table>
+    <thead><tr><th>Heure</th><th>N°</th><th>Type</th><th>Boissons</th><th>Client</th>{% if not vendeur %}<th>Par</th>{% endif %}<th class="droite">Total</th><th class="droite">Payé</th></tr></thead>
+    <tbody>
+    {% for v in r.ventes %}
+      <tr><td>{{ v.date|date:"H:i" }}</td><td><a href="{% url 'recu_vente' v.pk %}">{{ v.numero }}</a></td><td><span class="badge {{ v.type_vente }}">{{ v.get_type_vente_display }}</span></td>
+        <td class="petit">{% for l in v.lignes.all %}{{ l.quantite_caisses }} × {{ l.produit }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+        <td>{{ v.client|default:"—" }}</td>{% if not vendeur %}<td>{{ v.vendeur }}</td>{% endif %}
+        <td class="droite nombre">{{ v.montant_total|fcfa }}</td><td class="droite nombre">{{ v.montant_paye|fcfa }}</td></tr>
+    {% empty %}
+      <tr><td colspan="8" class="vide">Aucune vente.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+<p class="discret petit">Édité le {{ imprime_le|date:"d/m/Y à H:i" }} par {{ user }}.</p>
+{% endblock %}

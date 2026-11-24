@@ -1,0 +1,14 @@
+{% extends "cave/base.html" %}
+{% load cave_extras %}
+{% block titre %}Remboursement de {{ client }}{% endblock %}
+{% block contenu %}
+<div class="entete-page"><div><h1>Remboursement de {{ client }}</h1><div class="discret">Doit actuellement {{ solde|fcfa }}</div></div></div>
+<div class="carte" style="max-width:560px">
+  <form method="post">
+    {% csrf_token %}
+    {% include "cave/_form.html" %}
+    <button class="bouton principal" type="submit">Enregistrer le remboursement</button>
+    <a class="bouton" href="{% url 'client_detail' client.pk %}">Retour</a>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "cave/base.html" %}
+{% block titre %}{% if produit %}Modifier {{ produit }}{% else %}Nouveau produit{% endif %}{% endblock %}
+{% block contenu %}
+<div class="entete-page"><h1>{% if produit %}Modifier {{ produit }}{% else %}Nouveau produit{% endif %}</h1></div>
+<div class="carte" style="max-width:640px">
+  <form method="post">
+    {% csrf_token %}
+    {% include "cave/_form.html" %}
+    <button class="bouton principal" type="submit">Enregistrer</button>
+    <a class="bouton" href="{% url 'produits' %}">Retour</a>
+  </form>
+  {% if produit %}<p class="discret petit" style="margin-top:1rem">Un changement de prix ne modifie pas les ventes déjà faites : chaque reçu garde le prix du jour de la vente.</p>{% endif %}
+</div>
+{% endblock %}

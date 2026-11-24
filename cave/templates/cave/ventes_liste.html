@@ -1,0 +1,52 @@
+{% extends "cave/base.html" %}
+{% load cave_extras %}
+{% block titre %}Ventes{% endblock %}
+{% block contenu %}
+<div class="entete-page">
+  <div><h1>{% if user.est_patron %}Ventes{% else %}Mes ventes{% endif %}</h1><div class="discret">{{ jour|date:"l j F Y"|capfirst }}</div></div>
+  <div class="actions"><a class="bouton principal" href="{% url 'nouvelle_vente' %}">+ Nouvelle vente</a></div>
+</div>
+<form class="filtres" method="get">
+  <div class="navigation-date">
+    <a class="bouton petit" href="?date={{ veille|date:'Y-m-d' }}{% if vendeur_choisi %}&vendeur={{ vendeur_choisi.id }}{% endif %}" aria-label="Jour précédent">←</a>
+    <input type="date" name="date" value="{{ jour|date:'Y-m-d' }}" aria-label="Date">
+    <a class="bouton petit" href="?date={{ lendemain|date:'Y-m-d' }}{% if vendeur_choisi %}&vendeur={{ vendeur_choisi.id }}{% endif %}" aria-label="Jour suivant">→</a>
+  </div>
+  {% if vendeurs %}
+  <select name="vendeur" aria-label="Personne">
+    <option value="">Tout le monde</option>
+    {% for v in vendeurs %}<option value="{{ v.id }}" {% if vendeur_choisi.id == v.id %}selected{% endif %}>{{ v }}</option>{% endfor %}
+  </select>
+  {% endif %}
+  <select name="type" aria-label="Type de vente">
+    <option value="">Détail et gros</option>
+    <option value="detail" {% if type_choisi == "detail" %}selected{% endif %}>Détail</option>
+    <option value="gros" {% if type_choisi == "gros" %}selected{% endif %}>Gros</option>
+  </select>
+  <button class="bouton petit" type="submit">Afficher</button>
+</form>
+<div class="carte">
+  <div class="defilant">
+  <table>
+    <thead><tr><th>Heure</th><th>N°</th><th>Type</th><th>Boissons</th><th>Client</th>{% if user.est_patron %}<th>Par</th>{% endif %}<th class="droite">Total</th><th class="droite">Crédit</th><th></th></tr></thead>
+    <tbody>
+    {% for v in ventes %}
+      <tr class="{% if v.annulee %}annulee{% endif %}">
+        <td>{{ v.date|date:"H:i" }}</td>
+        <td><a href="{% url 'recu_vente' v.pk %}">{{ v.numero }}</a></td>
+        <td class="garder"><span class="badge {{ v.type_vente }}">{{ v.get_type_vente_display }}</span>{% if v.annulee %} <span class="badge annulee" title="{{ v.motif_annulation }}">Annulée</span>{% endif %}</td>
+        <td class="petit">{% for l in v.lignes.all %}{{ l.quantite_caisses }} × {{ l.produit }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+        <td>{{ v.client|default:"—" }}</td>
+        {% if user.est_patron %}<td>{{ v.vendeur }}</td>{% endif %}
+        <td class="droite nombre">{{ v.montant_total|fcfa }}</td>
+        <td class="droite nombre">{% if v.a_credit %}<span class="badge credit">{{ v.reste_a_payer|fcfa }}</span>{% endif %}</td>
+        <td class="actions garder"><a class="bouton petit" href="{% url 'recu_vente' v.pk %}">Reçu</a>{% if user.est_patron and not v.annulee %} <a class="bouton petit danger" href="{% url 'annuler' 'vente' v.pk %}?suite={{ request.get_full_path|urlencode }}">Annuler</a>{% endif %}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="9" class="vide">Aucune vente ce jour-là.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "cave/base.html" %}
+{% load cave_extras %}
+{% block titre %}Annuler {{ operation.numero }}{% endblock %}
+{% block contenu %}
+<div class="entete-page"><h1>Annuler l'opération {{ operation.numero }}</h1></div>
+<div class="carte" style="max-width:620px">
+  <p>
+    {% if type_operation == "vente" %}Vente {{ operation.get_type_vente_display|lower }} du {{ operation.date|date:"d/m/Y à H:i" }} par {{ operation.vendeur }} — {{ operation.montant_total|fcfa }}.
+    Les caisses reviennent dans le stock{% if operation.a_credit %} et le crédit de {{ operation.reste_a_payer|fcfa }} est retiré du compte du client{% endif %}.
+    {% elif type_operation == "arrivage" %}Arrivage du {{ operation.date|date:"d/m/Y à H:i" }}. Les caisses seront retirées du stock.
+    {% elif type_operation == "perte" %}Perte du {{ operation.date|date:"d/m/Y à H:i" }} ({{ operation.produit }}). Les bouteilles reviennent dans le stock.
+    {% elif type_operation == "reglement" %}Remboursement de {{ operation.montant|fcfa }} par {{ operation.client }} le {{ operation.date|date:"d/m/Y" }}. La somme sera de nouveau due.
+    {% endif %}
+  </p>
+  <p class="discret petit">L'opération n'est pas effacée : elle reste visible, barrée, avec le motif.</p>
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="suite" value="{{ suite }}">
+    {% include "cave/_form.html" %}
+    <button class="bouton principal" type="submit">Confirmer l'annulation</button>
+    <a class="bouton" href="{{ suite }}">Ne pas annuler</a>
+  </form>
+</div>
+{% endblock %}

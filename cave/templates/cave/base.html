@@ -1,0 +1,54 @@
+{% load static %}<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titre %}Gestion de cave{% endblock %} — {{ parametres_cave.nom }}</title>
+  <link rel="stylesheet" href="{% static 'cave/style.css' %}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍺</text></svg>">
+  {% block tete %}{% endblock %}
+</head>
+<body>
+{% if user.is_authenticated %}
+<header class="barre">
+  <a class="marque" href="{% url 'accueil' %}"><span aria-hidden="true">🍺</span> {{ parametres_cave.nom }}</a>
+  <div class="compte">
+    <a href="{% url 'mon_mot_de_passe' %}" title="Changer mon mot de passe">{{ user }}</a>
+    {% if user.get_role_display != user.get_full_name %}<span class="role">{{ user.get_role_display }}</span>{% endif %}
+    <form method="post" action="{% url 'deconnexion' %}">{% csrf_token %}<button class="bouton-lien" type="submit">Déconnexion</button></form>
+  </div>
+</header>
+{% with page=request.resolver_match.url_name %}
+<nav class="menu" aria-label="Menu principal">
+  <ul>
+    <li><a href="{% url 'accueil' %}" class="{% if page == 'accueil' %}actif{% endif %}">{% if user.est_patron %}Tableau de bord{% else %}Accueil{% endif %}</a></li>
+    <li><a href="{% url 'nouvelle_vente' %}" class="{% if page == 'nouvelle_vente' %}actif{% endif %}">Vendre</a></li>
+    <li><a href="{% url 'ventes' %}" class="{% if page == 'ventes' or page == 'recu_vente' %}actif{% endif %}">{% if user.est_patron %}Ventes{% else %}Mes ventes{% endif %}</a></li>
+    <li><a href="{% url 'point_du_jour' %}" class="{% if page == 'point_du_jour' %}actif{% endif %}">Point du jour</a></li>
+    {% if user.est_patron %}<li><a href="{% url 'statistiques' %}" class="{% if page == 'statistiques' %}actif{% endif %}">Statistiques</a></li>{% endif %}
+    <li><a href="{% url 'clients' %}" class="{% if page == 'clients' or page == 'client_detail' or page == 'client_nouveau' or page == 'client_modifier' or page == 'nouveau_reglement' or page == 'recu_reglement' %}actif{% endif %}">Clients et crédits</a></li>
+    <li><a href="{% url 'stock' %}" class="{% if page == 'stock' %}actif{% endif %}">Stock</a></li>
+    <li><a href="{% url 'arrivages' %}" class="{% if page == 'arrivages' %}actif{% endif %}">Arrivages</a></li>
+    <li><a href="{% url 'pertes' %}" class="{% if page == 'pertes' %}actif{% endif %}">Casses et pertes</a></li>
+    {% if user.est_patron %}
+    <li><a href="{% url 'journal' %}" class="{% if page == 'journal' %}actif{% endif %}">Journal</a></li>
+    <li class="separateur" aria-hidden="true"></li>
+    <li><a href="{% url 'produits' %}" class="{% if page == 'produits' or page == 'produit_nouveau' or page == 'produit_modifier' %}actif{% endif %}">Produits et prix</a></li>
+    <li><a href="{% url 'gerants' %}" class="{% if page == 'gerants' or page == 'gerant_nouveau' or page == 'gerant_modifier' or page == 'gerant_mot_de_passe' %}actif{% endif %}">Gérants</a></li>
+    <li><a href="{% url 'parametres' %}" class="{% if page == 'parametres' %}actif{% endif %}">Paramètres</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endwith %}
+{% endif %}
+<main class="contenu">
+  {% if messages %}
+  <ul class="messages">
+    {% for message in messages %}<li class="message {{ message.tags }}">{{ message }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+  {% block contenu %}{% endblock %}
+</main>
+<script src="{% static 'cave/app.js' %}"></script>
+</body>
+</html>

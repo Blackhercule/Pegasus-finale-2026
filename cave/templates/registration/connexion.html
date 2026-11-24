@@ -1,0 +1,19 @@
+{% extends "cave/base.html" %}
+{% block titre %}Connexion{% endblock %}
+{% block contenu %}
+<div class="page-connexion">
+  <div class="boite-connexion">
+    <div class="logo" aria-hidden="true">🍺</div>
+    <h1>{{ parametres_cave.nom }}</h1>
+    <div class="carte">
+      <form method="post">
+        {% csrf_token %}
+        {% include "cave/_form.html" %}
+        <input type="hidden" name="next" value="{{ next }}">
+        <button class="bouton principal large" type="submit">Se connecter</button>
+      </form>
+    </div>
+    <p class="discret petit centre">Patron et gérants : connectez-vous avec l'identifiant et le mot de passe donnés par le patron.</p>
+  </div>
+</div>
+{% endblock %}

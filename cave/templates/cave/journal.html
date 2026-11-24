@@ -1,0 +1,18 @@
+{% extends "cave/base.html" %}
+{% block titre %}Journal{% endblock %}
+{% block contenu %}
+<div class="entete-page"><div><h1>Journal de la cave</h1><div class="discret">Tout ce qui a été fait, par qui et à quelle heure — {{ jour|date:"l j F Y" }}</div></div></div>
+<form class="filtres" method="get">
+  <div class="navigation-date">
+    <a class="bouton petit" href="?date={{ veille|date:'Y-m-d' }}{% if qui %}&qui={{ qui }}{% endif %}" aria-label="Jour précédent">←</a>
+    <input type="date" name="date" value="{{ jour|date:'Y-m-d' }}" aria-label="Date">
+    <a class="bouton petit" href="?date={{ lendemain|date:'Y-m-d' }}{% if qui %}&qui={{ qui }}{% endif %}" aria-label="Jour suivant">→</a>
+  </div>
+  <select name="qui" aria-label="Personne">
+    <option value="">Tout le monde</option>
+    {% for p in personnes %}<option value="{{ p.id }}" {% if qui == p.id|stringformat:"s" %}selected{% endif %}>{{ p }}</option>{% endfor %}
+  </select>
+  <button class="bouton petit" type="submit">Afficher</button>
+</form>
+<div class="carte">{% include "cave/_journal.html" %}</div>
+{% endblock %}

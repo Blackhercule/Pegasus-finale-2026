@@ -1,0 +1,12 @@
+{% load cave_extras %}
+<ul class="journal">
+  {% for e in entrees %}
+  <li class="{{ e.action }}">
+    <span class="heure">{{ e.date|date:"H:i" }}</span>
+    <span><span class="qui">{{ e.utilisateur|default:"—" }}</span><span class="action">{{ e.action|cut:"_"|capfirst }}</span><br>
+      <span class="desc">{% if e.lien %}<a href="{{ e.lien }}">{{ e.description }}</a>{% else %}{{ e.description }}{% endif %}</span></span>
+  </li>
+  {% empty %}
+  <li class="vide" style="display:block">Rien pour le moment.</li>
+  {% endfor %}
+</ul>

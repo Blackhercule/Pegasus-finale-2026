@@ -1,0 +1,38 @@
+# Hébergement gratuit sur Render (https://render.com).
+# Sur Render : New > Blueprint, puis choisir ce dépôt. Render lit ce fichier et crée :
+#   - une base PostgreSQL gratuite (cave-base) ;
+#   - le site web gratuit (gestion-cave), relié automatiquement à la base.
+# Pas à pas détaillé : HEBERGEMENT.md
+
+databases:
+  - name: cave-base
+    plan: free
+    databaseName: cave
+    user: cave
+
+services:
+  - type: web
+    name: gestion-cave
+    runtime: python
+    plan: free
+    buildCommand: bash build.sh
+    startCommand: gunicorn config.wsgi:application
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cave-base
+          property: connectionString
+      # Clé secrète de Django, tirée au hasard par Render
+      - key: SECRET_KEY
+        generateValue: true
+      # Identifiant du compte patron
+      - key: PATRON_IDENTIFIANT
+        value: patron
+      # Mot de passe du patron : Render le demande à la création (il n'est jamais écrit dans le dépôt)
+      - key: PATRON_MOT_DE_PASSE
+        sync: false
+      # « oui » : charge des données fictives pour essayer. Mettre « non » pour une vraie cave.
+      - key: DONNEES_DEMO
+        value: "oui"
+      - key: WEB_CONCURRENCY
+        value: "2"

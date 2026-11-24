@@ -1,0 +1,56 @@
+{% extends "cave/base.html" %}
+{% load cave_extras %}
+{% block titre %}Arrivages{% endblock %}
+{% block contenu %}
+<div class="entete-page"><div><h1>Arrivages</h1><div class="discret">Caisses reçues du fournisseur. Pour le stock de départ, enregistrez un arrivage « Stock initial ».</div></div></div>
+<form method="post" data-grille-produits class="carte">
+  {% csrf_token %}
+  <h2>Nouvel arrivage</h2>
+  <div class="ligne-champs">
+    <div class="champ"><label for="fournisseur">Fournisseur</label><input type="text" id="fournisseur" name="fournisseur" maxlength="100" placeholder="Ex. : Brakina, dépôt SODIBO, stock initial…" value="{{ valeurs.fournisseur|default:'' }}"></div>
+    <div class="champ"><label for="note">Note</label><input type="text" id="note" name="note" maxlength="200" placeholder="Ex. : bon de livraison n°…" value="{{ valeurs.note|default:'' }}"></div>
+  </div>
+  <input type="search" class="recherche-produit" data-recherche placeholder="Chercher une boisson…" aria-label="Chercher une boisson">
+  <div class="produits">
+    {% for p in produits %}
+    <div class="produit-ligne" data-nom="{{ p }}" data-prix-detail="0" data-prix-gros="0">
+      <div><div class="nom">{{ p }}</div><div class="infos">caisse de {{ p.bouteilles_par_caisse }} · en stock {{ p.stock_texte }}</div></div>
+      <div class="compteur">
+        <button type="button" data-pas="-1" aria-label="Une caisse de moins de {{ p }}">−</button>
+        <input type="number" name="q_{{ p.id }}" min="0" step="1" inputmode="numeric" value="{{ p.quantite_saisie }}" placeholder="0" aria-label="Caisses reçues de {{ p }}">
+        <button type="button" data-pas="1" aria-label="Une caisse de plus de {{ p }}">+</button>
+      </div>
+    </div>
+    {% empty %}
+    <p class="vide">Aucun produit. {% if user.est_patron %}<a href="{% url 'produit_nouveau' %}">Ajouter un produit</a>{% endif %}</p>
+    {% endfor %}
+  </div>
+  <div class="barre-total">
+    <div class="total" data-caisses></div>
+    <button class="bouton principal" type="submit">Enregistrer l'arrivage</button>
+  </div>
+</form>
+
+<div class="carte">
+  <h2>Derniers arrivages</h2>
+  <div class="defilant">
+  <table>
+    <thead><tr><th>Date</th><th>N°</th><th>Fournisseur</th><th>Caisses reçues</th><th>Par</th>{% if user.est_patron %}<th></th>{% endif %}</tr></thead>
+    <tbody>
+    {% for a in historique %}
+      <tr class="{% if a.annulee %}annulee{% endif %}">
+        <td>{{ a.date|date:"d/m H:i" }}</td>
+        <td>{{ a.numero }}{% if a.annulee %} <span class="badge annulee" title="{{ a.motif_annulation }}">Annulé</span>{% endif %}</td>
+        <td>{{ a.fournisseur|default:"—" }}{% if a.note %}<div class="petit discret">{{ a.note }}</div>{% endif %}</td>
+        <td class="petit">{% for l in a.lignes.all %}{{ l.quantite_caisses }} × {{ l.produit }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+        <td>{{ a.enregistre_par }}</td>
+        {% if user.est_patron %}<td class="actions garder">{% if not a.annulee %}<a class="bouton petit danger" href="{% url 'annuler' 'arrivage' a.pk %}?suite={{ request.path|urlencode }}">Annuler</a>{% endif %}</td>{% endif %}
+      </tr>
+    {% empty %}
+      <tr><td colspan="6" class="vide">Aucun arrivage enregistré.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}
